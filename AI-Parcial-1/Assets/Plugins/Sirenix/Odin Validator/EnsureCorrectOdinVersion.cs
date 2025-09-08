@@ -3,21 +3,26 @@
 // Copyright (c) Sirenix ApS. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
+
+using System;
+using System.IO;
+using System.Reflection;
+using Sirenix.Serialization;
+using Sirenix.Utilities.Editor.Expressions;
+using UnityEditor;
+using UnityEditorInternal;
+using UnityEngine;
+using UnityEngine.Rendering;
+
 #if UNITY_EDITOR
 
 namespace Sirenix.OdinValidator.Editor
 {
-    using System;
-    using System.IO;
-    using System.Reflection;
-    using UnityEditor;
-    using UnityEngine;
-
     internal static class EnsureCorrectOdinVersion
     {
         private const string validatorVersion = "3.3.1.13";
 
-        private static bool IsHeadlessOrBatchMode { get { return SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null || UnityEditorInternal.InternalEditorUtility.inBatchMode; } }
+        private static bool IsHeadlessOrBatchMode => SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null || InternalEditorUtility.inBatchMode;
 
         [InitializeOnLoadMethod]
         private static void Init()
@@ -33,10 +38,10 @@ namespace Sirenix.OdinValidator.Editor
             if (IsHeadlessOrBatchMode)
                 return;
 
-            if (TryGetOdinInspectorVersion(out var inspectorVersion))
+            if (TryGetOdinInspectorVersion(out string inspectorVersion))
             {
-                var iVer = Version.Parse(inspectorVersion);
-                var vVer = Version.Parse(validatorVersion);
+                Version iVer = Version.Parse(inspectorVersion);
+                Version vVer = Version.Parse(validatorVersion);
 
                 if (iVer.Major == vVer.Major && iVer.Minor == vVer.Minor && iVer.Build == vVer.Build) // Ignore Revision
                 {
@@ -44,75 +49,62 @@ namespace Sirenix.OdinValidator.Editor
                 }
                 else
                 {
-                    var latestVersion = iVer > vVer ? inspectorVersion : validatorVersion;
-                    var oldestProduct = iVer > vVer ? "Odin Validator" : "Odin Inspector";
-                    var misMatchText = inspectorVersion + " : " + validatorVersion;
+                    string latestVersion = iVer > vVer ? inspectorVersion : validatorVersion;
+                    string oldestProduct = iVer > vVer ? "Odin Validator" : "Odin Inspector";
+                    string misMatchText = inspectorVersion + " : " + validatorVersion;
 
-                    if (TryGetOdinInstallPath(out var path))
+                    if (TryGetOdinInstallPath(out string path))
                     {
-                        var versionMismatchFile = path + "Odin Validator/ignoreVersionMismatch.txt";
+                        string versionMismatchFile = path + "Odin Validator/ignoreVersionMismatch.txt";
 
                         if (File.Exists(versionMismatchFile))
                         {
-                            var misMatch = File.ReadAllText(versionMismatchFile).Trim();
+                            string misMatch = File.ReadAllText(versionMismatchFile).Trim();
                             if (misMatch == misMatchText)
                                 return;
                         }
                     }
 
-                    if (!EditorUtility.DisplayDialog(
-                        "Odin Version Mismatch",
-
-                        "Odin Inspector and Odin Validator need to be on the same version to function correctly.\n" +
-                        $"\n" +
-                        $"Current Odin Inspector: {inspectorVersion}\n" +
-                        $"Current Odin Validator: {validatorVersion}\n" +
-                        $"\n" +
-                        $"Please install {oldestProduct} {latestVersion}",
-
-                        "OK", "Ignore until next version mismatch"))
+                    if (!EditorUtility.DisplayDialog("Odin Version Mismatch",
+                            "Odin Inspector and Odin Validator need to be on the same version to function correctly.\n" + "\n" + $"Current Odin Inspector: {inspectorVersion}\n" +
+                            $"Current Odin Validator: {validatorVersion}\n" + "\n" + $"Please install {oldestProduct} {latestVersion}", "OK", "Ignore until next version mismatch"))
                     {
-                        var versionMismatchFile = path + "Odin Validator/ignoreVersionMismatch.txt";
+                        string versionMismatchFile = path + "Odin Validator/ignoreVersionMismatch.txt";
                         File.WriteAllText(versionMismatchFile, misMatchText);
-                    };
+                    }
+
+                    ;
                 }
             }
             else
             {
-                EditorUtility.DisplayDialog(
-                      "Odin Validator requires Odin Inspector",
-                     $"Please install Odin Inspector {validatorVersion}",
-
-                      "OK");
+                EditorUtility.DisplayDialog("Odin Validator requires Odin Inspector", $"Please install Odin Inspector {validatorVersion}", "OK");
             }
         }
 
         private static void TryInstall()
         {
-            if (TryGetOdinInstallPath(out var path))
+            if (TryGetOdinInstallPath(out string path))
             {
-                var tmp_extension = "_tmp";
-                var assemblyFiles = new string[]
+                string tmp_extension = "_tmp";
+                string[] assemblyFiles =
                 {
-                    path + "Assemblies/Sirenix.OdinValidator.Editor.dll",
-                    path + "Assemblies/Sirenix.OdinValidator.Editor.dll.meta",
-                    path + "Assemblies/Sirenix.OdinValidator.Editor.xml",
-                    path + "Assemblies/Sirenix.OdinValidator.Editor.xml.meta",
-                    path + "Assemblies/Sirenix.OdinValidator.Editor.pdb",
-                    path + "Assemblies/Sirenix.OdinValidator.Editor.pdb.meta",
+                    path + "Assemblies/Sirenix.OdinValidator.Editor.dll", path + "Assemblies/Sirenix.OdinValidator.Editor.dll.meta",
+                    path + "Assemblies/Sirenix.OdinValidator.Editor.xml", path + "Assemblies/Sirenix.OdinValidator.Editor.xml.meta",
+                    path + "Assemblies/Sirenix.OdinValidator.Editor.pdb", path + "Assemblies/Sirenix.OdinValidator.Editor.pdb.meta"
                 };
 
-                var requireUpdate = File.Exists(assemblyFiles[0] + tmp_extension);
+                bool requireUpdate = File.Exists(assemblyFiles[0] + tmp_extension);
 
                 if (requireUpdate)
                 {
                     // Install / update Odin Validator.
                     AssetDatabase.StartAssetEditing();
 
-                    foreach (var item in assemblyFiles)
+                    foreach (string item in assemblyFiles)
                     {
-                        var oldFile = item;
-                        var newFile = item + tmp_extension;
+                        string oldFile = item;
+                        string newFile = item + tmp_extension;
 
                         if (File.Exists(newFile))
                         {
@@ -133,10 +125,10 @@ namespace Sirenix.OdinValidator.Editor
                     EditorPrefs.SetBool("ODIN_VALIDATOR_SHOW_GETTING_STARTED", false);
                     EditorApplication.delayCall += () =>
                     {
-                        var t = Sirenix.Serialization.TwoWaySerializationBinder.Default.BindToType("Sirenix.OdinInspector.Editor.GettingStarted.GettingStartedWindow");
+                        Type t = TwoWaySerializationBinder.Default.BindToType("Sirenix.OdinInspector.Editor.GettingStarted.GettingStartedWindow");
                         if (t != null)
                         {
-                            var action = Utilities.Editor.Expressions.ExpressionUtility.ParseAction<bool, bool>("ShowWindow(false, true)", true, t, out var _);
+                            ExpressionAction<bool, bool> action = ExpressionUtility.ParseAction<bool, bool>("ShowWindow(false, true)", true, t, out _);
                             action.Invoke(false, true);
                         }
                     };
@@ -151,7 +143,7 @@ namespace Sirenix.OdinValidator.Editor
 
         private static bool TryGetOdinInstallPath(out string path)
         {
-            var t = Type.GetType("Sirenix.Utilities.SirenixAssetPaths, Sirenix.Utilities");
+            Type t = Type.GetType("Sirenix.Utilities.SirenixAssetPaths, Sirenix.Utilities");
 
             if (t == null)
             {
@@ -159,7 +151,7 @@ namespace Sirenix.OdinValidator.Editor
                 return false;
             }
 
-            var v = t.GetField("SirenixPluginPath", BindingFlags.Public | BindingFlags.Static);
+            FieldInfo v = t.GetField("SirenixPluginPath", BindingFlags.Public | BindingFlags.Static);
             if (v == null)
             {
                 path = null;
@@ -172,7 +164,7 @@ namespace Sirenix.OdinValidator.Editor
 
         private static bool TryGetOdinInspectorVersion(out string version)
         {
-            var t = Type.GetType("Sirenix.OdinInspector.Editor.OdinInspectorVersion, Sirenix.OdinInspector.Editor");
+            Type t = Type.GetType("Sirenix.OdinInspector.Editor.OdinInspectorVersion, Sirenix.OdinInspector.Editor");
 
             if (t == null)
             {
@@ -180,7 +172,7 @@ namespace Sirenix.OdinValidator.Editor
                 return false;
             }
 
-            var v = t.GetProperty("Version", BindingFlags.Public | BindingFlags.Static);
+            PropertyInfo v = t.GetProperty("Version", BindingFlags.Public | BindingFlags.Static);
             if (v == null)
             {
                 version = null;
