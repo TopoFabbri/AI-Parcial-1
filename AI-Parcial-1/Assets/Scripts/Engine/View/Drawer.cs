@@ -56,10 +56,12 @@ namespace Engine.View
             foreach (string name in Drawables.GetDrawableNames())
             {
                 drawMatrices.Clear();
-                DrawInfo drawInfo;
-                
-                if (prefabDrawInfo.TryGetValue(name, out drawInfo))
+
+                if (!prefabDrawInfo.TryGetValue(name, out DrawInfo drawInfo))
+                {
+                    Debug.LogWarning("Prefab for " + name + " not found. Using default prefab instead.");
                     drawInfo = defaultDrawInfo;
+                }
                 
                 List<IDrawable> drawables = Drawables.GetDrawablesOfName(name);
                 int meshes = drawables.Count;

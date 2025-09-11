@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Engine.View;
+using Model.Game.Graph;
+using Model.Game.World.Agents;
+using Model.Tools.Pathfinder.Node;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -34,17 +38,27 @@ namespace Engine
         
         private Model.Game.Model model;
         private Drawer drawer;
+        private Graph<Node<Coordinate>, Coordinate> graph;
 
+        private Miner testMiner;
+        
         private void Start()
         {
             model = new Model.Game.Model();
             drawer = new Drawer(prefabs, defaultPrefab);
             
-            model.CreateGraph(graphSize.x, graphSize.y, nodeDistance, circumnavigableGraph);
+            graph = model.CreateGraph(graphSize.x, graphSize.y, nodeDistance, circumnavigableGraph);
+            
+            testMiner = new Miner(new System.Numerics.Vector3(0f, 0f, 0f));
             
             tileScale = tilePrefab.transform.localScale * (drawSize * nodeDistance);
             tileMesh = tilePrefab.GetComponent<MeshFilter>().sharedMesh;
             tileMaterial = tilePrefab.GetComponent<MeshRenderer>().sharedMaterial;
+        }
+
+        private void Update()
+        {
+            testMiner.Update();
         }
 
         private void LateUpdate()
