@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Model.Tools.Pathfinder.Coordinate;
 using Model.Tools.Pathfinder.Graph;
@@ -73,7 +74,7 @@ namespace Model.Tools.Pathfinder.Algorithms
 
         protected virtual int Distance(TNodeType a, TNodeType b)
         {
-            return a.GetCoordinate().GetDistanceTo(b.GetCoordinate());
+            return (int)MathF.Round(a.GetCoordinate().GetDistanceTo(b.GetCoordinate()));
         }
 
         protected virtual bool NodesEquals(TNodeType a, TNodeType b)

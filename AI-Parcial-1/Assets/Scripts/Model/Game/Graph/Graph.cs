@@ -3,20 +3,23 @@ using System.Collections.Generic;
 using Model.Tools.Pathfinder.Coordinate;
 using Model.Tools.Pathfinder.Graph;
 using Model.Tools.Pathfinder.Node;
-using ViewController.Graph;
 
 namespace Model.Game.Graph
 {
     public class Graph<TNode, TCoordinate> : IGraph<TNode, TCoordinate> 
-        where TNode : INode<TCoordinate>, INode, new() 
+        where TNode : Node<TCoordinate>, new() 
         where TCoordinate : Coordinate, new()
     {
         private readonly TCoordinate size;
+
+        private readonly bool circumnavigable;
         
         public Dictionary<TCoordinate, TNode> Nodes { get; } = new();
 
-        public Graph(int x, int y)
+        public Graph(int x, int y, float nodeDistance = 1f, bool circumnavigable = false)
         {
+            this.circumnavigable = circumnavigable;
+            
             size = new TCoordinate();
             size.Set(x, y);
             
@@ -27,7 +30,7 @@ namespace Model.Game.Graph
                     TCoordinate coordinate = new();
                     TNode node = new();
 
-                    coordinate.Set(i, j);
+                    coordinate.Set(i * nodeDistance, j * nodeDistance);
                     node.SetCoordinate(coordinate);
                     Nodes.Add(coordinate, node);
                 }
@@ -42,6 +45,21 @@ namespace Model.Game.Graph
             {
                 if (adjacentCoordinate is not TCoordinate coordinate) continue;
 
+                if (circumnavigable)
+                {
+                    while (coordinate.X < 0)
+                        coordinate.Set(coordinate.X + size.X, coordinate.Y);
+                    
+                    while (coordinate.X >= size.X)
+                        coordinate.Set(coordinate.X - size.X, coordinate.Y);
+                    
+                    while (coordinate.Y < 0)
+                        coordinate.Set(coordinate.X, coordinate.Y + size.Y);
+                    
+                    while (coordinate.Y >= size.Y)
+                        coordinate.Set(coordinate.X, coordinate.Y - size.Y);
+                }
+                
                 if (Nodes.TryGetValue(coordinate, out TNode adjacentNode))
                     adjacents.Add(adjacentNode);
             }
@@ -81,6 +99,7 @@ namespace Model.Game.Graph
             // Pure Bresenham, by contrast, outputs every (x, y) integer point regardless of bounds/availability
             // and does not need to create or look up objects in a container.
             List<TNode> result = new();
+            /*
             
             // dx, dy are the absolute deltas along X and Y. In the "pure" algorithm dy is commonly negated
             // to allow a single error accumulator (err) and symmetric stepping for all octants.
@@ -148,6 +167,7 @@ namespace Model.Game.Graph
 
             // PURE BRESENHAM: would return all integer points. We return the nodes that exist in the graph
             // along that line. Points outside the graph are silently ignored by TryGetValue.
+            */
             return result;
         }
     }

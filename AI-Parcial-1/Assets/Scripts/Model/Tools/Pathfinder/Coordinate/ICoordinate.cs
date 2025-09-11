@@ -5,7 +5,7 @@ namespace Model.Tools.Pathfinder.Coordinate
 {
     public interface ICoordinate : IEquatable<ICoordinate>
     {
-        int GetDistanceTo(ICoordinate other);
+        float GetDistanceTo(ICoordinate other);
         List<ICoordinate> GetAdjacents();
     }
 }

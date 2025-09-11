@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using Model.Tools.Pathfinder.Coordinate;
 
-namespace ViewController.Graph
+namespace Model.Game.Graph
 {
     public class Coordinate : ICoordinate
     {
-        public int X { get; private set; }
-        public int Y { get; private set; }
+        public float X { get; private set; }
+        public float Y { get; private set; }
 
         public Coordinate()
         {
@@ -15,19 +15,19 @@ namespace ViewController.Graph
             Y = 0;
         }
         
-        public Coordinate(int x, int y)
+        public Coordinate(float x, float y)
         {
             X = x;
             Y = y;
         }
 
-        public void Set(int x, int y)
+        public void Set(float x, float y)
         {
             X = x;
             Y = y;
         }
         
-        public int GetDistanceTo(ICoordinate coordinate)
+        public float GetDistanceTo(ICoordinate coordinate)
         {
             if (!typeof(Coordinate).IsAssignableFrom(coordinate.GetType())) return -1;
             
