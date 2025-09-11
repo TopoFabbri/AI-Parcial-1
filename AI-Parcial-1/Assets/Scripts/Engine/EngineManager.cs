@@ -38,8 +38,6 @@ namespace Engine
         private Model.Game.Model model;
         private Drawer drawer;
         private Graph<Node<Coordinate>, Coordinate> graph;
-
-        private Miner testMiner;
         
         private void Start()
         {
@@ -48,8 +46,6 @@ namespace Engine
             
             graph = model.CreateGraph(graphSize.x, graphSize.y, nodeDistance, circumnavigableGraph);
             
-            testMiner = new Miner(graph.GetNodeAtIndexes(graphSize.x / 2, graphSize.y / 2));
-            
             tileScale = tilePrefab.transform.localScale * (drawSize * nodeDistance);
             tileMesh = tilePrefab.GetComponent<MeshFilter>().sharedMesh;
             tileMaterial = tilePrefab.GetComponent<MeshRenderer>().sharedMaterial;
@@ -57,7 +53,7 @@ namespace Engine
 
         private void Update()
         {
-            testMiner.Update();
+            model.Update();
         }
 
         private void LateUpdate()
