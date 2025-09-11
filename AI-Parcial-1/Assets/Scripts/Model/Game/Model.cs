@@ -1,10 +1,13 @@
-﻿using Model.Game.Graph;
+﻿using System.Threading.Tasks;
+using Model.Game.Graph;
 using Model.Tools.Pathfinder.Node;
 
 namespace Model.Game
 {
     public class Model
     {
+        private readonly ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 32 };
+        
         public Graph<Node<Coordinate>, Coordinate> Graph { get; private set; }
 
         public Model()
@@ -20,6 +23,10 @@ namespace Model.Game
         
         public void Update()
         {
+            Parallel.ForEach(Graph.Nodes.Values, parallelOptions, node => 
+            {
+                node.Update(parallelOptions);
+            });
         }
     }
 }

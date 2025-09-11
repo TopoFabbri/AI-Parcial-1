@@ -16,9 +16,12 @@ namespace Model.Game.Graph
         
         public Dictionary<TCoordinate, TNode> Nodes { get; } = new();
 
+        private float nodeDistance;
+        
         public Graph(int x, int y, float nodeDistance = 1f, bool circumnavigable = false)
         {
             this.circumnavigable = circumnavigable;
+            this.nodeDistance = nodeDistance;
             
             size = new TCoordinate();
             size.Set(x, y);
@@ -77,6 +80,27 @@ namespace Model.Game.Graph
             return size;
         }
 
+        public Node<TCoordinate> GetNodeAtIndexes(int x, int y)
+        {
+            float fX = x * nodeDistance;
+            float fY = y * nodeDistance;
+
+            return GetNodeAt(fX, fY);
+        }
+
+        public Node<TCoordinate> GetNodeAt(float x, float y)
+        {
+            TCoordinate coordinate = new();
+            coordinate.Set(x, y);
+            
+            return GetNodeAt(coordinate);
+        }
+
+        public Node<TCoordinate> GetNodeAt(TCoordinate coordinate)
+        {
+            return Nodes.GetValueOrDefault(coordinate);
+        }
+        
         public void BlockNodes(ICollection<TCoordinate> coordinates)
         {
             foreach (TCoordinate coordinate in coordinates)

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Engine.View;
 using Model.Game.Graph;
 using Model.Game.World.Agents;
@@ -49,7 +48,7 @@ namespace Engine
             
             graph = model.CreateGraph(graphSize.x, graphSize.y, nodeDistance, circumnavigableGraph);
             
-            testMiner = new Miner(new System.Numerics.Vector3(0f, 0f, 0f));
+            testMiner = new Miner(graph.GetNodeAtIndexes(graphSize.x / 2, graphSize.y / 2));
             
             tileScale = tilePrefab.transform.localScale * (drawSize * nodeDistance);
             tileMesh = tilePrefab.GetComponent<MeshFilter>().sharedMesh;

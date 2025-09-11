@@ -11,6 +11,8 @@ namespace Model.Tools.Pathfinder.Algorithms
         {
             List<TNodeType> astarPath = base.FindPath(startNode, destinationNode, graph);
 
+            return astarPath;
+            
             if (astarPath == null || astarPath.Count == 0) return astarPath;
 
             List<TNodeType> tmpPath = new();

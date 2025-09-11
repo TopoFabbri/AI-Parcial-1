@@ -1,18 +1,19 @@
 ﻿using System.Numerics;
+using Model.Game.Graph;
 using Model.Game.World.Agents.MinerStates;
 using Model.Tools.Drawing;
 using Model.Tools.FSM;
+using Model.Tools.Pathfinder.Node;
 
 namespace Model.Game.World.Agents
 {
-    public class Miner : IDrawable
+    public class Miner : IDrawable, INodeContainable<Coordinate>
     {
         #region Fields
 
-        private float mineSpeed = 1f;
-        private float moveSpeed = 1f;
-
-        private Vector3 position;
+        private const float mineSpeed = 1f;
+        private const float moveSpeed = 1f;
+        private const float HeightDrawOffset = 1f;
 
         #endregion
         
@@ -43,14 +44,16 @@ namespace Model.Game.World.Agents
         string IDrawable.Name { get; set; } = "Miner";
 
         int IDrawable.Id { get; set; }
-        
-        public Miner(Vector3 position)
+
+        Coordinate INodeContainable<Coordinate>.NodeCoordinate { get; set; }
+
+        public Miner(Node<Coordinate> node)
         {
             fsm = new FSM<States, Flags>(States.Idle);
 
             fsm.AddState<IdleState>(States.Idle, () => new object[] { });
-            
-            this.position = position;
+
+            node.AddNodeContainable(this);
             ((IDrawable)this).Id = Drawables.AddDrawable(this);
         }
         
@@ -61,7 +64,7 @@ namespace Model.Game.World.Agents
 
         public Vector3 GetPosition()
         {
-            return position;
+            return new Vector3(((INodeContainable<Coordinate>)this).NodeCoordinate.X, HeightDrawOffset, ((INodeContainable<Coordinate>)this).NodeCoordinate.Y);
         }
     }
 }
