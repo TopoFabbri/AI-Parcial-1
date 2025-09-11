@@ -14,6 +14,7 @@ namespace Model.Game.World.Agents
         private const float mineSpeed = 1f;
         private const float moveSpeed = 1f;
         private const float HeightDrawOffset = 1f;
+        private Graph<Node<Coordinate>, Coordinate> graph;
 
         #endregion
         
@@ -37,7 +38,7 @@ namespace Model.Game.World.Agents
             AlarmTriggered,
         }
 
-        public FSM<States, Flags> fsm;
+        private readonly FSM<States, Flags> fsm;
 
         #endregion
 
@@ -47,8 +48,9 @@ namespace Model.Game.World.Agents
 
         Coordinate INodeContainable<Coordinate>.NodeCoordinate { get; set; }
 
-        public Miner(Node<Coordinate> node)
+        public Miner(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph)
         {
+            this.graph = graph;
             fsm = new FSM<States, Flags>(States.Idle);
 
             fsm.AddState<IdleState>(States.Idle, () => new object[] { });
