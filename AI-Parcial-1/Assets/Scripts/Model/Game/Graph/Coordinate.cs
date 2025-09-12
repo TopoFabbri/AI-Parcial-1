@@ -6,43 +6,43 @@ namespace Model.Game.Graph
 {
     public class Coordinate : ICoordinate
     {
-        public float X { get; private set; }
-        public float Y { get; private set; }
+        public int X { get; private set; }
+        public int Y { get; private set; }
 
         public Coordinate()
         {
             X = 0;
             Y = 0;
         }
-        
-        public Coordinate(float x, float y)
+
+        public Coordinate(int x, int y)
         {
             X = x;
             Y = y;
         }
 
-        public void Set(float x, float y)
+        public void SetPosition(int x, int y)
         {
             X = x;
             Y = y;
         }
-        
-        public float GetDistanceTo(ICoordinate coordinate)
+
+        public int GetDistanceTo(ICoordinate coordinate)
         {
             if (!typeof(Coordinate).IsAssignableFrom(coordinate.GetType())) return -1;
-            
-            return Math.Abs(X - ((Coordinate)coordinate).X)  + Math.Abs(Y - ((Coordinate)coordinate).Y);
+
+            return Math.Abs(X - ((Coordinate)coordinate).X) + Math.Abs(Y - ((Coordinate)coordinate).Y);
         }
 
         public List<ICoordinate> GetAdjacents()
         {
             List<ICoordinate> neighbours = new();
-            
+
             neighbours.Add(new Coordinate(X + 1, Y));
             neighbours.Add(new Coordinate(X, Y + 1));
             neighbours.Add(new Coordinate(X - 1, Y));
             neighbours.Add(new Coordinate(X, Y - 1));
-            
+
             return neighbours;
         }
 

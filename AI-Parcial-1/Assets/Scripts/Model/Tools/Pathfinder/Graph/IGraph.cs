@@ -12,5 +12,6 @@ namespace Model.Tools.Pathfinder.Graph
         public void BlockNodes(ICollection<TCoordinate> nodes);
         public void BlockNodes(ICollection<TNode> nodes);
         public ICollection<TNode> GetBresenhamNodes(TCoordinate start, TCoordinate end);
+        public float GetNodeDistance();
     }
 }

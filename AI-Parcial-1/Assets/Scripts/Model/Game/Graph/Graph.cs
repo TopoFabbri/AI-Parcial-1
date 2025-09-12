@@ -16,7 +16,7 @@ namespace Model.Game.Graph
         
         public Dictionary<TCoordinate, TNode> Nodes { get; } = new();
 
-        private float nodeDistance;
+        private readonly float nodeDistance;
         
         public Graph(int x, int y, float nodeDistance = 1f, bool circumnavigable = false)
         {
@@ -24,7 +24,7 @@ namespace Model.Game.Graph
             this.nodeDistance = nodeDistance;
             
             size = new TCoordinate();
-            size.Set(x, y);
+            size.SetPosition(x, y);
             
             for (int i = 0; i < x; i++)
             {
@@ -33,7 +33,8 @@ namespace Model.Game.Graph
                     TCoordinate coordinate = new();
                     TNode node = new();
 
-                    coordinate.Set(i * nodeDistance, j * nodeDistance);
+                    coordinate.SetPosition(i, j);
+                    
                     node.SetCoordinate(coordinate);
                     Nodes.Add(coordinate, node);
                 }
@@ -51,16 +52,16 @@ namespace Model.Game.Graph
                 if (circumnavigable)
                 {
                     while (coordinate.X < 0)
-                        coordinate.Set(coordinate.X + size.X, coordinate.Y);
+                        coordinate.SetPosition(coordinate.X + size.X, coordinate.Y);
                     
                     while (coordinate.X >= size.X)
-                        coordinate.Set(coordinate.X - size.X, coordinate.Y);
+                        coordinate.SetPosition(coordinate.X - size.X, coordinate.Y);
                     
                     while (coordinate.Y < 0)
-                        coordinate.Set(coordinate.X, coordinate.Y + size.Y);
+                        coordinate.SetPosition(coordinate.X, coordinate.Y + size.Y);
                     
                     while (coordinate.Y >= size.Y)
-                        coordinate.Set(coordinate.X, coordinate.Y - size.Y);
+                        coordinate.SetPosition(coordinate.X, coordinate.Y - size.Y);
                 }
                 
                 if (Nodes.TryGetValue(coordinate, out TNode adjacentNode))
@@ -82,17 +83,9 @@ namespace Model.Game.Graph
 
         public Node<TCoordinate> GetNodeAtIndexes(int x, int y)
         {
-            float fX = x * nodeDistance;
-            float fY = y * nodeDistance;
-
-            return GetNodeAt(fX, fY);
-        }
-
-        public Node<TCoordinate> GetNodeAt(float x, float y)
-        {
             TCoordinate coordinate = new();
-            coordinate.Set(x, y);
-            
+            coordinate.SetPosition(x, y);
+
             return GetNodeAt(coordinate);
         }
 
@@ -193,6 +186,11 @@ namespace Model.Game.Graph
             // along that line. Points outside the graph are silently ignored by TryGetValue.
             */
             return result;
+        }
+
+        public float GetNodeDistance()
+        {
+            return nodeDistance;
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Model.Tools.EventSystem
         private static readonly Dictionary<Type, List<Delegate>> EventListeners = new();
         private static ConcurrentPool Pool { get; } = new();
         
-        public static void Raise<TEvent>(params object[] parameters) where TEvent : IEvent
+        public static void Raise<TEvent>(params object[] parameters) where TEvent : IEvent, new()
         {
             TEvent eventInstance = Pool.Get<TEvent>(parameters);
             

@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using Engine.View;
+using Model.Game.Events;
 using Model.Game.Graph;
 using Model.Game.World.Agents;
+using Model.Tools.EventSystem;
 using Model.Tools.Pathfinder.Node;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -46,7 +48,7 @@ namespace Engine
             
             graph = model.CreateGraph(graphSize.x, graphSize.y, nodeDistance, circumnavigableGraph);
             
-            tileScale = tilePrefab.transform.localScale * (drawSize * nodeDistance);
+            tileScale = tilePrefab.transform.localScale * drawSize;
             tileMesh = tilePrefab.GetComponent<MeshFilter>().sharedMesh;
             tileMaterial = tilePrefab.GetComponent<MeshRenderer>().sharedMaterial;
         }
@@ -54,6 +56,9 @@ namespace Engine
         private void Update()
         {
             model.Update();
+            
+            if (Input.GetKeyDown(KeyCode.Space))
+                EventSystem.Raise<RequestedMinerCreationEvent>();
         }
 
         private void LateUpdate()

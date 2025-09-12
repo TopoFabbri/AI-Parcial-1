@@ -26,7 +26,7 @@ namespace Engine.View
             
             ParallelLoopResult result = Parallel.For(0, keys.Count, ParallelOptions, i =>
             {
-                Vector3 position = new(graph.Nodes[keys[i]].GetCoordinate().X, 0f, graph.Nodes[keys[i]].GetCoordinate().Y);
+                Vector3 position = new Vector3(graph.Nodes[keys[i]].GetCoordinate().X, 0f, graph.Nodes[keys[i]].GetCoordinate().Y) * graph.GetNodeDistance();
                 
                 drawMatrices[i / MaxObjsPerDrawCall][i % MaxObjsPerDrawCall].SetTRS(position, Quaternion.identity, tileScale);
             });

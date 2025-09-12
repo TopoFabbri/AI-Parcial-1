@@ -40,6 +40,10 @@ namespace Model.Tools.FSM
             TransitionBehaviour = null;
         }
 
+        public void Assign(params object[] parameters)
+        {
+        }
+
         public void AddMainThreadBehaviour(int executionOrder, Action behaviour)
         {
             MainThreadBehaviours ??= new Dictionary<int, List<Action>>();

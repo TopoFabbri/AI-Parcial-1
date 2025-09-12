@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
+using Model.Game.Events;
 using Model.Game.Graph;
 using Model.Game.World.Agents;
 using Model.Tools.Drawing;
+using Model.Tools.EventSystem;
+using Model.Tools.Pathfinder.Coordinate;
 using Model.Tools.Pathfinder.Node;
 
 namespace Model.Game.World
@@ -25,11 +28,14 @@ namespace Model.Game.World
             
             node.AddNodeContainable(this);
             ((IDrawable)this).Id = Drawables.AddDrawable(this);
+            
+            EventSystem.Subscribe<RequestedMinerCreationEvent>(CreateMiner);
         }
-        
+
         ~Center()
         {
             miners.Clear();
+            EventSystem.Unsubscribe<RequestedMinerCreationEvent>(CreateMiner);
         }
 
         public Vector3 GetPosition()
@@ -41,7 +47,7 @@ namespace Model.Game.World
         {
         }
 
-        public void CreateMiner()
+        private void CreateMiner(RequestedMinerCreationEvent obj)
         {
             miners.Add(new Miner(graph.GetNodeAt(((INodeContainable<Coordinate>)this).NodeCoordinate), graph));
         }
