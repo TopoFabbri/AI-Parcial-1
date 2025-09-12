@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using Model.Game.Graph;
 using Model.Game.World.Agents.MinerStates;
+using Model.Game.World.Mining;
 using Model.Tools.Drawing;
 using Model.Tools.FSM;
 using Model.Tools.Pathfinder.Node;
@@ -14,7 +15,8 @@ namespace Model.Game.World.Agents
         private const float mineSpeed = 1f;
         private const float moveSpeed = 1f;
         private const float HeightDrawOffset = 1f;
-        private Graph<Node<Coordinate>, Coordinate> graph;
+        private readonly Graph<Node<Coordinate>, Coordinate> graph;
+        public GoldContainer GoldContainer { get; set; }
 
         #endregion
         
@@ -48,9 +50,11 @@ namespace Model.Game.World.Agents
 
         Coordinate INodeContainable<Coordinate>.NodeCoordinate { get; set; }
 
-        public Miner(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph)
+        public Miner(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, float goldQty = 0)
         {
             this.graph = graph;
+            GoldContainer = new GoldContainer(goldQty);
+            
             fsm = new FSM<States, Flags>(States.Idle);
 
             fsm.AddState<IdleState>(States.Idle, () => new object[] { });

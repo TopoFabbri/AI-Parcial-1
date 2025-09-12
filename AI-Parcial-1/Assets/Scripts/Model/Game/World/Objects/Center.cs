@@ -7,7 +7,7 @@ using Model.Tools.Drawing;
 using Model.Tools.EventSystem;
 using Model.Tools.Pathfinder.Node;
 
-namespace Model.Game.World
+namespace Model.Game.World.Objects
 {
     public class Center : ILocalizable, INodeContainable<Coordinate>
     {
@@ -29,12 +29,14 @@ namespace Model.Game.World
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
             
             EventSystem.Subscribe<RequestedMinerCreationEvent>(CreateMiner);
+            EventSystem.Subscribe<RequestedCaravanCreationEvent>(CreateCaravan);
         }
 
         ~Center()
         {
             miners.Clear();
             EventSystem.Unsubscribe<RequestedMinerCreationEvent>(CreateMiner);
+            EventSystem.Unsubscribe<RequestedCaravanCreationEvent>(CreateCaravan);
         }
 
         public Vector3 GetPosition()
@@ -52,6 +54,10 @@ namespace Model.Game.World
         private void CreateMiner(RequestedMinerCreationEvent minerCreationRequest)
         {
             miners.Add(new Miner(graph.GetNodeAt(((INodeContainable<Coordinate>)this).NodeCoordinate), graph));
+        }
+
+        private void CreateCaravan(RequestedCaravanCreationEvent caravanCreationRequest)
+        {
         }
     }
 }
