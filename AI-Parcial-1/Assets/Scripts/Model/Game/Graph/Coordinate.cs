@@ -21,7 +21,7 @@ namespace Model.Game.Graph
             Y = y;
         }
 
-        public void SetPosition(int x, int y)
+        public void Set(int x, int y)
         {
             X = x;
             Y = y;

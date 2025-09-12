@@ -7,7 +7,7 @@ using Model.Tools.Pathfinder.Node;
 namespace Model.Game.Graph
 {
     public class Graph<TNode, TCoordinate> : IGraph<TNode, TCoordinate> 
-        where TNode : Node<TCoordinate>, new() 
+        where TNode : Node<TCoordinate>, new()
         where TCoordinate : Coordinate, new()
     {
         private readonly TCoordinate size;
@@ -24,7 +24,7 @@ namespace Model.Game.Graph
             this.nodeDistance = nodeDistance;
             
             size = new TCoordinate();
-            size.SetPosition(x, y);
+            size.Set(x, y);
             
             for (int i = 0; i < x; i++)
             {
@@ -33,7 +33,7 @@ namespace Model.Game.Graph
                     TCoordinate coordinate = new();
                     TNode node = new();
 
-                    coordinate.SetPosition(i, j);
+                    coordinate.Set(i, j);
                     
                     node.SetCoordinate(coordinate);
                     Nodes.Add(coordinate, node);
@@ -52,16 +52,16 @@ namespace Model.Game.Graph
                 if (circumnavigable)
                 {
                     while (coordinate.X < 0)
-                        coordinate.SetPosition(coordinate.X + size.X, coordinate.Y);
+                        coordinate.Set(coordinate.X + size.X, coordinate.Y);
                     
                     while (coordinate.X >= size.X)
-                        coordinate.SetPosition(coordinate.X - size.X, coordinate.Y);
+                        coordinate.Set(coordinate.X - size.X, coordinate.Y);
                     
                     while (coordinate.Y < 0)
-                        coordinate.SetPosition(coordinate.X, coordinate.Y + size.Y);
+                        coordinate.Set(coordinate.X, coordinate.Y + size.Y);
                     
                     while (coordinate.Y >= size.Y)
-                        coordinate.SetPosition(coordinate.X, coordinate.Y - size.Y);
+                        coordinate.Set(coordinate.X, coordinate.Y - size.Y);
                 }
                 
                 if (Nodes.TryGetValue(coordinate, out TNode adjacentNode))
@@ -84,7 +84,7 @@ namespace Model.Game.Graph
         public Node<TCoordinate> GetNodeAtIndexes(int x, int y)
         {
             TCoordinate coordinate = new();
-            coordinate.SetPosition(x, y);
+            coordinate.Set(x, y);
 
             return GetNodeAt(coordinate);
         }
@@ -116,7 +116,6 @@ namespace Model.Game.Graph
             // Pure Bresenham, by contrast, outputs every (x, y) integer point regardless of bounds/availability
             // and does not need to create or look up objects in a container.
             List<TNode> result = new();
-            /*
             
             // dx, dy are the absolute deltas along X and Y. In the "pure" algorithm dy is commonly negated
             // to allow a single error accumulator (err) and symmetric stepping for all octants.
@@ -140,7 +139,7 @@ namespace Model.Game.Graph
                 if (Nodes.TryGetValue(key, out TNode value))
                 {
                     // PURE BRESENHAM: no duplication concern because points are unique
-                    // HERE: we add a defensive duplicate guard due to generic equality/hash behavior
+                    // HERE: we add a defensive duplicate guard due to generic equality/hash behaviour
                     if (result.Count == 0 || !EqualityComparer<TNode>.Default.Equals(result[^1], value))
                         result.Add(value);
                 }
@@ -184,7 +183,6 @@ namespace Model.Game.Graph
 
             // PURE BRESENHAM: would return all integer points. We return the nodes that exist in the graph
             // along that line. Points outside the graph are silently ignored by TryGetValue.
-            */
             return result;
         }
 
