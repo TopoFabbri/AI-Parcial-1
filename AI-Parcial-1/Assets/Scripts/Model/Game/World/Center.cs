@@ -9,13 +9,13 @@ using Model.Tools.Pathfinder.Node;
 
 namespace Model.Game.World
 {
-    public class Center : IDrawable, INodeContainable<Coordinate>
+    public class Center : ILocalizable, INodeContainable<Coordinate>
     {
         private const float HeightDrawOffset = 1f;
 
-        string IDrawable.Name { get; set; } = "Center";
+        string ILocalizable.Name { get; set; } = "Center";
 
-        int IDrawable.Id { get; set; }
+        int ILocalizable.Id { get; set; }
 
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
         private readonly List<Miner> miners = new();
@@ -26,7 +26,7 @@ namespace Model.Game.World
             this.graph = graph;
             
             node.AddNodeContainable(this);
-            ((IDrawable)this).Id = Drawables.AddDrawable(this);
+            ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
             
             EventSystem.Subscribe<RequestedMinerCreationEvent>(CreateMiner);
         }

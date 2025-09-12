@@ -7,7 +7,7 @@ using Model.Tools.Pathfinder.Node;
 
 namespace Model.Game.World.Agents
 {
-    public class Miner : IDrawable, INodeContainable<Coordinate>
+    public class Miner : ILocalizable, INodeContainable<Coordinate>
     {
         #region Fields
 
@@ -42,9 +42,9 @@ namespace Model.Game.World.Agents
 
         #endregion
 
-        string IDrawable.Name { get; set; } = "Miner";
+        string ILocalizable.Name { get; set; } = "Miner";
 
-        int IDrawable.Id { get; set; }
+        int ILocalizable.Id { get; set; }
 
         Coordinate INodeContainable<Coordinate>.NodeCoordinate { get; set; }
 
@@ -56,7 +56,7 @@ namespace Model.Game.World.Agents
             fsm.AddState<IdleState>(States.Idle, () => new object[] { });
 
             node.AddNodeContainable(this);
-            ((IDrawable)this).Id = Drawables.AddDrawable(this);
+            ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
         }
         
         public void Update()

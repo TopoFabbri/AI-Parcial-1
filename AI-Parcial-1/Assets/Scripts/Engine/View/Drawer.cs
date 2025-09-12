@@ -53,7 +53,7 @@ namespace Engine.View
         {
             List<Matrix4x4[]> drawMatrices = new();
 
-            foreach (string name in Drawables.GetDrawableNames())
+            foreach (string name in Localizables.GetLocalizableNames())
             {
                 drawMatrices.Clear();
 
@@ -63,7 +63,7 @@ namespace Engine.View
                     drawInfo = defaultDrawInfo;
                 }
                 
-                List<IDrawable> drawables = Drawables.GetDrawablesOfName(name);
+                List<ILocalizable> drawables = Localizables.GetLocalizablesOfName(name);
                 int meshes = drawables.Count;
 
                 for (int i = 0; i < meshes; i += MaxObjsPerDrawCall)
