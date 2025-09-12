@@ -5,7 +5,6 @@ using Model.Game.Graph;
 using Model.Game.World.Agents;
 using Model.Tools.Drawing;
 using Model.Tools.EventSystem;
-using Model.Tools.Pathfinder.Coordinate;
 using Model.Tools.Pathfinder.Node;
 
 namespace Model.Game.World
@@ -40,14 +39,17 @@ namespace Model.Game.World
 
         public Vector3 GetPosition()
         {
-            return new Vector3(((INodeContainable<Coordinate>)this).NodeCoordinate.X, HeightDrawOffset, ((INodeContainable<Coordinate>)this).NodeCoordinate.Y);
+            float x = ((INodeContainable<Coordinate>)this).NodeCoordinate.X * graph.GetNodeDistance();
+            float y = ((INodeContainable<Coordinate>)this).NodeCoordinate.Y * graph.GetNodeDistance();
+            
+            return new Vector3(x, HeightDrawOffset, y);
         }
 
         public void Update()
         {
         }
 
-        private void CreateMiner(RequestedMinerCreationEvent obj)
+        private void CreateMiner(RequestedMinerCreationEvent minerCreationRequest)
         {
             miners.Add(new Miner(graph.GetNodeAt(((INodeContainable<Coordinate>)this).NodeCoordinate), graph));
         }

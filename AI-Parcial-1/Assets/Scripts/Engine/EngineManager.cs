@@ -48,7 +48,7 @@ namespace Engine
             
             graph = model.CreateGraph(graphSize.x, graphSize.y, nodeDistance, circumnavigableGraph);
             
-            tileScale = tilePrefab.transform.localScale * drawSize;
+            tileScale = tilePrefab.transform.localScale * drawSize * nodeDistance;
             tileMesh = tilePrefab.GetComponent<MeshFilter>().sharedMesh;
             tileMaterial = tilePrefab.GetComponent<MeshRenderer>().sharedMaterial;
         }

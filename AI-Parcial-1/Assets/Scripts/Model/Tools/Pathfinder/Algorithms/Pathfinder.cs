@@ -47,7 +47,7 @@ namespace Model.Tools.Pathfinder.Algorithms
 
                     if (!openList.Contains(neighbor) || tentativeNewAccumulatedCost < nodes[currentNode].AcumulativeCost)
                     {
-                        nodes[neighbor] = (currentNode, tentativeNewAccumulatedCost, Distance(neighbor, destinationNode));
+                        nodes[neighbor] = (currentNode, tentativeNewAccumulatedCost, Distance(neighbor, destinationNode, graph));
 
                         if (!openList.Contains(neighbor)) openList.Add(neighbor);
                     }
@@ -72,9 +72,9 @@ namespace Model.Tools.Pathfinder.Algorithms
             }
         }
 
-        protected virtual int Distance(TNodeType a, TNodeType b)
+        protected virtual int Distance(TNodeType a, TNodeType b, IGraph<TNodeType, TCoordinate> graph)
         {
-            return (int)MathF.Round(a.GetCoordinate().GetDistanceTo(b.GetCoordinate()));
+            return (int)MathF.Round(graph.GetDistanceBetweenNodes(a, b));
         }
 
         protected virtual bool NodesEquals(TNodeType a, TNodeType b)

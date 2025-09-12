@@ -192,5 +192,10 @@ namespace Model.Game.Graph
         {
             return nodeDistance;
         }
+
+        public float GetDistanceBetweenNodes(TNode a, TNode b)
+        {
+            return a.GetCoordinate().GetDistanceTo(b.GetCoordinate()) * nodeDistance;
+        }
     }
 }

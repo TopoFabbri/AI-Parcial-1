@@ -502,7 +502,7 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-  graphSize: {x: 10, y: 10}
+  graphSize: {x: 11, y: 11}
   circumnavigableGraph: 1
   nodeDistance: 1.5
   tilePrefab: {fileID: 5679408169038904489, guid: e4f78b30982e81e48aac19bb4d99999a, type: 3}

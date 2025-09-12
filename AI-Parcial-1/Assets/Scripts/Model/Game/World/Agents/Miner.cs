@@ -66,7 +66,10 @@ namespace Model.Game.World.Agents
 
         public Vector3 GetPosition()
         {
-            return new Vector3(((INodeContainable<Coordinate>)this).NodeCoordinate.X, HeightDrawOffset, ((INodeContainable<Coordinate>)this).NodeCoordinate.Y);
+            float x = ((INodeContainable<Coordinate>)this).NodeCoordinate.X * graph.GetNodeDistance();
+            float y = ((INodeContainable<Coordinate>)this).NodeCoordinate.Y * graph.GetNodeDistance();
+            
+            return new Vector3(x, HeightDrawOffset, y);
         }
     }
 }
