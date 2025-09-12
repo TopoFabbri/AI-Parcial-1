@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
+using Engine.Controller;
 using Engine.View;
 using Model.Game.Events;
 using Model.Game.Graph;
-using Model.Game.World.Agents;
 using Model.Tools.EventSystem;
 using Model.Tools.Pathfinder.Node;
 using Sirenix.OdinInspector;
@@ -29,6 +29,12 @@ namespace Engine
 
         #endregion
 
+        #region References
+
+        [TabGroup("Settings", "References"), SerializeField] private CameraController cameraController;
+
+        #endregion
+        
         #region Fields
 
         private Vector3 tileScale;
@@ -51,20 +57,34 @@ namespace Engine
             tileScale = tilePrefab.transform.localScale * drawSize * nodeDistance;
             tileMesh = tilePrefab.GetComponent<MeshFilter>().sharedMesh;
             tileMaterial = tilePrefab.GetComponent<MeshRenderer>().sharedMaterial;
+            
+            cameraController.PositionCamera(graph);
         }
 
         private void Update()
         {
             model.Update();
-            
-            if (Input.GetKeyDown(KeyCode.Space))
-                EventSystem.Raise<RequestedMinerCreationEvent>();
         }
 
         private void LateUpdate()
         {
             GraphView.DrawGraph(model.Graph, tileScale, tileMesh, tileMaterial);
             drawer.Draw();
+        }
+
+        private void OnCreateMiner()
+        {
+            EventSystem.Raise<RequestedMinerCreationEvent>();
+        }
+        
+        private void CreateCaravan()
+        {
+            EventSystem.Raise<RequestedCaravanCreationEvent>();
+        }
+        
+        private void RaiseAlarm()
+        {
+            EventSystem.Raise<RaiseAlarmEvent>();
         }
     }
 }
