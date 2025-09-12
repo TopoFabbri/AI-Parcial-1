@@ -5,9 +5,9 @@ namespace Model.Tools.Pool
 {
     public class ConcurrentPool
     {
-        private static readonly ConcurrentDictionary<Type, ConcurrentStack<IResetable>> Pool = new();
+        private readonly ConcurrentDictionary<Type, ConcurrentStack<IResetable>> Pool = new();
 
-        public static TResetable Get<TResetable>() where TResetable : IResetable, new()
+        public TResetable Get<TResetable>(params object[] parameters) where TResetable : IResetable
         {
             if (!Pool.ContainsKey(typeof(TResetable)))
                 Pool.TryAdd(typeof(TResetable), new ConcurrentStack<IResetable>());
@@ -21,13 +21,13 @@ namespace Model.Tools.Pool
             }
             else
             {
-                value = new TResetable();
+                value = (TResetable)Activator.CreateInstance(typeof(TResetable),parameters);
             }
 
             return value;
         }
 
-        public static void Release<TResetable>(TResetable obj) where TResetable : IResetable, new()
+        public void Release<TResetable>(TResetable obj) where TResetable : IResetable
         {
             obj.Reset();
             Pool[typeof(TResetable)].Push(obj);

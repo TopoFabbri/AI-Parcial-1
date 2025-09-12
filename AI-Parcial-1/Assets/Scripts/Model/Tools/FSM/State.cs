@@ -1,4 +1,5 @@
 ﻿using System;
+using Model.Tools.Pool;
 
 namespace Model.Tools.FSM
 {
@@ -6,6 +7,7 @@ namespace Model.Tools.FSM
     {
         public Action<Enum> OnFlag;
 
+        public static ConcurrentPool Pool { get; } = new();
         public virtual Type[] OnEnterParamTypes => Array.Empty<Type>();
         public virtual Type[] OnTickParamTypes => Array.Empty<Type>();
         public virtual Type[] OnExitParamTypes => Array.Empty<Type>();

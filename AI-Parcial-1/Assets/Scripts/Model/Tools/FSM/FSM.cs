@@ -12,7 +12,7 @@ namespace Model.Tools.FSM
         private readonly Dictionary<int, Func<object[]>> behaviourOnEnterParameters;
         private readonly Dictionary<int, Func<object[]>> behaviourOnExitParameters;
         private readonly Dictionary<int, Func<object[]>> behaviourOnTickParameters;
-
+        
         private readonly ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 32 };
         private readonly Dictionary<int, State> states;
 
@@ -117,7 +117,7 @@ namespace Model.Tools.FSM
             }
 
             behaviourActions.TransitionBehaviour?.Invoke();
-            ConcurrentPool.Release(behaviourActions);
+            State.Pool.Release(behaviourActions);
         }
 
         public void ValidateParams(Type[] expectedParams, Func<object[]> receivedParams)
