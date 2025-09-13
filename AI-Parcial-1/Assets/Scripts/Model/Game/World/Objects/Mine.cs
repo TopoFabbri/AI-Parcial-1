@@ -32,7 +32,7 @@ namespace Model.Game.World.Objects
             node.AddNodeContainable(this);
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
             
-            Voronoi<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), graph, Mines);
+            VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), graph, Mines);
         }
 
         public Coordinate GetCoordinates()

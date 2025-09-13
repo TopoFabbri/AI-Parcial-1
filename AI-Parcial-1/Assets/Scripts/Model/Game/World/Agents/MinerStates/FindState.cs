@@ -32,7 +32,7 @@ namespace Model.Game.World.Agents.MinerStates
 
         private static void GetClosestMine(Coordinate minerCoordinate, Coordinate closestMineCoordinate)
         {
-            Coordinate voronoiMapCoordinate = Voronoi<Node<Coordinate>, Coordinate>.GetClosestTo(typeof(Mine), minerCoordinate);
+            Coordinate voronoiMapCoordinate = VoronoiRegistry<Node<Coordinate>, Coordinate>.GetClosestTo(typeof(Mine), minerCoordinate);
             closestMineCoordinate.Set(voronoiMapCoordinate.X, voronoiMapCoordinate.Y);
         }
     }

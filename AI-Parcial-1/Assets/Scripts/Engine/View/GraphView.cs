@@ -130,7 +130,7 @@ namespace Engine.View
                 try
                 {
                     // Find the closest Voronoi seed (mine)
-                    Coordinate closest = Voronoi<Node<Coordinate>, Coordinate>.GetClosestTo(typeof(Mine), key);
+                    Coordinate closest = VoronoiRegistry<Node<Coordinate>, Coordinate>.GetClosestTo(typeof(Mine), key);
 
                     if (!MineMaterials.TryGetValue(closest, out matToUse))
                     {
