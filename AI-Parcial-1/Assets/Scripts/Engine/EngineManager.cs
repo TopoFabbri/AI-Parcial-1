@@ -27,6 +27,7 @@ namespace Engine
         [TabGroup("View/View", "Graph"), Required, SerializeField] private GameObject tilePrefab;
         
         [TabGroup("View/View", "Drawing"), SerializeField] private float drawSize = .9f;
+        [TabGroup("View/View", "Drawing"), SerializeField] private bool drawVoronoi = false;
         [TabGroup("View/View", "Drawing"), SerializeField] private GameObject defaultPrefab;
         [TabGroup("View/View", "Drawing"), SerializeField] private Dictionary<string, GameObject> prefabs = new();
 
@@ -66,7 +67,7 @@ namespace Engine
 
         private void LateUpdate()
         {
-            GraphView.DrawGraph(model.Graph, tileScale, tileMesh, tileMaterial);
+            GraphView.DrawGraph(model.Graph, tileScale, tileMesh, tileMaterial, drawVoronoi);
             drawer.Draw();
         }
 
@@ -75,6 +76,8 @@ namespace Engine
             model = null;
             drawer = null;
             graph = null;
+            
+            GraphView.ClearMaterials();
         }
 
         private void OnCreateMiner()
