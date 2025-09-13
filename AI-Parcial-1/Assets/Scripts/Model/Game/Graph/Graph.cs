@@ -75,6 +75,16 @@ namespace Model.Game.Graph
             return adjacents;
         }
 
+        public ICollection<TCoordinate> GetAdjacents(TCoordinate coordinate)
+        {
+            List<TCoordinate> adjacents = new();
+            
+            foreach (TNode node in GetAdjacents(Nodes[coordinate]))
+                adjacents.Add(node.GetCoordinate());
+
+            return adjacents;
+        }
+
         public ICollection<TNode> GetNodes()
         {
             return Nodes.Values;

@@ -9,6 +9,7 @@ namespace Model.Tools.Pathfinder.Graph
         public ICollection<TNode> GetNodes();
         public TCoordinate GetSize();
         public ICollection<TNode> GetAdjacents(TNode node);
+        public ICollection<TCoordinate> GetAdjacents(TCoordinate coordinate);
         public void BlockNodes(ICollection<TCoordinate> nodes);
         public void BlockNodes(ICollection<TNode> nodes);
         public float GetNodeDistance();
