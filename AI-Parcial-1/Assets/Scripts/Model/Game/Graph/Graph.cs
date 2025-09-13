@@ -40,6 +40,11 @@ namespace Model.Game.Graph
                 }
             }
         }
+        
+        ~Graph()
+        {
+            Nodes.Clear();
+        }
 
         public ICollection<TNode> GetAdjacents(TNode node)
         {
@@ -194,6 +199,12 @@ namespace Model.Game.Graph
         public float GetDistanceBetweenNodes(TNode a, TNode b)
         {
             return a.GetCoordinate().GetDistanceTo(b.GetCoordinate()) * nodeDistance;
+        }
+
+        public void MoveContainableTo(INodeContainable<TCoordinate> containable, TCoordinate coordinate)
+        {
+            Nodes[containable.NodeCoordinate].RemoveNodeContainable(containable);
+            Nodes[coordinate].AddNodeContainable(containable);
         }
     }
 }

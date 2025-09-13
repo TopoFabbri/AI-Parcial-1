@@ -4,7 +4,7 @@ namespace Model.Tools.Pathfinder.Node
 {
     public interface INodeContainable<TCoordinate> where TCoordinate : ICoordinate
     {
-        public TCoordinate NodeCoordinate { get; internal set; }
+        public TCoordinate NodeCoordinate { get; set; }
         public void Update();
     }
 }

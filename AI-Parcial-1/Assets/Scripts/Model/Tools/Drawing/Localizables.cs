@@ -33,6 +33,11 @@ namespace Model.Tools.Drawing
         {
             return DrawablesList.Keys;
         }
+
+        public static void Clear()
+        {
+            DrawablesList.Clear();
+        }
         
         private static int GetAvailableId(string name)
         {

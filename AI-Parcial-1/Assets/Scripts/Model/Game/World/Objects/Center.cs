@@ -24,17 +24,18 @@ namespace Model.Game.World.Objects
         public Center(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph)
         {
             this.graph = graph;
-            
+
             node.AddNodeContainable(this);
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
-            
+
             EventSystem.Subscribe<RequestedMinerCreationEvent>(CreateMiner);
             EventSystem.Subscribe<RequestedCaravanCreationEvent>(CreateCaravan);
         }
 
         ~Center()
         {
-            miners.Clear();
+            Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
+
             EventSystem.Unsubscribe<RequestedMinerCreationEvent>(CreateMiner);
             EventSystem.Unsubscribe<RequestedCaravanCreationEvent>(CreateCaravan);
         }
@@ -43,7 +44,7 @@ namespace Model.Game.World.Objects
         {
             float x = ((INodeContainable<Coordinate>)this).NodeCoordinate.X * graph.GetNodeDistance();
             float y = ((INodeContainable<Coordinate>)this).NodeCoordinate.Y * graph.GetNodeDistance();
-            
+
             return new Vector3(x, HeightDrawOffset, y);
         }
 

@@ -4,6 +4,7 @@ using Model.Game.World.Agents.MinerStates;
 using Model.Game.World.Mining;
 using Model.Tools.Drawing;
 using Model.Tools.FSM;
+using Model.Tools.Pathfinder.Algorithms;
 using Model.Tools.Pathfinder.Node;
 
 namespace Model.Game.World.Agents
@@ -14,8 +15,13 @@ namespace Model.Game.World.Agents
 
         private const float mineSpeed = 1f;
         private const float moveSpeed = 1f;
+        private const float idleTime = 1f;
         private const float HeightDrawOffset = 1f;
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
+        private AStarPathfinder<Node<Coordinate>, Coordinate> pathfinder;
+
+        private Coordinate targetCoordinate;
+        
         public GoldContainer GoldContainer { get; set; }
 
         #endregion
@@ -26,7 +32,6 @@ namespace Model.Game.World.Agents
         {
             Idle,
             FindMine,
-            FindPath,
             Move,
             Mine,
             Hide
@@ -34,10 +39,10 @@ namespace Model.Game.World.Agents
 
         public enum Flags
         {
+            IdleEnded,
             MineFound,
-            PathFound,
             ReachedTarget,
-            AlarmTriggered,
+            AlarmTriggered
         }
 
         private readonly FSM<States, Flags> fsm;
@@ -48,19 +53,36 @@ namespace Model.Game.World.Agents
 
         int ILocalizable.Id { get; set; }
 
-        Coordinate INodeContainable<Coordinate>.NodeCoordinate { get; set; }
+        public Coordinate NodeCoordinate { get; set; }
 
         public Miner(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, float goldQty = 0)
         {
             this.graph = graph;
             GoldContainer = new GoldContainer(goldQty);
-            
-            fsm = new FSM<States, Flags>(States.Idle);
-
-            fsm.AddState<IdleState>(States.Idle, () => new object[] { });
+            pathfinder = new AStarPathfinder<Node<Coordinate>, Coordinate>();
+            targetCoordinate = new Coordinate();
 
             node.AddNodeContainable(this);
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
+            
+            fsm = new FSM<States, Flags>(States.Idle);
+
+            fsm.AddState<IdleState>(States.Idle, onTickParameters: () => new object[] { idleTime });
+            fsm.AddState<FindState>(States.FindMine, onTickParameters: () => new object[] { NodeCoordinate, targetCoordinate });
+            fsm.AddState<MoveState>(States.Move,
+                onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph },
+                onTickParameters: () => new object[] { graph, this, moveSpeed });
+
+            fsm.SetTransition(States.Idle, Flags.IdleEnded, States.FindMine);
+            
+            fsm.SetTransition(States.FindMine, Flags.MineFound, States.Move);
+            
+            fsm.SetTransition(States.Move, Flags.ReachedTarget, States.Idle);
+        }
+        
+        ~Miner()
+        {
+            Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
         }
         
         public void Update()
@@ -70,8 +92,8 @@ namespace Model.Game.World.Agents
 
         public Vector3 GetPosition()
         {
-            float x = ((INodeContainable<Coordinate>)this).NodeCoordinate.X * graph.GetNodeDistance();
-            float y = ((INodeContainable<Coordinate>)this).NodeCoordinate.Y * graph.GetNodeDistance();
+            float x = NodeCoordinate.X * graph.GetNodeDistance();
+            float y = NodeCoordinate.Y * graph.GetNodeDistance();
             
             return new Vector3(x, HeightDrawOffset, y);
         }

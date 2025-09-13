@@ -11,9 +11,9 @@ namespace Model.Game.World.Objects
     {
         public static List<Mine> Mines { get; } = new();
         private const float HeightDrawOffset = 1f;
-        
+
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
-        
+
         public GoldContainer GoldContainer { get; private set; }
 
         string ILocalizable.Name { get; set; } = "Mine";
@@ -23,15 +23,20 @@ namespace Model.Game.World.Objects
         public Mine(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, float goldQty)
         {
             this.graph = graph;
-            
+
             Mines.Add(this);
-            
+
             GoldContainer = new GoldContainer(goldQty);
-            
+
             node.AddNodeContainable(this);
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
         }
         
+        ~Mine()
+        {
+            Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
+        }
+
         public Vector3 GetPosition()
         {
             float x = ((INodeContainable<Coordinate>)this).NodeCoordinate.X * graph.GetNodeDistance();

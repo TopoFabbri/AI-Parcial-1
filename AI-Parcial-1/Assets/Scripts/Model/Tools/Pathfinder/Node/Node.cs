@@ -11,7 +11,7 @@ namespace Model.Tools.Pathfinder.Node
         private bool blocked;
         private TCoordinate coordinate;
         protected int cost;
-
+        
         private readonly ConcurrentBag<INodeContainable<TCoordinate>> nodeContainables = new();
         
         public void SetCost(int cost)
@@ -60,9 +60,10 @@ namespace Model.Tools.Pathfinder.Node
             nodeContainables.TryTake(out nodeContainable);
         }
 
-        public void Update(ParallelOptions parallelOptions)
+        public void Update()
         {
-            Parallel.ForEach(nodeContainables, parallelOptions, nodeContainable => nodeContainable.Update());
+            foreach (INodeContainable<TCoordinate> nodeContainable in nodeContainables)
+                nodeContainable.Update();
         }
         
         public bool Equals(INode<TCoordinate> other)

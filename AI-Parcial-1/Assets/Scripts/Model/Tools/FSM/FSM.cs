@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using Model.Tools.Pool;
 
@@ -42,20 +43,18 @@ namespace Model.Tools.FSM
         public void AddState<TState>(TStateType stateIndex, Func<object[]> onTickParameters = null, Func<object[]> onEnterParameters = null, Func<object[]> onExitParameters = null)
             where TState : State, new()
         {
-            if (!states.ContainsKey(Convert.ToInt32(stateIndex)))
-            {
-                TState state = new();
+            if (states.ContainsKey(Convert.ToInt32(stateIndex))) return;
+            TState state = new();
 
-                ValidateParams(state.OnEnterParamTypes, onEnterParameters);
-                ValidateParams(state.OnTickParamTypes, onTickParameters);
-                ValidateParams(state.OnExitParamTypes, onExitParameters);
+            ValidateParams(state.OnEnterParamTypes, onEnterParameters);
+            ValidateParams(state.OnTickParamTypes, onTickParameters);
+            ValidateParams(state.OnExitParamTypes, onExitParameters);
 
-                state.OnFlag += Transition;
-                states.Add(Convert.ToInt32(stateIndex), state);
-                behaviourOnTickParameters.Add(Convert.ToInt32(stateIndex), onTickParameters);
-                behaviourOnEnterParameters.Add(Convert.ToInt32(stateIndex), onEnterParameters);
-                behaviourOnExitParameters.Add(Convert.ToInt32(stateIndex), onExitParameters);
-            }
+            state.OnFlag += Transition;
+            states.Add(Convert.ToInt32(stateIndex), state);
+            behaviourOnTickParameters.Add(Convert.ToInt32(stateIndex), onTickParameters);
+            behaviourOnEnterParameters.Add(Convert.ToInt32(stateIndex), onEnterParameters);
+            behaviourOnExitParameters.Add(Convert.ToInt32(stateIndex), onExitParameters);
         }
 
         private void ForceState(TStateType state)

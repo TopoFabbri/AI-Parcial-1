@@ -10,6 +10,6 @@ namespace Model.Tools.Pathfinder.Node
         public void AddNodeContainable(INodeContainable<TCoordinate> nodeContainable);
         public void RemoveNodeContainable(INodeContainable<TCoordinate> nodeContainable);
         public ConcurrentBag<INodeContainable<TCoordinate>> GetNodeContainables();
-        public void Update(ParallelOptions parallelOptions);
+        public void Update();
     }
 }
