@@ -1,31 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Model.Tools.Pathfinder.Coordinate;
 using Model.Tools.Pathfinder.Graph;
 using Model.Tools.Pathfinder.Node;
 
 namespace Model.Game.Graph
 {
-    public class Graph<TNode, TCoordinate> : IGraph<TNode, TCoordinate> 
-        where TNode : Node<TCoordinate>, new()
-        where TCoordinate : Coordinate, new()
+    public class Graph<TNode, TCoordinate> : IGraph<TNode, TCoordinate> where TNode : Node<TCoordinate>, new() where TCoordinate : Coordinate, new()
     {
         private readonly TCoordinate size;
 
         private readonly bool circumnavigable;
-        
+
         public Dictionary<TCoordinate, TNode> Nodes { get; } = new();
 
         private readonly float nodeDistance;
-        
+
         public Graph(int x, int y, float nodeDistance = 1f, bool circumnavigable = false)
         {
             this.circumnavigable = circumnavigable;
             this.nodeDistance = nodeDistance;
-            
+
             size = new TCoordinate();
             size.Set(x, y);
-            
+
             for (int i = 0; i < x; i++)
             {
                 for (int j = 0; j < y; j++)
@@ -34,13 +33,13 @@ namespace Model.Game.Graph
                     TNode node = new();
 
                     coordinate.Set(i, j);
-                    
+
                     node.SetCoordinate(coordinate);
                     Nodes.Add(coordinate, node);
                 }
             }
         }
-        
+
         ~Graph()
         {
             Nodes.Clear();
@@ -58,17 +57,17 @@ namespace Model.Game.Graph
                 {
                     while (coordinate.X < 0)
                         coordinate.Set(coordinate.X + size.X, coordinate.Y);
-                    
+
                     while (coordinate.X >= size.X)
                         coordinate.Set(coordinate.X - size.X, coordinate.Y);
-                    
+
                     while (coordinate.Y < 0)
                         coordinate.Set(coordinate.X, coordinate.Y + size.Y);
-                    
+
                     while (coordinate.Y >= size.Y)
                         coordinate.Set(coordinate.X, coordinate.Y - size.Y);
                 }
-                
+
                 if (Nodes.TryGetValue(coordinate, out TNode adjacentNode))
                     adjacents.Add(adjacentNode);
             }
@@ -98,7 +97,7 @@ namespace Model.Game.Graph
         {
             return Nodes.GetValueOrDefault(coordinate);
         }
-        
+
         public void BlockNodes(ICollection<TCoordinate> coordinates)
         {
             foreach (TCoordinate coordinate in coordinates)
@@ -121,14 +120,14 @@ namespace Model.Game.Graph
             // Pure Bresenham, by contrast, outputs every (x, y) integer point regardless of bounds/availability
             // and does not need to create or look up objects in a container.
             List<TNode> result = new();
-            
+
             // dx, dy are the absolute deltas along X and Y. In the "pure" algorithm dy is commonly negated
             // to allow a single error accumulator (err) and symmetric stepping for all octants.
             int dx = Math.Abs(end.X - start.X);
-            int sx = start.X < end.X ? 1 : -1;   // sx: step direction on X (pure Bresenham uses the same)
+            int sx = start.X < end.X ? 1 : -1; // sx: step direction on X (pure Bresenham uses the same)
             int dy = -Math.Abs(end.Y - start.Y);
-            int sy = start.Y < end.Y ? 1 : -1;   // sy: step direction on Y (pure Bresenham uses the same)
-            int err = dx + dy;                    // err starts as dx + dy (dy is negative). Classic variant uses this form.
+            int sy = start.Y < end.Y ? 1 : -1; // sy: step direction on Y (pure Bresenham uses the same)
+            int err = dx + dy; // err starts as dx + dy (dy is negative). Classic variant uses this form.
 
             // Current integer position, initialised to start
             int x = start.X;
@@ -168,7 +167,7 @@ namespace Model.Game.Graph
                         err += dy;
                         x += sx;
                     }
-                    else           // steep -> step Y first
+                    else // steep -> step Y first
                     {
                         err += dx;
                         y += sy;
@@ -198,7 +197,23 @@ namespace Model.Game.Graph
 
         public float GetDistanceBetweenNodes(TNode a, TNode b)
         {
-            return a.GetCoordinate().GetDistanceTo(b.GetCoordinate()) * nodeDistance;
+            if (!circumnavigable) return a.GetCoordinate().GetDistanceTo(b.GetCoordinate()) * nodeDistance;
+            
+            List<int> xDis = new();
+            List<int> yDis = new();
+                
+            xDis.Add(Math.Abs(a.GetCoordinate().X - b.GetCoordinate().X));
+            xDis.Add(Math.Abs(a.GetCoordinate().X - (b.GetCoordinate().X + size.X)));
+            xDis.Add(Math.Abs(a.GetCoordinate().X - (b.GetCoordinate().X - size.X)));
+                
+            yDis.Add(Math.Abs(a.GetCoordinate().Y - b.GetCoordinate().Y));
+            yDis.Add(Math.Abs(a.GetCoordinate().Y - (b.GetCoordinate().Y + size.Y)));
+            yDis.Add(Math.Abs(a.GetCoordinate().Y - (b.GetCoordinate().Y - size.Y)));
+                
+            int minX = xDis.Min();
+            int minY = yDis.Min();
+                
+            return (minX + minY) * nodeDistance;
         }
 
         public void MoveContainableTo(INodeContainable<TCoordinate> containable, TCoordinate coordinate)
