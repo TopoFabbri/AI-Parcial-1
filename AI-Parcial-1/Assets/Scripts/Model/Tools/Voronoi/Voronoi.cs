@@ -18,7 +18,7 @@ namespace Model.Tools.Voronoi
             Registries[type].Generate(graph, voronoiObjects);
         }
 
-        private static TCoordinate GetClosestTo(Type type, TCoordinate coordinate)
+        public static TCoordinate GetClosestTo(Type type, TCoordinate coordinate)
         {
             return Registries[type].GetClosestTo(coordinate);
         }
