@@ -5,6 +5,7 @@ using Model.Game.World.Objects;
 using Model.Tools.Drawing;
 using Model.Tools.Pathfinder.Node;
 using Model.Tools.Time;
+using Model.Tools.Voronoi;
 
 namespace Model.Game
 {
@@ -50,6 +51,8 @@ namespace Model.Game
                     
                 Graph.Nodes[coordinate].AddNodeContainable(mine);
             }
+            
+            VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), Graph, Mine.Mines);
             
             return Graph;
         }

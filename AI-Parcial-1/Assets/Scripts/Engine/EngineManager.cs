@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Engine.Controller;
 using Engine.View;
 using Model.Game.Events;
@@ -55,7 +56,12 @@ namespace Engine
         public float MinerMineSpeed => minerMineSpeed;
         public float CaravanSpeed => caravanSpeed;
         public int CaravanCapacity => caravanCapacity;
-        
+
+        private void Awake()
+        {
+            EventSystem.Subscribe<DebugEvent>(OnModelDebugEvent);
+        }
+
         private void Start()
         {
             model = new Model.Game.Model();
@@ -88,6 +94,13 @@ namespace Engine
             graph = null;
             
             GraphView.ClearMaterials();
+            
+            EventSystem.Unsubscribe<DebugEvent>(OnModelDebugEvent);
+        }
+        
+        private static void OnModelDebugEvent(DebugEvent debugEvent)
+        {
+            Debug.Log(debugEvent.Message);
         }
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Model.Tools.Pathfinder.Coordinate;
 using Model.Tools.Pathfinder.Graph;
 using Model.Tools.Pathfinder.Node;
-using Model.Game.Graph;
 
 namespace Model.Tools.Voronoi
 {

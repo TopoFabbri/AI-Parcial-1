@@ -31,8 +31,6 @@ namespace Model.Game.World.Objects
 
             node.AddNodeContainable(this);
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
-            
-            VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), graph, Mines);
         }
 
         public Coordinate GetCoordinates()
