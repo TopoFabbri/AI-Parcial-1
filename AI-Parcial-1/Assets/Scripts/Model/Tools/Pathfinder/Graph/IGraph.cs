@@ -14,5 +14,7 @@ namespace Model.Tools.Pathfinder.Graph
         public void BlockNodes(ICollection<TNode> nodes);
         public float GetNodeDistance();
         public float GetDistanceBetweenNodes(TNode a, TNode b);
+        public float GetDistanceBetweenCoordinates(TCoordinate a, TCoordinate b);
+        public bool IsCircumnavigable();
     }
 }

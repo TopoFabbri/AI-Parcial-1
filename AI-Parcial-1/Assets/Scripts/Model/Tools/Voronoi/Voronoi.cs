@@ -8,60 +8,49 @@ namespace Model.Tools.Voronoi
     internal class Voronoi<TNode, TCoordinate> where TNode : INode<TCoordinate>, INode where TCoordinate : ICoordinate
     {
         private readonly Dictionary<TCoordinate, TCoordinate> voronoiMap = new();
+        private readonly IVoronoiPolicy<TNode, TCoordinate> policy;
+
+        internal Voronoi(IVoronoiPolicy<TNode, TCoordinate> policy)
+        {
+            this.policy = policy;
+        }
 
         internal void Generate(IGraph<TNode, TCoordinate> graph, List<IVoronoiObject<TCoordinate>> voronoiObjects)
         {
             voronoiMap.Clear();
-            
-            List<TCoordinate> exploredCoords = new();
-            Dictionary<TCoordinate, TCoordinate> toExploreCoords = new();
 
+            List<TCoordinate> sites = new();
+            
             foreach (IVoronoiObject<TCoordinate> voronoiObject in voronoiObjects)
             {
-                TCoordinate coordinates = voronoiObject.GetCoordinates();
+                TCoordinate site = voronoiObject.GetCoordinates();
                 
-                if (exploredCoords.Contains(coordinates)) continue;
+                if (!sites.Contains(site))
+                    sites.Add(site);
                 
-                voronoiMap[coordinates] = coordinates;
-                exploredCoords.Add(coordinates);
+                voronoiMap[site] = site;
             }
 
-            foreach (TCoordinate exploredCoord in exploredCoords)
-            {
-                foreach (TCoordinate adjacent in graph.GetAdjacents(exploredCoord))
-                {
-                    if (exploredCoords.Contains(adjacent)) continue;
-                    if (toExploreCoords.ContainsKey(adjacent)) continue;
-                    
-                    toExploreCoords.Add(adjacent, exploredCoord);
-                }
-            }
+            if (sites.Count == 0)
+                return;
 
-            Dictionary<TCoordinate, TCoordinate> toExploreTmp = new();
-
-            do
+            foreach (TNode node in graph.GetNodes())
             {
-                foreach (KeyValuePair<TCoordinate, TCoordinate> toExploreCoord in toExploreCoords)
-                {
-                    voronoiMap.TryAdd(toExploreCoord.Key, voronoiMap[toExploreCoord.Value]);
-                    exploredCoords.Add(toExploreCoord.Key);
+                TCoordinate point = node.GetCoordinate();
+
+                TCoordinate winner = sites[0];
                 
-                    toExploreTmp.Add(toExploreCoord.Key, toExploreCoord.Value);
-                }
-            
-                toExploreCoords.Clear();
-
-                foreach (TCoordinate toExploreCoord in toExploreTmp.Keys)
+                for (int i = 1; i < sites.Count; i++)
                 {
-                    foreach (TCoordinate adjacent in graph.GetAdjacents(toExploreCoord))
-                    {
-                        if (exploredCoords.Contains(adjacent)) continue;
-                        if (toExploreCoords.ContainsKey(adjacent)) continue;
+                    TCoordinate challenger = sites[i];
+                    int compareResult = policy.CompareOwnership(point, winner, challenger, graph);
                     
-                        toExploreCoords.Add(adjacent, toExploreCoord);
-                    }
+                    if (compareResult > 0)
+                        winner = challenger;
                 }
-            } while (toExploreCoords.Count > 0);
+
+                voronoiMap[point] = winner;
+            }
         }
 
         internal TCoordinate GetClosestTo(TCoordinate coordinate)

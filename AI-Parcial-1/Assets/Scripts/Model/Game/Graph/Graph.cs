@@ -226,6 +226,16 @@ namespace Model.Game.Graph
             return (minX + minY) * nodeDistance;
         }
 
+        public float GetDistanceBetweenCoordinates(TCoordinate a, TCoordinate b)
+        {
+            return GetDistanceBetweenNodes(Nodes[a], Nodes[b]);
+        }
+
+        public bool IsCircumnavigable()
+        {
+            return circumnavigable;
+        }
+
         public void MoveContainableTo(INodeContainable<TCoordinate> containable, TCoordinate coordinate)
         {
             Nodes[containable.NodeCoordinate].RemoveNodeContainable(containable);
