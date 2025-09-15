@@ -22,12 +22,17 @@ namespace Engine
         [TabGroup("Game/Game", "Mines"), SerializeField] private int maxMineGoldQty = 1000;
         
         [TabGroup("Game/Game", "Miners"), SerializeField] private int minerStartGold;
+        [TabGroup("Game/Game", "Miners"), SerializeField] private float minerSpeed = 1f;
+        [TabGroup("Game/Game", "Miners"), SerializeField] private float minerMineSpeed = 1f;
+        
+        [TabGroup("Game/Game", "Caravan"), SerializeField] private float caravanSpeed = 2f;
+        [TabGroup("Game/Game", "Caravan"), SerializeField] private int caravanCapacity = 10;
 
         [FoldoutGroup("View", true)]
         [TabGroup("View/View", "Graph"), Required, SerializeField] private GameObject tilePrefab;
         
         [TabGroup("View/View", "Drawing"), SerializeField] private float drawSize = .9f;
-        [TabGroup("View/View", "Drawing"), SerializeField] private bool drawVoronoi = false;
+        [TabGroup("View/View", "Drawing"), SerializeField] private bool drawVoronoi;
         [TabGroup("View/View", "Drawing"), SerializeField] private GameObject defaultPrefab;
         [TabGroup("View/View", "Drawing"), SerializeField] private Dictionary<string, GameObject> prefabs = new();
 
@@ -46,6 +51,11 @@ namespace Engine
         private Drawer drawer;
         private Graph<Node<Coordinate>, Coordinate> graph;
 
+        public float MinerSpeed => minerSpeed;
+        public float MinerMineSpeed => minerMineSpeed;
+        public float CaravanSpeed => caravanSpeed;
+        public int CaravanCapacity => caravanCapacity;
+        
         private void Start()
         {
             model = new Model.Game.Model();
@@ -78,21 +88,6 @@ namespace Engine
             graph = null;
             
             GraphView.ClearMaterials();
-        }
-
-        private void OnCreateMiner()
-        {
-            EventSystem.Raise<RequestedMinerCreationEvent>();
-        }
-
-        private void CreateCaravan()
-        {
-            EventSystem.Raise<RequestedCaravanCreationEvent>();
-        }
-
-        private void RaiseAlarm()
-        {
-            EventSystem.Raise<RaiseAlarmEvent>();
         }
     }
 }

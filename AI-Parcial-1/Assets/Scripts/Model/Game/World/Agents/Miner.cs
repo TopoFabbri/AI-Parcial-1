@@ -13,8 +13,9 @@ namespace Model.Game.World.Agents
     {
         #region Fields
 
-        private const float mineSpeed = 1f;
-        private const float moveSpeed = 1f;
+        private float mineSpeed = 1f;
+        private float moveSpeed = 1f;
+        
         private const float idleTime = 1f;
         private const float HeightDrawOffset = 1f;
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
@@ -55,13 +56,16 @@ namespace Model.Game.World.Agents
 
         public Coordinate NodeCoordinate { get; set; }
 
-        public Miner(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, float goldQty = 0)
+        public Miner(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, float mineSpeed, float moveSpeed, int goldQty = 0)
         {
+            this.mineSpeed = mineSpeed;
+            this.moveSpeed = moveSpeed;
+            
             this.graph = graph;
             GoldContainer = new GoldContainer(goldQty);
             pathfinder = new AStarPathfinder<Node<Coordinate>, Coordinate>();
             targetCoordinate = new Coordinate();
-
+            
             node.AddNodeContainable(this);
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
             

@@ -36,11 +36,11 @@ namespace Model.Game.World.Agents.MinerStates
 
             behaviourActions.AddMultiThreadableBehaviour(0, () =>
             {
-                if (pathfinder != null) 
+                if (pathfinder != null)
                     path = pathfinder.FindPath(startNode, targetNode, graph);
-                else 
+                else
                     path = new List<Node<Coordinate>> { targetNode };
-                
+
                 path.Insert(0, startNode);
             });
 
@@ -55,23 +55,19 @@ namespace Model.Game.World.Agents.MinerStates
 
             BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
 
-            behaviourActions.AddMultiThreadableBehaviour(0, () =>
-            {
-                MoveToTargetCoordinate(graph, miner, speed);
-                ;
-            });
+            behaviourActions.AddMultiThreadableBehaviour(0, () => { MoveToTargetCoordinate(graph, miner, speed); });
 
             return behaviourActions;
         }
 
         private void MoveToTargetCoordinate(Graph<Node<Coordinate>, Coordinate> graph, INodeContainable<Coordinate> miner, float speed)
         {
-            currentNodeIndex = (int)((Time.DateTime - enterTime).TotalSeconds / speed);
+            currentNodeIndex = (int)((Time.DateTime - enterTime).TotalSeconds * speed);
 
             if (currentNodeIndex >= path.Count)
             {
+                currentNodeIndex = path.Count - 1;
                 OnFlag?.Invoke(Miner.Flags.ReachedTarget);
-                return;
             }
 
             graph.MoveContainableTo(miner, path[currentNodeIndex].GetCoordinate());

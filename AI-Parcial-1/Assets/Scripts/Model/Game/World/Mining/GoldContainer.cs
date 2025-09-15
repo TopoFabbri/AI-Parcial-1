@@ -2,21 +2,21 @@
 {
     public class GoldContainer
     {
-        private float startingGold;
-        private float containingGold;
+        private int startingGold;
+        private int containingGold;
         
-        public GoldContainer(float startingGold)
+        public GoldContainer(int startingGold)
         {
             this.startingGold = startingGold;
             containingGold = startingGold;
         }
         
-        public void AddGold(float qty)
+        public void AddGold(int qty)
         {
             containingGold += qty;
         }
 
-        public float GetGold(float qty)
+        public int GetGold(int qty)
         {
             if (qty > containingGold)
             {

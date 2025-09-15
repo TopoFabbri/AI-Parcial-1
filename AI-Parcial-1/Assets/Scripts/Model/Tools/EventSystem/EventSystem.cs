@@ -12,6 +12,7 @@ namespace Model.Tools.EventSystem
         public static void Raise<TEvent>(params object[] parameters) where TEvent : IEvent, new()
         {
             TEvent eventInstance = Pool.Get<TEvent>(parameters);
+            eventInstance.Assign(parameters);
             
             if (EventListeners.TryGetValue(eventInstance.GetType(), out List<Delegate> delegates))
             {

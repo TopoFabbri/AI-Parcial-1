@@ -19,7 +19,7 @@ namespace Model.Game.World.Objects
 
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
         private readonly List<Miner> miners = new();
-        Coordinate INodeContainable<Coordinate>.NodeCoordinate { get; set; }
+        public Coordinate NodeCoordinate { get; set; }
 
         public Center(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph)
         {
@@ -54,11 +54,13 @@ namespace Model.Game.World.Objects
 
         private void CreateMiner(RequestedMinerCreationEvent minerCreationRequest)
         {
-            miners.Add(new Miner(graph.GetNodeAt(((INodeContainable<Coordinate>)this).NodeCoordinate), graph));
+            miners.Add(new Miner(graph.GetNodeAt(NodeCoordinate), graph, minerCreationRequest.mineSpeed, minerCreationRequest.moveSpeed));
         }
 
         private void CreateCaravan(RequestedCaravanCreationEvent caravanCreationRequest)
         {
+            float caravanSpeed = caravanCreationRequest.moveSpeed;
+            int caravanCapacity = caravanCreationRequest.carryCapacity;
         }
     }
 }

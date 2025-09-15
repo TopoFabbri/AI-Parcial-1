@@ -21,7 +21,7 @@ namespace Model.Game.World.Objects
         int ILocalizable.Id { get; set; }
         public Coordinate NodeCoordinate { get; set; }
 
-        public Mine(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, float goldQty)
+        public Mine(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, int goldQty)
         {
             this.graph = graph;
 

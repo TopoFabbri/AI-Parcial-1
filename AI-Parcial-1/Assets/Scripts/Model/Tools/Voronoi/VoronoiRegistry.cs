@@ -11,19 +11,9 @@ namespace Model.Tools.Voronoi
     {
         private static readonly Dictionary<Type, Voronoi<TNode, TCoordinate>> Registries = new();
 
-        private static IVoronoiPolicy<TNode, TCoordinate> CreateDefaultPolicy(IGraph<TNode, TCoordinate> graph)
-        {
-            return new DistanceBasedVoronoiPolicy<TNode, TCoordinate>();
-            if (typeof(TCoordinate) != typeof(Coordinate)) return new DistanceBasedVoronoiPolicy<TNode, TCoordinate>();
-            if (!graph.IsCircumnavigable()) return (IVoronoiPolicy<TNode, TCoordinate>)(object)new Euclidean2DVoronoiPolicy();
-            
-            Coordinate size = (Coordinate)(object)graph.GetSize();
-            return (IVoronoiPolicy<TNode, TCoordinate>)(object)new Euclidean2DToroidalVoronoiPolicy(size.X, size.Y);
-        }
-
         public static void GenerateVoronoi(Type type, IGraph<TNode, TCoordinate> graph, List<IVoronoiObject<TCoordinate>> voronoiObjects, IVoronoiPolicy<TNode, TCoordinate> policy = null)
         {
-            policy ??= CreateDefaultPolicy(graph);
+            policy ??=  new DistanceBasedVoronoiPolicy<TNode, TCoordinate>();
             
             Registries[type] = new Voronoi<TNode, TCoordinate>(policy);
             Registries[type].Generate(graph, voronoiObjects);
