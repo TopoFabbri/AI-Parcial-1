@@ -12,7 +12,7 @@ namespace Model.Tools.Pathfinder.Node
         private TCoordinate coordinate;
         protected int cost;
         
-        private readonly ConcurrentBag<INodeContainable<TCoordinate>> nodeContainables = new();
+        private readonly List<INodeContainable<TCoordinate>> nodeContainables = new();
         
         public void SetCost(int cost)
         {
@@ -50,20 +50,14 @@ namespace Model.Tools.Pathfinder.Node
             nodeContainable.NodeCoordinate = coordinate;
         }
         
-        public ConcurrentBag<INodeContainable<TCoordinate>> GetNodeContainables()
+        public List<INodeContainable<TCoordinate>> GetNodeContainables()
         {
             return nodeContainables;
         }
 
         public void RemoveNodeContainable(INodeContainable<TCoordinate> nodeContainable)
         {
-            nodeContainables.TryTake(out nodeContainable);
-        }
-
-        public void Update()
-        {
-            foreach (INodeContainable<TCoordinate> nodeContainable in nodeContainables)
-                nodeContainable.Update();
+            nodeContainables.Remove(nodeContainable);
         }
         
         public bool Equals(INode<TCoordinate> other)

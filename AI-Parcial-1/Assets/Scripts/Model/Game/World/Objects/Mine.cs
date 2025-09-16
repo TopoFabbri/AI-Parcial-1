@@ -15,7 +15,7 @@ namespace Model.Game.World.Objects
 
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
 
-        public GoldContainer GoldContainer { get; private set; }
+        public GoldContainer GoldContainer { get; }
 
         string ILocalizable.Name { get; set; } = "Mine";
         int ILocalizable.Id { get; set; }
@@ -28,19 +28,22 @@ namespace Model.Game.World.Objects
             Mines.Add(this);
 
             GoldContainer = new GoldContainer(goldQty);
+            GoldContainer.Depleted += Destroy;
 
             node.AddNodeContainable(this);
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
+        }
+        
+        ~Mine()
+        {
+            Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
+            
+            GoldContainer.Depleted -= Destroy;
         }
 
         public Coordinate GetCoordinates()
         {
             return NodeCoordinate;
-        }
-
-        ~Mine()
-        {
-            Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
         }
 
         public Vector3 GetPosition()
@@ -49,6 +52,14 @@ namespace Model.Game.World.Objects
             float y = NodeCoordinate.Y * graph.GetNodeDistance();
 
             return new Vector3(x, HeightDrawOffset, y);
+        }
+
+        public void Destroy()
+        {
+            Mines.Remove(this);
+            Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
+            
+            VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), graph, Mines);
         }
 
         public void Update()

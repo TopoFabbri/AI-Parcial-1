@@ -1,0 +1,64 @@
+﻿using System;
+using Model.Game.Graph;
+using Model.Game.World.Mining;
+using Model.Game.World.Objects;
+using Model.Tools.FSM;
+using Model.Tools.Pathfinder.Node;
+using Model.Tools.Time;
+
+namespace Model.Game.World.Agents.MinerStates
+{
+    public class MineState : State
+    {
+        private Mine mine;
+
+        public override Type[] OnEnterParamTypes => new[] { typeof(Graph<Node<Coordinate>, Coordinate>), typeof(Coordinate) };
+        public override Type[] OnTickParamTypes => new[] { typeof(GoldContainer), typeof(float) };
+
+        public override BehaviourActions GetOnEnterBehaviours(params object[] parameters)
+        {
+            Graph<Node<Coordinate>, Coordinate> graph = parameters[0] as Graph<Node<Coordinate>, Coordinate>;
+            Coordinate coordinate = parameters[1] as Coordinate;
+
+            BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
+
+            behaviourActions.AddMultiThreadableBehaviour(0, () => { SetMine(graph, coordinate); });
+
+            return behaviourActions;
+        }
+
+        private void SetMine(Graph<Node<Coordinate>, Coordinate> graph, Coordinate coordinate)
+        {
+            if (graph == null) return;
+
+            foreach (INodeContainable<Coordinate> nodeContainable in graph.GetNodeAt(coordinate).GetNodeContainables())
+            {
+                if (nodeContainable is Mine mineContainable)
+                    mine = mineContainable;
+            }
+        }
+
+        public override BehaviourActions GetOnTickBehaviours(params object[] parameters)
+        {
+            GoldContainer goldContainer = parameters[0] as GoldContainer;
+            float mineSpeed = (float)parameters[1];
+
+            BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
+
+            behaviourActions.AddMultiThreadableBehaviour(0, () => { MineGold(goldContainer, mineSpeed); });
+
+            return behaviourActions;
+        }
+
+        private void MineGold(GoldContainer goldContainer, float mineSpeed)
+        {
+            if (mine == null || mine.GoldContainer.IsEmpty)
+            {
+                flag?.Invoke(Miner.Flags.MineDepleted);
+                return;
+            }
+
+            goldContainer.AddGold(mine.GoldContainer.GetGold(mineSpeed * Time.TickTime));
+        }
+    }
+}

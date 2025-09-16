@@ -47,7 +47,8 @@ namespace Model.Game.World.Agents
             MineFound,
             ReachedTarget,
             AlarmRaised,
-            CenterFound
+            CenterFound,
+            MineDepleted
         }
 
         private readonly FSM<States, Flags> fsm;
@@ -81,6 +82,9 @@ namespace Model.Game.World.Agents
             fsm.AddState<MoveState>(States.Move,
                 onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph },
                 onTickParameters: () => new object[] { graph, this, moveSpeed });
+            fsm.AddState<MineState>(States.Mine, 
+                onEnterParameters: () => new object[] {graph, NodeCoordinate},
+                onTickParameters: () => new object[] { GoldContainer, mineSpeed });
 
             fsm.SetTransition(States.Idle, Flags.IdleEnded, States.FindMine);
             fsm.SetTransition(States.Idle, Flags.AlarmRaised, States.FindCenter);
@@ -88,10 +92,12 @@ namespace Model.Game.World.Agents
             fsm.SetTransition(States.FindMine, Flags.MineFound, States.Move);
             fsm.SetTransition(States.FindMine, Flags.AlarmRaised, States.FindCenter);
             
-            fsm.SetTransition(States.Move, Flags.ReachedTarget, States.Idle);
+            fsm.SetTransition(States.Move, Flags.ReachedTarget, States.Mine);
             fsm.SetTransition(States.Move, Flags.AlarmRaised, States.FindCenter);
             
             fsm.SetTransition(States.FindCenter, Flags.CenterFound, States.Move);
+            
+            fsm.SetTransition(States.Mine, Flags.MineDepleted, States.FindMine);
             
             EventSystem.Subscribe<RaiseAlarmEvent>(OnAlarmRaised);
         }
@@ -105,6 +111,13 @@ namespace Model.Game.World.Agents
         public void Update()
         {
             fsm.Tick();
+        }
+
+        public void Destroy()
+        {
+            Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
+
+            EventSystem.Unsubscribe<RaiseAlarmEvent>(OnAlarmRaised);
         }
 
         public Vector3 GetPosition()

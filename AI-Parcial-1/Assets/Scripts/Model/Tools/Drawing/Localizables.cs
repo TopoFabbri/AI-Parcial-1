@@ -36,6 +36,13 @@ namespace Model.Tools.Drawing
 
         public static void Clear()
         {
+            List<ILocalizable> localizables = new();
+            foreach (string name in DrawablesList.Keys)
+                localizables.AddRange(DrawablesList[name].Values);
+            
+            foreach (ILocalizable localizable in localizables)
+                localizable.Destroy();
+            
             DrawablesList.Clear();
         }
         

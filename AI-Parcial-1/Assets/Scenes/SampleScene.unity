@@ -2387,8 +2387,8 @@ MonoBehaviour:
   circumnavigableMap: 1
   nodeDistance: 0.5
   mineQty: 10
-  minMineGoldQty: 100
-  maxMineGoldQty: 1000
+  minMineGoldQty: 10
+  maxMineGoldQty: 11
   minerStartGold: 0
   minerSpeed: 4
   minerMineSpeed: 2

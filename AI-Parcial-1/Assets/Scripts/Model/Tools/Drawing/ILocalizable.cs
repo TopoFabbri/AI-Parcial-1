@@ -8,5 +8,7 @@ namespace Model.Tools.Drawing
         public int Id { get; internal set; }
         
         public Vector3 GetPosition();
+        public void Update();
+        public void Destroy();
     }
 }

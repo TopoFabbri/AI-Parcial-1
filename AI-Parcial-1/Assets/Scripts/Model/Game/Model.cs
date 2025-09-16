@@ -48,8 +48,6 @@ namespace Model.Game
                 } while (Graph.Nodes[coordinate].GetNodeContainables().Count != 0 && --maxIterations > 0);
 
                 Mine mine = new(Graph.Nodes[coordinate], Graph, random.Next(minMineGold, maxMineGold));
-                    
-                Graph.Nodes[coordinate].AddNodeContainable(mine);
             }
             
             VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), Graph, Mine.Mines);
@@ -60,9 +58,12 @@ namespace Model.Game
         public void Update()
         {
             Time.Update();
-            
-            foreach (Node<Coordinate> node in Graph.Nodes.Values)
-                node.Update();
+
+            foreach (string localizableName in Localizables.GetLocalizableNames())
+            {
+                foreach (ILocalizable localizable in Localizables.GetLocalizablesOfName(localizableName))
+                    localizable.Update();
+            }
         }
     }
 }

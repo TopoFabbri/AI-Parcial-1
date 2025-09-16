@@ -1,26 +1,36 @@
-﻿namespace Model.Game.World.Mining
+﻿using System;
+
+namespace Model.Game.World.Mining
 {
     public class GoldContainer
     {
-        private int startingGold;
-        private int containingGold;
+        private float startingGold;
+        private float containingGold;
         
-        public GoldContainer(int startingGold)
+        public event Action Depleted;
+        
+        public GoldContainer(float startingGold)
         {
             this.startingGold = startingGold;
             containingGold = startingGold;
+            IsEmpty = false;
         }
-        
-        public void AddGold(int qty)
+
+        public bool IsEmpty { get; private set; }
+
+        public void AddGold(float qty)
         {
             containingGold += qty;
         }
 
-        public int GetGold(int qty)
+        public float GetGold(float qty)
         {
             if (qty > containingGold)
             {
                 containingGold = 0;
+                IsEmpty = true;
+                Depleted?.Invoke();
+                
                 return containingGold;
             }
             
