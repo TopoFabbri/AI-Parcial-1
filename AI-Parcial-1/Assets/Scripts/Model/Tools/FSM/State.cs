@@ -5,7 +5,7 @@ namespace Model.Tools.FSM
 {
     public abstract class State
     {
-        public Action<Enum> OnFlag;
+        public Action<Enum> flag;
 
         public static ConcurrentPool Pool { get; } = new();
         public virtual Type[] OnEnterParamTypes => Array.Empty<Type>();

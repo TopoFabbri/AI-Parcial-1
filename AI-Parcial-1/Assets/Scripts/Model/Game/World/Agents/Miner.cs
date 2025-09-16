@@ -1,8 +1,10 @@
 ﻿using System.Numerics;
+using Model.Game.Events;
 using Model.Game.Graph;
 using Model.Game.World.Agents.MinerStates;
 using Model.Game.World.Mining;
 using Model.Tools.Drawing;
+using Model.Tools.EventSystem;
 using Model.Tools.FSM;
 using Model.Tools.Pathfinder.Algorithms;
 using Model.Tools.Pathfinder.Node;
@@ -33,6 +35,7 @@ namespace Model.Game.World.Agents
         {
             Idle,
             FindMine,
+            FindCenter,
             Move,
             Mine,
             Hide
@@ -43,7 +46,8 @@ namespace Model.Game.World.Agents
             IdleEnded,
             MineFound,
             ReachedTarget,
-            AlarmTriggered
+            AlarmRaised,
+            CenterFound
         }
 
         private readonly FSM<States, Flags> fsm;
@@ -72,20 +76,29 @@ namespace Model.Game.World.Agents
             fsm = new FSM<States, Flags>(States.Idle);
 
             fsm.AddState<IdleState>(States.Idle, onTickParameters: () => new object[] { idleTime });
-            fsm.AddState<FindState>(States.FindMine, onTickParameters: () => new object[] { NodeCoordinate, targetCoordinate });
+            fsm.AddState<FindMineState>(States.FindMine, onTickParameters: () => new object[] { NodeCoordinate, targetCoordinate });
+            fsm.AddState<FindCenterState>(States.FindCenter, onTickParameters: () => new object[] { targetCoordinate });
             fsm.AddState<MoveState>(States.Move,
                 onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph },
                 onTickParameters: () => new object[] { graph, this, moveSpeed });
 
             fsm.SetTransition(States.Idle, Flags.IdleEnded, States.FindMine);
+            fsm.SetTransition(States.Idle, Flags.AlarmRaised, States.FindCenter);
             
             fsm.SetTransition(States.FindMine, Flags.MineFound, States.Move);
+            fsm.SetTransition(States.FindMine, Flags.AlarmRaised, States.FindCenter);
             
             fsm.SetTransition(States.Move, Flags.ReachedTarget, States.Idle);
+            fsm.SetTransition(States.Move, Flags.AlarmRaised, States.FindCenter);
+            
+            fsm.SetTransition(States.FindCenter, Flags.CenterFound, States.Move);
+            
+            EventSystem.Subscribe<RaiseAlarmEvent>(OnAlarmRaised);
         }
         
         ~Miner()
         {
+            EventSystem.Unsubscribe<RaiseAlarmEvent>(OnAlarmRaised);
             Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
         }
         
@@ -100,6 +113,11 @@ namespace Model.Game.World.Agents
             float y = NodeCoordinate.Y * graph.GetNodeDistance();
             
             return new Vector3(x, HeightDrawOffset, y);
+        }
+        
+        private void OnAlarmRaised(RaiseAlarmEvent raiseAlarmEvent)
+        {
+            fsm.Transition(Flags.AlarmRaised);
         }
     }
 }

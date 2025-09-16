@@ -12,7 +12,8 @@ namespace Model.Game.World.Objects
     public class Center : ILocalizable, INodeContainable<Coordinate>
     {
         private const float HeightDrawOffset = 1f;
-
+        private static Coordinate _centerCoordinate; 
+        
         string ILocalizable.Name { get; set; } = "Center";
 
         int ILocalizable.Id { get; set; }
@@ -28,12 +29,15 @@ namespace Model.Game.World.Objects
             node.AddNodeContainable(this);
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
 
+            _centerCoordinate = NodeCoordinate;
+
             EventSystem.Subscribe<RequestedMinerCreationEvent>(CreateMiner);
             EventSystem.Subscribe<RequestedCaravanCreationEvent>(CreateCaravan);
         }
 
         ~Center()
         {
+            _centerCoordinate = new Coordinate();
             Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
 
             EventSystem.Unsubscribe<RequestedMinerCreationEvent>(CreateMiner);
@@ -61,6 +65,11 @@ namespace Model.Game.World.Objects
         {
             float caravanSpeed = caravanCreationRequest.moveSpeed;
             int caravanCapacity = caravanCreationRequest.carryCapacity;
+        }
+
+        public static Coordinate GetCoordinate()
+        {
+            return _centerCoordinate;
         }
     }
 }

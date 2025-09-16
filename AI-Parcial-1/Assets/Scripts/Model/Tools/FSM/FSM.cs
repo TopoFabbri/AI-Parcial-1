@@ -50,7 +50,7 @@ namespace Model.Tools.FSM
             ValidateParams(state.OnTickParamTypes, onTickParameters);
             ValidateParams(state.OnExitParamTypes, onExitParameters);
 
-            state.OnFlag += Transition;
+            state.flag += Transition;
             states.Add(Convert.ToInt32(stateIndex), state);
             behaviourOnTickParameters.Add(Convert.ToInt32(stateIndex), onTickParameters);
             behaviourOnEnterParameters.Add(Convert.ToInt32(stateIndex), onEnterParameters);

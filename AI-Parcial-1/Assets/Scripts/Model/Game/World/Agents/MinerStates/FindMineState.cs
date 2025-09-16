@@ -8,7 +8,7 @@ using Model.Tools.Voronoi;
 
 namespace Model.Game.World.Agents.MinerStates
 {
-    public class FindState : State
+    public class FindMineState : State
     {
         public override Type[] OnTickParamTypes => new[] { typeof(Coordinate), typeof(Coordinate) };
 
@@ -24,7 +24,7 @@ namespace Model.Game.World.Agents.MinerStates
             behaviourActions.AddMultiThreadableBehaviour(0, () =>
             {
                 GetClosestMine(minerCoordinate, closestMineCoordinate);
-                OnFlag?.Invoke(Miner.Flags.MineFound);
+                flag?.Invoke(Miner.Flags.MineFound);
             });
 
             return behaviourActions;
@@ -34,6 +34,28 @@ namespace Model.Game.World.Agents.MinerStates
         {
             Coordinate voronoiMapCoordinate = VoronoiRegistry<Node<Coordinate>, Coordinate>.GetClosestTo(typeof(Mine), minerCoordinate);
             closestMineCoordinate.Set(voronoiMapCoordinate.X, voronoiMapCoordinate.Y);
+        }
+    }
+
+    public class FindCenterState : State
+    {
+        public override Type[] OnTickParamTypes => new[] { typeof(Coordinate) };
+        
+        public override BehaviourActions GetOnTickBehaviours(params object[] parameters)
+        {
+            Coordinate centerCoordinate = parameters[0] as Coordinate;
+
+            BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
+
+            behaviourActions.AddMultiThreadableBehaviour(0, () =>
+            {
+                if (centerCoordinate == null) return;
+                
+                centerCoordinate.Set(Center.GetCoordinate().X, Center.GetCoordinate().Y);
+                flag?.Invoke(Miner.Flags.CenterFound);
+            });
+
+            return behaviourActions;
         }
     }
 }

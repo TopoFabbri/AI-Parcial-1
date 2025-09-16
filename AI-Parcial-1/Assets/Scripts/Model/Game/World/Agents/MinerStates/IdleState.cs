@@ -39,7 +39,7 @@ namespace Model.Game.World.Agents.MinerStates
             
             if (currentTime > idleTime)
             {
-                OnFlag?.Invoke(Miner.Flags.IdleEnded);
+                flag?.Invoke(Miner.Flags.IdleEnded);
             }
         }
     }

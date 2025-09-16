@@ -67,7 +67,7 @@ namespace Model.Game.World.Agents.MinerStates
             if (currentNodeIndex >= path.Count)
             {
                 currentNodeIndex = path.Count - 1;
-                OnFlag?.Invoke(Miner.Flags.ReachedTarget);
+                flag?.Invoke(Miner.Flags.ReachedTarget);
             }
 
             graph.MoveContainableTo(miner, path[currentNodeIndex].GetCoordinate());
