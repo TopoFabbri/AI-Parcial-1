@@ -38,7 +38,8 @@ namespace Model.Game.World.Agents
             FindCenter,
             Move,
             Mine,
-            Deposit
+            Deposit,
+            Hide
         }
 
         public enum Flags
@@ -47,14 +48,16 @@ namespace Model.Game.World.Agents
             MineFound,
             ReachedMine,
             AlarmRaised,
+            AlarmCleared,
             CenterFound,
             MineDepleted,
             GoldFilled,
             GoldDeposited,
-            ReachedCenter
+            ReachedCenter,
+            StayHidden
         }
 
-        private readonly FSM<States, Flags> fsm;
+        private FSM<States, Flags> fsm;
 
         #endregion
 
@@ -77,11 +80,19 @@ namespace Model.Game.World.Agents
             node.AddNodeContainable(this);
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
             
+            InitializeFSM();
+
+            EventSystem.Subscribe<RaiseAlarmEvent>(OnAlarmRaised);
+        }
+
+        private void InitializeFSM()
+        {
             fsm = new FSM<States, Flags>(States.Idle);
 
             fsm.AddState<IdleState>(States.Idle, onTickParameters: () => new object[] { idleTime });
             fsm.AddState<FindMineState>(States.FindMine, onTickParameters: () => new object[] { NodeCoordinate, targetCoordinate });
             fsm.AddState<FindCenterState>(States.FindCenter, onTickParameters: () => new object[] { targetCoordinate });
+            fsm.AddState<HideState>(States.Hide);
             fsm.AddState<DepositState>(States.Deposit, 
                 onEnterParameters: () => new object[] { graph, NodeCoordinate },
                 onTickParameters: () => new object[] { GoldContainer });
@@ -102,17 +113,21 @@ namespace Model.Game.World.Agents
             fsm.SetTransition(States.Move, Flags.ReachedMine, States.Mine);
             fsm.SetTransition(States.Move, Flags.AlarmRaised, States.FindCenter);
             fsm.SetTransition(States.Move, Flags.ReachedCenter, States.Deposit);
+            fsm.SetTransition(States.Move, Flags.StayHidden, States.Hide);
+            fsm.SetTransition(States.Move, Flags.AlarmCleared, States.FindMine);
             
             fsm.SetTransition(States.FindCenter, Flags.CenterFound, States.Move);
             
+            fsm.SetTransition(States.Hide, Flags.AlarmCleared, States.FindMine);
+            
             fsm.SetTransition(States.Mine, Flags.MineDepleted, States.FindMine);
             fsm.SetTransition(States.Mine, Flags.GoldFilled, States.FindCenter);
+            fsm.SetTransition(States.Mine, Flags.AlarmRaised, States.FindCenter);
             
             fsm.SetTransition(States.Deposit, Flags.GoldDeposited, States.FindMine);
-            
-            EventSystem.Subscribe<RaiseAlarmEvent>(OnAlarmRaised);
+            fsm.SetTransition(States.Deposit, Flags.AlarmRaised, States.FindCenter);
         }
-        
+
         ~Miner()
         {
             EventSystem.Unsubscribe<RaiseAlarmEvent>(OnAlarmRaised);
@@ -141,7 +156,7 @@ namespace Model.Game.World.Agents
         
         private void OnAlarmRaised(RaiseAlarmEvent raiseAlarmEvent)
         {
-            fsm.Transition(Flags.AlarmRaised);
+            fsm.Transition(Model.AlarmRaised ? Flags.AlarmRaised : Flags.AlarmCleared);
         }
     }
 }

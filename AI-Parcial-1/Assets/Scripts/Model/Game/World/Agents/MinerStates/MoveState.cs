@@ -79,7 +79,7 @@ namespace Model.Game.World.Agents.MinerStates
 
                     if (nodeContainable is Center center)
                     {
-                        flag?.Invoke(Miner.Flags.ReachedCenter);
+                        flag?.Invoke(Model.AlarmRaised ? Miner.Flags.StayHidden : Miner.Flags.ReachedCenter);
                         break;
                     }
                 }
@@ -87,5 +87,9 @@ namespace Model.Game.World.Agents.MinerStates
 
             graph.MoveContainableTo(miner, path[currentNodeIndex].GetCoordinate());
         }
+    }
+
+    public class HideState : State
+    {
     }
 }

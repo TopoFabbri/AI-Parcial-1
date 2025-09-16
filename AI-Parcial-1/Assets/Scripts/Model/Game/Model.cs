@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Model.Game.Events;
 using Model.Game.Graph;
 using Model.Game.World.Objects;
 using Model.Tools.Drawing;
+using Model.Tools.EventSystem;
 using Model.Tools.Pathfinder.Node;
 using Model.Tools.Time;
 using Model.Tools.Voronoi;
@@ -17,8 +19,17 @@ namespace Model.Game
         
         private Center center;
         
+        public static bool AlarmRaised { get; private set; }
+        
+        public Model()
+        { 
+            EventSystem.Subscribe<RaiseAlarmEvent>(OnRaiseAlarm);
+        }
+        
         ~Model()
         {
+            EventSystem.Unsubscribe<RaiseAlarmEvent>(OnRaiseAlarm);
+            
             center = null;
             
             Mine.Mines.Clear();
@@ -69,6 +80,11 @@ namespace Model.Game
         public float GetCenterGold()
         {
             return center.GoldContainer.ContainingGold;
+        }
+        
+        private static void OnRaiseAlarm(RaiseAlarmEvent raiseAlarmEvent)
+        {
+            AlarmRaised = !AlarmRaised;
         }
     }
 }

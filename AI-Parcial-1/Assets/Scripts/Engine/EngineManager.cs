@@ -40,6 +40,7 @@ namespace Engine
 
         [FoldoutGroup("References"), Required, SerializeField] private CameraController cameraController;
         [FoldoutGroup("References"), Required, SerializeField] private TextMeshProUGUI goldTxt;
+        [FoldoutGroup("References"), Required, SerializeField] private TextMeshProUGUI alarmTxt;
         
         #region Fields
 
@@ -87,7 +88,7 @@ namespace Engine
         {
             GraphView.DrawGraph(model.Graph, tileScale, tileMesh, tileMaterial, drawVoronoi);
             drawer.Draw();
-            UpdateCenterGoldTxt();
+            UpdateHudTxt();
         }
 
         private void OnDestroy()
@@ -106,9 +107,10 @@ namespace Engine
             Debug.Log(debugEvent.Message);
         }
 
-        private void UpdateCenterGoldTxt()
+        private void UpdateHudTxt()
         {
             goldTxt.text = "Gold: " + model.GetCenterGold();
+            alarmTxt.text = Model.Game.Model.AlarmRaised ? "CANCEL" : "ALARM";
         }
     }
 }
