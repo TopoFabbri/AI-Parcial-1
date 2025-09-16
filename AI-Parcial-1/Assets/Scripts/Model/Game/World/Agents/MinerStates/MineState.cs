@@ -5,6 +5,7 @@ using Model.Game.World.Objects;
 using Model.Tools.FSM;
 using Model.Tools.Pathfinder.Node;
 using Model.Tools.Time;
+using Sirenix.Utilities;
 
 namespace Model.Game.World.Agents.MinerStates
 {

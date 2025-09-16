@@ -65,5 +65,10 @@ namespace Model.Game
                     localizable.Update();
             }
         }
+
+        public float GetCenterGold()
+        {
+            return center.GoldContainer.ContainingGold;
+        }
     }
 }

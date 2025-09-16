@@ -3,6 +3,7 @@ using System.Numerics;
 using Model.Game.Events;
 using Model.Game.Graph;
 using Model.Game.World.Agents;
+using Model.Game.World.Mining;
 using Model.Tools.Drawing;
 using Model.Tools.EventSystem;
 using Model.Tools.Pathfinder.Node;
@@ -11,9 +12,12 @@ namespace Model.Game.World.Objects
 {
     public class Center : ILocalizable, INodeContainable<Coordinate>
     {
+        private const float MaxGold = 10000f;
         private const float HeightDrawOffset = 1f;
         private static Coordinate _centerCoordinate;
 
+        public GoldContainer GoldContainer { get; private set; }
+        
         string ILocalizable.Name { get; set; } = "Center";
 
         int ILocalizable.Id { get; set; }
@@ -25,6 +29,7 @@ namespace Model.Game.World.Objects
         public Center(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph)
         {
             this.graph = graph;
+            GoldContainer = new GoldContainer(0, MaxGold);
 
             node.AddNodeContainable(this);
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);

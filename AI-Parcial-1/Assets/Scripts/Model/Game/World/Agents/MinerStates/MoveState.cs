@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Model.Game.Graph;
+using Model.Game.World.Objects;
 using Model.Tools.FSM;
 using Model.Tools.Pathfinder.Algorithms;
 using Model.Tools.Pathfinder.Node;
@@ -67,7 +68,21 @@ namespace Model.Game.World.Agents.MinerStates
             if (currentNodeIndex >= path.Count)
             {
                 currentNodeIndex = path.Count - 1;
-                flag?.Invoke(Miner.Flags.ReachedTarget);
+
+                foreach (INodeContainable<Coordinate> nodeContainable in graph.Nodes[path[currentNodeIndex].GetCoordinate()].GetNodeContainables())
+                {
+                    if (nodeContainable is Mine mine)
+                    {
+                        flag?.Invoke(Miner.Flags.ReachedMine);
+                        break;
+                    }
+
+                    if (nodeContainable is Center center)
+                    {
+                        flag?.Invoke(Miner.Flags.ReachedCenter);
+                        break;
+                    }
+                }
             }
 
             graph.MoveContainableTo(miner, path[currentNodeIndex].GetCoordinate());

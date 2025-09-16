@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Engine.Controller;
 using Engine.View;
 using Model.Game.Events;
@@ -7,6 +6,7 @@ using Model.Game.Graph;
 using Model.Tools.EventSystem;
 using Model.Tools.Pathfinder.Node;
 using Sirenix.OdinInspector;
+using TMPro;
 using UnityEngine;
 
 namespace Engine
@@ -38,9 +38,9 @@ namespace Engine
         [TabGroup("View/View", "Drawing"), SerializeField] private GameObject defaultPrefab;
         [TabGroup("View/View", "Drawing"), SerializeField] private Dictionary<string, GameObject> prefabs = new();
 
-        [FoldoutGroup("References")]
-        [Required, SerializeField] private CameraController cameraController;
-
+        [FoldoutGroup("References"), Required, SerializeField] private CameraController cameraController;
+        [FoldoutGroup("References"), Required, SerializeField] private TextMeshProUGUI goldTxt;
+        
         #region Fields
 
         private Vector3 tileScale;
@@ -87,6 +87,7 @@ namespace Engine
         {
             GraphView.DrawGraph(model.Graph, tileScale, tileMesh, tileMaterial, drawVoronoi);
             drawer.Draw();
+            UpdateCenterGoldTxt();
         }
 
         private void OnDestroy()
@@ -103,6 +104,11 @@ namespace Engine
         private static void OnModelDebugEvent(DebugEvent debugEvent)
         {
             Debug.Log(debugEvent.Message);
+        }
+
+        private void UpdateCenterGoldTxt()
+        {
+            goldTxt.text = "Gold: " + model.GetCenterGold();
         }
     }
 }
