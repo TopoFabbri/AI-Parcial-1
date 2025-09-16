@@ -37,8 +37,7 @@ namespace Model.Game.World.Agents
             FindMine,
             FindCenter,
             Move,
-            Mine,
-            Hide
+            Mine
         }
 
         public enum Flags
@@ -48,7 +47,8 @@ namespace Model.Game.World.Agents
             ReachedTarget,
             AlarmRaised,
             CenterFound,
-            MineDepleted
+            MineDepleted,
+            GoldFilled
         }
 
         private readonly FSM<States, Flags> fsm;
@@ -61,13 +61,13 @@ namespace Model.Game.World.Agents
 
         public Coordinate NodeCoordinate { get; set; }
 
-        public Miner(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, float mineSpeed, float moveSpeed, int goldQty = 0)
+        public Miner(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, float mineSpeed, float moveSpeed, float maxGold, int goldQty = 0)
         {
             this.mineSpeed = mineSpeed;
             this.moveSpeed = moveSpeed;
             
             this.graph = graph;
-            GoldContainer = new GoldContainer(goldQty);
+            GoldContainer = new GoldContainer(goldQty, maxGold);
             pathfinder = new AStarPathfinder<Node<Coordinate>, Coordinate>();
             targetCoordinate = new Coordinate();
             
@@ -83,8 +83,9 @@ namespace Model.Game.World.Agents
                 onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph },
                 onTickParameters: () => new object[] { graph, this, moveSpeed });
             fsm.AddState<MineState>(States.Mine, 
-                onEnterParameters: () => new object[] {graph, NodeCoordinate},
-                onTickParameters: () => new object[] { GoldContainer, mineSpeed });
+                onEnterParameters: () => new object[] {graph, NodeCoordinate, GoldContainer},
+                onTickParameters: () => new object[] { GoldContainer, mineSpeed },
+                onExitParameters: () => new object[] { GoldContainer });
 
             fsm.SetTransition(States.Idle, Flags.IdleEnded, States.FindMine);
             fsm.SetTransition(States.Idle, Flags.AlarmRaised, States.FindCenter);
@@ -98,6 +99,7 @@ namespace Model.Game.World.Agents
             fsm.SetTransition(States.FindCenter, Flags.CenterFound, States.Move);
             
             fsm.SetTransition(States.Mine, Flags.MineDepleted, States.FindMine);
+            fsm.SetTransition(States.Mine, Flags.GoldFilled, States.FindCenter);
             
             EventSystem.Subscribe<RaiseAlarmEvent>(OnAlarmRaised);
         }

@@ -4,23 +4,31 @@ namespace Model.Game.World.Mining
 {
     public class GoldContainer
     {
-        private float startingGold;
+        private readonly float startingGold;
+        private readonly float maxGold;
         private float containingGold;
         
         public event Action Depleted;
+        public event Action Filled;
         
-        public GoldContainer(float startingGold)
+        public GoldContainer(float startingGold, float maxGold)
         {
             this.startingGold = startingGold;
             containingGold = startingGold;
-            IsEmpty = false;
+            this.maxGold = maxGold;
         }
 
-        public bool IsEmpty { get; private set; }
+        public bool IsEmpty => containingGold <= 0;
+        public bool IsFull => containingGold >= maxGold;
 
         public void AddGold(float qty)
         {
             containingGold += qty;
+
+            if (containingGold < maxGold) return;
+            
+            containingGold = maxGold;
+            Filled?.Invoke();
         }
 
         public float GetGold(float qty)
@@ -28,7 +36,6 @@ namespace Model.Game.World.Mining
             if (qty > containingGold)
             {
                 containingGold = 0;
-                IsEmpty = true;
                 Depleted?.Invoke();
                 
                 return containingGold;

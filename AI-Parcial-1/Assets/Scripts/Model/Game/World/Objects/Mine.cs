@@ -27,7 +27,7 @@ namespace Model.Game.World.Objects
 
             Mines.Add(this);
 
-            GoldContainer = new GoldContainer(goldQty);
+            GoldContainer = new GoldContainer(goldQty, goldQty);
             GoldContainer.Depleted += Destroy;
 
             node.AddNodeContainable(this);

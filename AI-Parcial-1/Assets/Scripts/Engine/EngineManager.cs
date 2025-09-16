@@ -25,6 +25,7 @@ namespace Engine
         [TabGroup("Game/Game", "Miners"), SerializeField] private int minerStartGold;
         [TabGroup("Game/Game", "Miners"), SerializeField] private float minerSpeed = 1f;
         [TabGroup("Game/Game", "Miners"), SerializeField] private float minerMineSpeed = 1f;
+        [TabGroup("Game/Game", "Miners"), SerializeField] private float minerMaxGold = 15f;
         
         [TabGroup("Game/Game", "Caravan"), SerializeField] private float caravanSpeed = 2f;
         [TabGroup("Game/Game", "Caravan"), SerializeField] private int caravanCapacity = 10;
@@ -54,6 +55,7 @@ namespace Engine
 
         public float MinerSpeed => minerSpeed;
         public float MinerMineSpeed => minerMineSpeed;
+        public float MinerMaxGold => minerMaxGold;
         public float CaravanSpeed => caravanSpeed;
         public int CaravanCapacity => caravanCapacity;
 
