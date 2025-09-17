@@ -2,7 +2,7 @@
 
 namespace Model.Tools.Drawing
 {
-    public interface ILocalizable
+    public interface ILocalizable : ITextable
     {
         public string Name { get; protected set; }
         public int Id { get; internal set; }

@@ -16,6 +16,8 @@ namespace Model.Game.World.Objects
         private const float HeightDrawOffset = 1f;
         private static Coordinate _centerCoordinate;
 
+        private string infoText;
+        
         public GoldContainer GoldContainer { get; private set; }
 
         string ILocalizable.Name { get; set; } = "Center";
@@ -75,6 +77,15 @@ namespace Model.Game.World.Objects
         public static Coordinate GetCoordinate()
         {
             return _centerCoordinate;
+        }
+
+        public string GetHoverText()
+        {
+            infoText = ((ILocalizable)this).Name + " " + ((ILocalizable)this).Id + ": ";
+            infoText += "Gold " + GoldContainer.ContainingQty + ". ";
+            infoText += "Miners " + miners.Count + ".";
+            
+            return infoText;
         }
     }
 }

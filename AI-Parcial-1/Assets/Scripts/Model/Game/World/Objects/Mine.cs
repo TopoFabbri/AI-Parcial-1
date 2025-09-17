@@ -46,6 +46,15 @@ namespace Model.Game.World.Objects
             GoldContainer.Depleted -= Destroy;
         }
 
+        public string GetHoverText()
+        {
+            string infoText = ((ILocalizable)this).Name + " " + ((ILocalizable)this).Id + ": ";
+            infoText += "Gold " + GoldContainer.ContainingQty + ". ";
+            infoText += "Food " + FoodContainer.ContainingQty + ".";
+
+            return infoText;
+        }
+
         public Coordinate GetCoordinates()
         {
             return NodeCoordinate;

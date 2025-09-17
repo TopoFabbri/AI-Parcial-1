@@ -142,7 +142,15 @@ namespace Model.Game.World.Agents
             EventSystem.Unsubscribe<RaiseAlarmEvent>(OnAlarmRaised);
             Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
         }
-        
+
+        public string GetHoverText()
+        {
+            string infoText = ((ILocalizable)this).Name + " " + ((ILocalizable)this).Id + ": ";
+            infoText += "Gold " + GoldContainer.ContainingQty + ".";
+
+            return infoText;
+        }
+
         public void Update()
         {
             fsm.Tick();
