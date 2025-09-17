@@ -20,7 +20,10 @@ namespace Model.Tools.Voronoi
 
         public static TCoordinate GetClosestTo(Type type, TCoordinate coordinate)
         {
-            return Registries[type].GetClosestTo(coordinate);
+            if (!Registries.TryGetValue(type, out Voronoi<TNode, TCoordinate> registry))
+                throw new ArgumentException($"There is no voronoi for type " + type.Namespace);
+            
+            return registry.GetClosestTo(coordinate);
         }
     }
 }

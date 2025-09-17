@@ -1,4 +1,6 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Model.Tools.Drawing;
 using UnityEngine;
@@ -63,7 +65,7 @@ namespace Engine.View
                     drawInfo = defaultDrawInfo;
                 }
                 
-                List<ILocalizable> drawables = Localizables.GetLocalizablesOfName(name);
+                ConcurrentBag<ILocalizable> drawables = Localizables.GetLocalizablesOfName(name);
                 int meshes = drawables.Count;
 
                 for (int i = 0; i < meshes; i += MaxObjsPerDrawCall)
@@ -71,10 +73,11 @@ namespace Engine.View
                     drawMatrices.Add(new Matrix4x4[meshes > MaxObjsPerDrawCall ? MaxObjsPerDrawCall : meshes]);
                     meshes -= MaxObjsPerDrawCall;
                 }
-
+                
                 ParallelLoopResult result = Parallel.For(0, drawables.Count, parallelOptions, i =>
                 {
-                    Vector3 position = new(drawables[i].GetPosition().X, drawables[i].GetPosition().Y, drawables[i].GetPosition().Z);
+                    ILocalizable drawable = drawables.ElementAt(i);
+                    Vector3 position = new(drawable.GetPosition().X, drawable.GetPosition().Y, drawable.GetPosition().Z);
                     
                     drawMatrices[i / MaxObjsPerDrawCall][i % MaxObjsPerDrawCall].SetTRS(position, drawInfo.rotation, drawInfo.scale);
                 });

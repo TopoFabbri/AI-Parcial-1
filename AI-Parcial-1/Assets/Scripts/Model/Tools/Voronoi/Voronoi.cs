@@ -67,7 +67,7 @@ namespace Model.Tools.Voronoi
 
         internal TCoordinate GetClosestTo(TCoordinate coordinate)
         {
-            return voronoiMap[coordinate];
+            return voronoiMap.GetValueOrDefault(coordinate, coordinate);
         }
     }
 }
