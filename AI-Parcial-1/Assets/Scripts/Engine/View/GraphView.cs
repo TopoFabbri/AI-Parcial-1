@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Model.Game.Graph;
 using Model.Game.World.Objects;
@@ -50,10 +48,9 @@ namespace Engine.View
 
         private static void DrawAsDefault(Graph<Node<Coordinate>, Coordinate> graph, Vector3 tileScale, Mesh tileMesh, Material tileMaterial, float nodeDistance)
         {
-            List<Matrix4x4[]> matrices = BuildMatrices(graph.Nodes.Keys, nodeDistance, tileScale);
+            List<Matrix4x4[]> matrices = BuildMatrices(new List<Coordinate>(graph.Nodes.Keys), nodeDistance, tileScale);
 
             DrawMatrices(tileMesh, tileMaterial, matrices);
-            return;
         }
 
         private static void DrawAsVoronoi(Graph<Node<Coordinate>, Coordinate> graph, Vector3 tileScale, Mesh tileMesh, Material tileMaterial, float nodeDistance)
@@ -86,7 +83,7 @@ namespace Engine.View
             MineMaterials.Clear();
         }
 
-        private static List<Matrix4x4[]> BuildMatrices(ICollection<Coordinate> coordinates, float nodeDistance, Vector3 scale)
+        private static List<Matrix4x4[]> BuildMatrices(List<Coordinate> coordinates, float nodeDistance, Vector3 scale)
         {
             List<Matrix4x4[]> drawMatrices = new();
             int meshCount = coordinates.Count;
@@ -98,7 +95,7 @@ namespace Engine.View
 
             Parallel.For(0, coordinates.Count, ParallelOptions, i =>
             {
-                Coordinate coordinate = coordinates.ElementAt(i);
+                Coordinate coordinate = coordinates[i];
 
                 Vector3 pos = new Vector3(coordinate.X, 0f, coordinate.Y) * nodeDistance;
                 drawMatrices[i / MaxObjsPerDrawCall][i % MaxObjsPerDrawCall] = Matrix4x4.TRS(pos, Quaternion.identity, scale);

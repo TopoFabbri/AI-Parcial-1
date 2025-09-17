@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Model.Game.Events;
 using Model.Tools.Pathfinder.Coordinate;
 using Model.Tools.Pathfinder.Graph;
 using Model.Tools.Pathfinder.Node;
@@ -25,7 +22,6 @@ namespace Model.Tools.Voronoi
 
         internal void Generate(IGraph<TNode, TCoordinate> graph, List<IVoronoiObject<TCoordinate>> voronoiObjects)
         {
-            DateTime startTime = Time.Time.DateTime;
             voronoiMap.Clear();
 
             ConcurrentBag<TCoordinate> sites = new();
@@ -45,7 +41,6 @@ namespace Model.Tools.Voronoi
             Parallel.ForEach(graph.GetNodes(), parallelOptions, node =>
             {
                 TCoordinate point = node.GetCoordinate();
-
                 TCoordinate winner = sites.ElementAt(0);
 
                 for (int i = 1; i < sites.Count; i++)
@@ -59,10 +54,6 @@ namespace Model.Tools.Voronoi
 
                 voronoiMap[point] = winner;
             });
-
-            string debug = "Voronoi generated in: " + (Time.Time.DateTime - startTime).TotalSeconds.ToString(CultureInfo.InvariantCulture) + "s";
-
-            EventSystem.EventSystem.Raise<DebugEvent>(debug);
         }
 
         internal TCoordinate GetClosestTo(TCoordinate coordinate)

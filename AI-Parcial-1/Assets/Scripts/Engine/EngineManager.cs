@@ -21,14 +21,14 @@ namespace Engine
         [TabGroup("Game/Game", "Mines"), SerializeField] private int mineQty = 5;
         [TabGroup("Game/Game", "Mines"), SerializeField] private int minMineGoldQty = 100;
         [TabGroup("Game/Game", "Mines"), SerializeField] private int maxMineGoldQty = 1000;
+
+        [field: TabGroup("Game/Game", "Miners"), SerializeField] public float MinerSpeed{ get; private set; } = 1f;
+        [field: TabGroup("Game/Game", "Miners"), SerializeField] public float MinerMineSpeed{ get; private set; } = 1f;
+        [field: TabGroup("Game/Game", "Miners"), SerializeField] public float MinerMaxGold{ get; private set; } = 15f;
+        [field: TabGroup("Game/Game", "Miners"), SerializeField] public int MinerMaxFood{ get; private set; } = 500;
         
-        [TabGroup("Game/Game", "Miners"), SerializeField] private int minerStartGold;
-        [TabGroup("Game/Game", "Miners"), SerializeField] private float minerSpeed = 1f;
-        [TabGroup("Game/Game", "Miners"), SerializeField] private float minerMineSpeed = 1f;
-        [TabGroup("Game/Game", "Miners"), SerializeField] private float minerMaxGold = 15f;
-        
-        [TabGroup("Game/Game", "Caravan"), SerializeField] private float caravanSpeed = 2f;
-        [TabGroup("Game/Game", "Caravan"), SerializeField] private int caravanCapacity = 10;
+        [field: TabGroup("Game/Game", "Caravan"), SerializeField] public float CaravanSpeed { get; private set; } = 2f;
+        [field: TabGroup("Game/Game", "Caravan"), SerializeField] public int CaravanCapacity { get; private set; } = 10;
 
         [FoldoutGroup("View", true)]
         [TabGroup("View/View", "Graph"), Required, SerializeField] private GameObject tilePrefab;
@@ -53,12 +53,6 @@ namespace Engine
         private Model.Game.Model model;
         private Drawer drawer;
         private Graph<Node<Coordinate>, Coordinate> graph;
-
-        public float MinerSpeed => minerSpeed;
-        public float MinerMineSpeed => minerMineSpeed;
-        public float MinerMaxGold => minerMaxGold;
-        public float CaravanSpeed => caravanSpeed;
-        public int CaravanCapacity => caravanCapacity;
 
         private void Awake()
         {

@@ -79,7 +79,7 @@ namespace Model.Game
 
         public float GetCenterGold()
         {
-            return center.GoldContainer.ContainingGold;
+            return center.GoldContainer.ContainingQty;
         }
         
         private static void OnRaiseAlarm(RaiseAlarmEvent raiseAlarmEvent)

@@ -3,7 +3,7 @@ using System.Numerics;
 using Model.Game.Events;
 using Model.Game.Graph;
 using Model.Game.World.Agents;
-using Model.Game.World.Mining;
+using Model.Game.World.Resource;
 using Model.Tools.Drawing;
 using Model.Tools.EventSystem;
 using Model.Tools.Pathfinder.Node;
@@ -17,7 +17,7 @@ namespace Model.Game.World.Objects
         private static Coordinate _centerCoordinate;
 
         public GoldContainer GoldContainer { get; private set; }
-        
+
         string ILocalizable.Name { get; set; } = "Center";
 
         int ILocalizable.Id { get; set; }
@@ -63,7 +63,8 @@ namespace Model.Game.World.Objects
 
         private void CreateMiner(RequestedMinerCreationEvent minerCreationRequest)
         {
-            miners.Add(new Miner(graph.GetNodeAt(NodeCoordinate), graph, minerCreationRequest.mineSpeed, minerCreationRequest.moveSpeed, minerCreationRequest.maxGold));
+            miners.Add(new Miner(graph.GetNodeAt(NodeCoordinate), graph, minerCreationRequest.mineSpeed, minerCreationRequest.moveSpeed, minerCreationRequest.maxGold,
+                minerCreationRequest.maxFood));
         }
 
         private void CreateCaravan(RequestedCaravanCreationEvent caravanCreationRequest)

@@ -27,7 +27,7 @@ namespace Engine.Controller.Input
 
         public void OnCreateMiner()
         {
-            EventSystem.Raise<RequestedMinerCreationEvent>(engineManager.MinerSpeed, engineManager.MinerMineSpeed, engineManager.MinerMaxGold);
+            EventSystem.Raise<RequestedMinerCreationEvent>(engineManager.MinerSpeed, engineManager.MinerMineSpeed, engineManager.MinerMaxGold, engineManager.MinerMaxFood);
         }
 
         public void CreateCaravan()

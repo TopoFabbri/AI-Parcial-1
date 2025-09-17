@@ -1,4 +1,5 @@
 ﻿using System;
+using Model.Game.World.Resource;
 using Model.Tools.FSM;
 using Model.Tools.Time;
 
@@ -8,39 +9,26 @@ namespace Model.Game.World.Agents.MinerStates
     {
         public override Type[] OnTickParamTypes => new[]
         {
-            typeof(float)
+            typeof(FoodContainer)
         };
-
-        private DateTime enterTime;
-
-        public override BehaviourActions GetOnEnterBehaviours(params object[] parameters)
-        {
-            BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
-
-            behaviourActions.AddMultiThreadableBehaviour(0, () => { enterTime = Time.DateTime; });
-
-            return behaviourActions;
-        }
 
         public override BehaviourActions GetOnTickBehaviours(params object[] parameters)
         {
-            float idleTime = (float)parameters[0];
+            FoodContainer foodContainer = parameters[0] as FoodContainer;
 
             BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
 
-            behaviourActions.AddMultiThreadableBehaviour(0, () => { CheckIfEnded(idleTime); });
+            behaviourActions.AddMultiThreadableBehaviour(0, () => { CheckIfEnded(foodContainer); });
 
             return behaviourActions;
         }
 
-        private void CheckIfEnded(float idleTime)
+        private void CheckIfEnded(FoodContainer foodContainer)
         {
-            float currentTime = (float)(Time.DateTime - enterTime).TotalSeconds;
-            
-            if (currentTime > idleTime)
-            {
-                flag?.Invoke(Miner.Flags.IdleEnded);
-            }
+            if (foodContainer == null) return;
+
+            if (!foodContainer.IsEmpty)
+                flag.Invoke(Miner.Flags.IdleEnded);
         }
     }
 }

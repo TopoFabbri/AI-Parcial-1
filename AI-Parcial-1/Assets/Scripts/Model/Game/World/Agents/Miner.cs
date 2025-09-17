@@ -2,7 +2,7 @@
 using Model.Game.Events;
 using Model.Game.Graph;
 using Model.Game.World.Agents.MinerStates;
-using Model.Game.World.Mining;
+using Model.Game.World.Resource;
 using Model.Tools.Drawing;
 using Model.Tools.EventSystem;
 using Model.Tools.FSM;
@@ -15,17 +15,18 @@ namespace Model.Game.World.Agents
     {
         #region Fields
 
-        private float mineSpeed = 1f;
-        private float moveSpeed = 1f;
+        private readonly float mineSpeed;
+        private readonly float moveSpeed;
         
-        private const float idleTime = 1f;
+        private const float GoldPerFoodUnit = 3f;
         private const float HeightDrawOffset = 1f;
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
-        private AStarPathfinder<Node<Coordinate>, Coordinate> pathfinder;
+        private readonly Pathfinder<Node<Coordinate>, Coordinate> pathfinder;
 
         private Coordinate targetCoordinate;
-        
-        public GoldContainer GoldContainer { get; set; }
+
+        private GoldContainer GoldContainer { get; }
+        private FoodContainer FoodContainer { get; }
 
         #endregion
         
@@ -54,7 +55,8 @@ namespace Model.Game.World.Agents
             GoldFilled,
             GoldDeposited,
             ReachedCenter,
-            StayHidden
+            StayHidden,
+            FoodDepleted
         }
 
         private FSM<States, Flags> fsm;
@@ -67,8 +69,16 @@ namespace Model.Game.World.Agents
 
         public Coordinate NodeCoordinate { get; set; }
 
-        public Miner(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, float mineSpeed, float moveSpeed, float maxGold, int goldQty = 0)
+        public Miner(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, float mineSpeed, float moveSpeed, float maxGold, int maxFood, float goldQty = 0, int foodQty = 3)
         {
+            this.mineSpeed = mineSpeed;
+            this.moveSpeed = moveSpeed;
+            
+            this.graph = graph;
+            GoldContainer = new GoldContainer(goldQty, maxGold);
+            FoodContainer = new FoodContainer(foodQty, maxFood);
+            pathfinder = new AStarPathfinder<Node<Coordinate>, Coordinate>();
+            targetCoordinate = new Coordinate();
             this.mineSpeed = mineSpeed;
             this.moveSpeed = moveSpeed;
             
@@ -87,9 +97,9 @@ namespace Model.Game.World.Agents
 
         private void InitializeFSM()
         {
-            fsm = new FSM<States, Flags>(States.Idle);
+            fsm = new FSM<States, Flags>(States.FindMine);
 
-            fsm.AddState<IdleState>(States.Idle, onTickParameters: () => new object[] { idleTime });
+            fsm.AddState<IdleState>(States.Idle, onTickParameters: () => new object[] { FoodContainer });
             fsm.AddState<FindMineState>(States.FindMine, onTickParameters: () => new object[] { NodeCoordinate, targetCoordinate });
             fsm.AddState<FindCenterState>(States.FindCenter, onTickParameters: () => new object[] { targetCoordinate });
             fsm.AddState<HideState>(States.Hide);
@@ -101,10 +111,10 @@ namespace Model.Game.World.Agents
                 onTickParameters: () => new object[] { graph, this, moveSpeed });
             fsm.AddState<MineState>(States.Mine, 
                 onEnterParameters: () => new object[] {graph, NodeCoordinate, GoldContainer},
-                onTickParameters: () => new object[] { GoldContainer, mineSpeed },
+                onTickParameters: () => new object[] { GoldContainer, FoodContainer, mineSpeed, GoldPerFoodUnit },
                 onExitParameters: () => new object[] { GoldContainer });
 
-            fsm.SetTransition(States.Idle, Flags.IdleEnded, States.FindMine);
+            fsm.SetTransition(States.Idle, Flags.IdleEnded, States.Mine);
             fsm.SetTransition(States.Idle, Flags.AlarmRaised, States.FindCenter);
             
             fsm.SetTransition(States.FindMine, Flags.MineFound, States.Move);
@@ -123,6 +133,7 @@ namespace Model.Game.World.Agents
             fsm.SetTransition(States.Mine, Flags.MineDepleted, States.FindMine);
             fsm.SetTransition(States.Mine, Flags.GoldFilled, States.FindCenter);
             fsm.SetTransition(States.Mine, Flags.AlarmRaised, States.FindCenter);
+            fsm.SetTransition(States.Mine, Flags.FoodDepleted, States.Idle);
             
             fsm.SetTransition(States.Deposit, Flags.GoldDeposited, States.FindMine);
             fsm.SetTransition(States.Deposit, Flags.AlarmRaised, States.FindCenter);

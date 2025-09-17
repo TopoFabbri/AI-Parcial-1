@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
 using Model.Game.Graph;
-using Model.Game.World.Mining;
+using Model.Game.World.Resource;
 using Model.Tools.Drawing;
 using Model.Tools.Pathfinder.Node;
 using Model.Tools.Voronoi;

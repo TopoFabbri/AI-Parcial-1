@@ -1,7 +1,7 @@
 ﻿using System;
 using Model.Game.Graph;
-using Model.Game.World.Mining;
 using Model.Game.World.Objects;
+using Model.Game.World.Resource;
 using Model.Tools.FSM;
 using Model.Tools.Pathfinder.Node;
 
@@ -50,7 +50,7 @@ namespace Model.Game.World.Agents.MinerStates
 
         private void DepositGold(GoldContainer minerContainer)
         {
-            center.GoldContainer.AddGold(minerContainer.GetGold(minerContainer.ContainingGold));
+            center.GoldContainer.Add(minerContainer.Get(minerContainer.ContainingQty));
             flag.Invoke(Miner.Flags.GoldDeposited);
         }
     }

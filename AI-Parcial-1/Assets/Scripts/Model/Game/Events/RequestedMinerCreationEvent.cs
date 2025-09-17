@@ -7,6 +7,7 @@ namespace Model.Game.Events
         public float mineSpeed;
         public float moveSpeed;
         public float maxGold;
+        public int maxFood;
         
         public void Reset()
         {
@@ -17,6 +18,7 @@ namespace Model.Game.Events
             moveSpeed = (float)parameters[0];
             mineSpeed = (float)parameters[1];
             maxGold = (float)parameters[2];
+            maxFood = (int)parameters[3];
         }
     }
 }
