@@ -33,8 +33,8 @@ namespace Engine
         [FoldoutGroup("View", true)]
         [TabGroup("View/View", "Graph"), Required, SerializeField] private GameObject tilePrefab;
         
+        [TabGroup("View/View", "Drawing"), SerializeField] private GraphView.DrawModes drawMode;
         [TabGroup("View/View", "Drawing"), SerializeField] private float drawSize = .9f;
-        [TabGroup("View/View", "Drawing"), SerializeField] private bool drawVoronoi;
         [TabGroup("View/View", "Drawing"), SerializeField] private GameObject defaultPrefab;
         [TabGroup("View/View", "Drawing"), SerializeField] private Dictionary<string, GameObject> prefabs = new();
 
@@ -86,7 +86,7 @@ namespace Engine
 
         private void LateUpdate()
         {
-            GraphView.DrawGraph(model.Graph, tileScale, tileMesh, tileMaterial, drawVoronoi);
+            GraphView.DrawGraph(model.Graph, tileScale, tileMesh, tileMaterial, drawMode);
             drawer.Draw();
             UpdateHudTxt();
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Model.Game.Graph;
 using Model.Game.World.Objects;
@@ -11,173 +12,165 @@ namespace Engine.View
 {
     public static class GraphView
     {
+        public enum DrawModes
+        {
+            None,
+            Default,
+            Voronoi,
+            Content
+        }
+
         private const int MaxObjsPerDrawCall = 1000;
         private static readonly ParallelOptions ParallelOptions = new() { MaxDegreeOfParallelism = 32 };
-        
-        // Cache of materials per Voronoi region (per Mine coordinate)
+
         private static readonly Dictionary<Coordinate, Material> MineMaterials = new();
-        
-        // Generate a vibrant, deterministic color per mine based on its coordinate
+        private static readonly int BaseColorPropertyID = Shader.PropertyToID("_BaseColor");
+        private static readonly int ColorPropertyID = Shader.PropertyToID("_Color");
+        private static readonly int EmissionColorPropertyID = Shader.PropertyToID("_EmissionColor");
+
+        public static void DrawGraph(Graph<Node<Coordinate>, Coordinate> graph, Vector3 tileScale, Mesh tileMesh, Material tileMaterial, DrawModes drawMode)
+        {
+            if (drawMode == DrawModes.None) return;
+            if (graph == null || !tileMesh || !tileMaterial) return;
+
+            float nodeDistance = graph.GetNodeDistance();
+
+            if (Mine.Mines.Count <= 0) drawMode = DrawModes.Default;
+
+            if (drawMode == DrawModes.Default)
+            {
+                DrawAsDefault(graph, tileScale, tileMesh, tileMaterial, nodeDistance);
+                return;
+            }
+
+            EnsureMineMaterials(tileMaterial);
+
+            DrawAsVoronoi(graph, tileScale, tileMesh, tileMaterial, nodeDistance);
+        }
+
+        private static void DrawAsDefault(Graph<Node<Coordinate>, Coordinate> graph, Vector3 tileScale, Mesh tileMesh, Material tileMaterial, float nodeDistance)
+        {
+            List<Matrix4x4[]> matrices = BuildMatrices(graph.Nodes.Keys, nodeDistance, tileScale);
+
+            DrawMatrices(tileMesh, tileMaterial, matrices);
+            return;
+        }
+
+        private static void DrawAsVoronoi(Graph<Node<Coordinate>, Coordinate> graph, Vector3 tileScale, Mesh tileMesh, Material tileMaterial, float nodeDistance)
+        {
+            Dictionary<Material, List<Matrix4x4[]>> groupedMatrices = new();
+            Dictionary<Material, List<Coordinate>> groupedCoords = new();
+
+            foreach (Coordinate coordinate in graph.Nodes.Keys)
+            {
+                Material mat = GetMaterialForCoordinate(tileMaterial, coordinate);
+
+                if (!groupedCoords.TryGetValue(mat, out List<Coordinate> bag))
+                {
+                    bag = new List<Coordinate>();
+                    groupedCoords[mat] = bag;
+                }
+
+                bag.Add(coordinate);
+            }
+
+            foreach (KeyValuePair<Material, List<Coordinate>> coordGroup in groupedCoords)
+                groupedMatrices.Add(coordGroup.Key, BuildMatrices(coordGroup.Value, nodeDistance, tileScale));
+
+            foreach (KeyValuePair<Material, List<Matrix4x4[]>> matGroup in groupedMatrices)
+                DrawMatrices(tileMesh, matGroup.Key, matGroup.Value);
+        }
+
+        public static void ClearMaterials()
+        {
+            MineMaterials.Clear();
+        }
+
+        private static List<Matrix4x4[]> BuildMatrices(ICollection<Coordinate> coordinates, float nodeDistance, Vector3 scale)
+        {
+            List<Matrix4x4[]> drawMatrices = new();
+            int meshCount = coordinates.Count;
+
+            for (int i = 0; i < meshCount; i += MaxObjsPerDrawCall)
+            {
+                drawMatrices.Add(new Matrix4x4[meshCount > MaxObjsPerDrawCall ? MaxObjsPerDrawCall : meshCount]);
+            }
+
+            Parallel.For(0, coordinates.Count, ParallelOptions, i =>
+            {
+                Coordinate coordinate = coordinates.ElementAt(i);
+
+                Vector3 pos = new Vector3(coordinate.X, 0f, coordinate.Y) * nodeDistance;
+                drawMatrices[i / MaxObjsPerDrawCall][i % MaxObjsPerDrawCall] = Matrix4x4.TRS(pos, Quaternion.identity, scale);
+            });
+            
+            return drawMatrices;
+        }
+
+        private static void DrawMatrices(Mesh mesh, Material material, List<Matrix4x4[]> matrices)
+        {
+            foreach (Matrix4x4[] matrixArray in matrices)
+                Graphics.DrawMeshInstanced(mesh, 0, material, matrixArray);
+        }
+
+        private static Material GetMaterialForCoordinate(Material baseMaterial, Coordinate key)
+        {
+            try
+            {
+                Coordinate closest = VoronoiRegistry<Node<Coordinate>, Coordinate>.GetClosestTo(typeof(Mine), key);
+                if (MineMaterials.TryGetValue(closest, out Material mat)) return mat;
+
+                mat = CreateColoredMaterial(baseMaterial, closest);
+                MineMaterials[closest] = mat;
+                return mat;
+            }
+            catch
+            {
+                return baseMaterial;
+            }
+        }
+
+        private static void EnsureMineMaterials(Material baseMaterial)
+        {
+            try
+            {
+                List<IVoronoiObject<Coordinate>> mines = Mine.Mines;
+                if (mines == null) return;
+
+                foreach (IVoronoiObject<Coordinate> vorObj in mines)
+                {
+                    Coordinate coord = vorObj.GetCoordinates();
+
+                    if (!MineMaterials.ContainsKey(coord))
+                        MineMaterials[coord] = CreateColoredMaterial(baseMaterial, coord);
+                }
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+
+        private static Material CreateColoredMaterial(Material baseMaterial, Coordinate coord)
+        {
+            Material mat = new(baseMaterial);
+            Color c = GetVibrantColor(coord);
+            if (mat.HasProperty(BaseColorPropertyID)) mat.SetColor(BaseColorPropertyID, c);
+            if (mat.HasProperty(ColorPropertyID)) mat.SetColor(ColorPropertyID, c);
+            if (mat.HasProperty(EmissionColorPropertyID)) mat.SetColor(EmissionColorPropertyID, c * 0.5f);
+            return mat;
+        }
+
         private static Color GetVibrantColor(Coordinate coord)
         {
-            int hash = coord.GetHashCode();
-            // Map hash to [0,1]
-            float u = (hash & 0x7FFFFFFF) / (float)int.MaxValue;
-            // Distribute hues across the wheel and vary saturation/value for contrast
+            int hash = coord.GetHashCode() & 0x7FFFFFFF;
+            float u = hash / (float)int.MaxValue;
             float h = Mathf.Repeat(u * 0.983f + 0.123f, 1f);
             float s = 0.65f + 0.35f * Mathf.Repeat(u * 3.137f, 1f);
             float v = 0.85f + 0.15f * Mathf.Repeat(u * 5.789f, 1f);
             Color c = Color.HSVToRGB(h, s, v);
             c.a = 1f;
             return c;
-        }
-        
-        private static void EnsureMineMaterials(Material baseMaterial)
-        {
-            // Create instanced materials only once per mine coordinate
-            try
-            {
-                var mines = Mine.Mines; // static list maintained by Mine
-                if (mines == null) return;
-
-                // Step to spread grayscale values (avoid 0 and 1 extremes for visibility)
-                int total = mines.Count;
-                float step = total > 0 ? 1f / (total + 1) : 1f;
-
-                foreach (var vorObj in mines)
-                {
-                    Coordinate coord = vorObj.GetCoordinates();
-                    if (MineMaterials.ContainsKey(coord)) continue;
-
-                    var mat = new Material(baseMaterial);
-                    Color c = GetVibrantColor(coord);
-                    if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", c);
-                    if (mat.HasProperty("_Color")) mat.SetColor("_Color", c);
-                    if (mat.HasProperty("_EmissionColor")) mat.SetColor("_EmissionColor", c * 0.5f);
-
-                    MineMaterials[coord] = mat;
-                }
-            }
-            catch
-            {
-                // If anything fails (e.g., no Mine system yet), we silently fall back to single-material rendering in DrawGraph
-            }
-        }
-
-        public static void DrawGraph(Graph<Node<Coordinate>, Coordinate> graph, Vector3 tileScale, Mesh tileMesh, Material tileMaterial, bool drawVoronoi)
-        {
-            // If the toggle is off, do the EXACT original behavior: single-material, multithreaded batching, no Voronoi, no material cache.
-            if (!drawVoronoi)
-            {
-                List<Matrix4x4[]> drawMatrices = new();
-                
-                int meshes = graph.Nodes.Count;
-                List<Coordinate> keys = new(graph.Nodes.Keys);
-                
-                for (int i = 0; i < meshes; i += MaxObjsPerDrawCall)
-                {
-                    drawMatrices.Add(new Matrix4x4[meshes > MaxObjsPerDrawCall ? MaxObjsPerDrawCall : meshes]);
-                    meshes -= MaxObjsPerDrawCall;
-                }
-                
-                Parallel.For(0, keys.Count, ParallelOptions, i =>
-                {
-                    Vector3 position = new Vector3(graph.Nodes[keys[i]].GetCoordinate().X, 0f, graph.Nodes[keys[i]].GetCoordinate().Y) * graph.GetNodeDistance();
-                    
-                    drawMatrices[i / MaxObjsPerDrawCall][i % MaxObjsPerDrawCall].SetTRS(position, Quaternion.identity, tileScale);
-                });
-                
-                foreach (Matrix4x4[] matrixArray in drawMatrices)
-                {
-                    Graphics.DrawMeshInstanced(tileMesh, 0, tileMaterial, matrixArray);
-                }
-                return;
-            }
-            
-            // Try Voronoi-based grouping by nearest Mine. If unavailable, fall back to original single-material draw.
-            bool canUseVoronoi = false;
-            try { canUseVoronoi = Mine.Mines is { Count: > 0 }; } catch { canUseVoronoi = false; }
-
-            if (!canUseVoronoi)
-            {
-                // Fallback: original behavior (single material). This path is only reached when drawVoronoi == true but mines/Voronoi aren't available.
-                List<Matrix4x4> matrices = new(graph.Nodes.Count);
-                foreach (var key in graph.Nodes.Keys)
-                {
-                    Vector3 pos = new Vector3(key.X, 0f, key.Y) * graph.GetNodeDistance();
-                    matrices.Add(Matrix4x4.TRS(pos, Quaternion.identity, tileScale));
-                }
-
-                for (int i = 0; i < matrices.Count; i += MaxObjsPerDrawCall)
-                {
-                    int count = Math.Min(MaxObjsPerDrawCall, matrices.Count - i);
-                    var batch = new Matrix4x4[count];
-                    matrices.CopyTo(i, batch, 0, count);
-                    Graphics.DrawMeshInstanced(tileMesh, 0, tileMaterial, batch);
-                }
-                return;
-            }
-
-            // Ensure materials exist for current mines
-            EnsureMineMaterials(tileMaterial);
-
-            // Group tile transforms by their nearest mine's material
-            Dictionary<Material, List<Matrix4x4>> grouped = new();
-
-            foreach (var key in graph.Nodes.Keys)
-            {
-                Material matToUse = tileMaterial; // default
-                try
-                {
-                    // Find the closest Voronoi seed (mine)
-                    Coordinate closest = VoronoiRegistry<Node<Coordinate>, Coordinate>.GetClosestTo(typeof(Mine), key);
-
-                    if (!MineMaterials.TryGetValue(closest, out matToUse))
-                    {
-                        // If missing (e.g., mine added after cache), create on the fly with a unique vibrant color
-                        var mat = new Material(tileMaterial);
-                        Color c = GetVibrantColor(closest);
-                        if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", c);
-                        if (mat.HasProperty("_Color")) mat.SetColor("_Color", c);
-                        if (mat.HasProperty("_EmissionColor")) mat.SetColor("_EmissionColor", c * 0.5f);
-                        MineMaterials[closest] = mat;
-                        matToUse = mat;
-                    }
-                }
-                catch
-                {
-                    // If Voronoi lookup fails for some reason, fall back to base material for this tile.
-                    matToUse = tileMaterial;
-                }
-
-                if (!grouped.TryGetValue(matToUse, out var list))
-                {
-                    list = new List<Matrix4x4>();
-                    grouped[matToUse] = list;
-                }
-
-                Vector3 position = new Vector3(key.X, 0f, key.Y) * graph.GetNodeDistance();
-                list.Add(Matrix4x4.TRS(position, Quaternion.identity, tileScale));
-            }
-
-            // Draw each group in instanced batches
-            foreach (var kv in grouped)
-            {
-                var material = kv.Key;
-                var matrices = kv.Value;
-                for (int i = 0; i < matrices.Count; i += MaxObjsPerDrawCall)
-                {
-                    int count = Math.Min(MaxObjsPerDrawCall, matrices.Count - i);
-                    var batch = new Matrix4x4[count];
-                    matrices.CopyTo(i, batch, 0, count);
-                    Graphics.DrawMeshInstanced(tileMesh, 0, material, batch);
-                }
-            }
-        }
-
-        public static void ClearMaterials()
-        {
-            MineMaterials.Clear();
         }
     }
 }
