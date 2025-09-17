@@ -3117,7 +3117,7 @@ MonoBehaviour:
   <CaravanSpeed>k__BackingField: 2
   <CaravanCapacity>k__BackingField: 10
   tilePrefab: {fileID: 5679408169038904489, guid: e4f78b30982e81e48aac19bb4d99999a, type: 3}
-  drawMode: 1
+  drawMode: 2
   drawSize: 1
   defaultPrefab: {fileID: 3284166792071553244, guid: c99075e0db17248489ee8b0265c397d3, type: 3}
   cameraController: {fileID: 330585548}

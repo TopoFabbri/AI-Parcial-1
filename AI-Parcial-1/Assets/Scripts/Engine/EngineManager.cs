@@ -57,6 +57,7 @@ namespace Engine
         private void Awake()
         {
             EventSystem.Subscribe<DebugEvent>(OnModelDebugEvent);
+            EventSystem.Subscribe<GraphModifiedEvent>(GraphView.OnModifiedGraph);
         }
 
         private void Start()
@@ -93,6 +94,7 @@ namespace Engine
             
             GraphView.ClearMaterials();
             
+            EventSystem.Unsubscribe<GraphModifiedEvent>(GraphView.OnModifiedGraph);
             EventSystem.Unsubscribe<DebugEvent>(OnModelDebugEvent);
         }
         

@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
+using Model.Game.Events;
 using Model.Game.Graph;
 using Model.Game.World.Resource;
 using Model.Tools.Drawing;
+using Model.Tools.EventSystem;
 using Model.Tools.Pathfinder.Node;
 using Model.Tools.Voronoi;
 
@@ -60,6 +62,7 @@ namespace Model.Game.World.Objects
             Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
             
             VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), graph, Mines);
+            EventSystem.Raise<GraphModifiedEvent>();
         }
 
         public void Update()

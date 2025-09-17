@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Model.Game.Events;
 using Model.Game.Graph;
 using Model.Game.World.Objects;
@@ -13,8 +12,6 @@ namespace Model.Game
 {
     public class Model
     {
-        private readonly ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 32 };
-        
         public Graph<Node<Coordinate>, Coordinate> Graph { get; private set; }
         
         private Center center;
@@ -62,6 +59,7 @@ namespace Model.Game
             }
             
             VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), Graph, Mine.Mines);
+            EventSystem.Raise<GraphModifiedEvent>();
             
             return Graph;
         }
