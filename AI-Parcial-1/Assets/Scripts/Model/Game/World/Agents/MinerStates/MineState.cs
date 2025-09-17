@@ -14,7 +14,7 @@ namespace Model.Game.World.Agents.MinerStates
         private float goldUntilFoodRequired;
 
         public override Type[] OnEnterParamTypes => new[] { typeof(Graph<Node<Coordinate>, Coordinate>), typeof(Coordinate), typeof(GoldContainer) };
-        public override Type[] OnTickParamTypes => new[] { typeof(GoldContainer), typeof(FoodContainer), typeof(float), typeof(float) };
+        public override Type[] OnTickParamTypes => new[] { typeof(GoldContainer), typeof(float), typeof(float) };
         public override Type[] OnExitParamTypes => new[] { typeof(GoldContainer) };
 
         public override BehaviourActions GetOnEnterBehaviours(params object[] parameters)
@@ -39,14 +39,13 @@ namespace Model.Game.World.Agents.MinerStates
         public override BehaviourActions GetOnTickBehaviours(params object[] parameters)
         {
             GoldContainer goldContainer = parameters[0] as GoldContainer;
-            FoodContainer foodContainer = parameters[1] as FoodContainer;
-            float mineSpeed = (float)parameters[2];
-            float goldPerFoodUnit = (float)parameters[3];
+            float mineSpeed = (float)parameters[1];
+            float goldPerFoodUnit = (float)parameters[2];
 
             BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
 
-            behaviourActions.AddMultiThreadableBehaviour(0, () => { MineGold(goldContainer, mineSpeed); });
-            behaviourActions.AddMultiThreadableBehaviour(1, () => { CheckFood(foodContainer, goldPerFoodUnit); });
+            behaviourActions.AddMultiThreadableBehaviour(0, () => { CheckFood(goldPerFoodUnit); });
+            behaviourActions.AddMultiThreadableBehaviour(1, () => { MineGold(goldContainer, mineSpeed); });
 
             return behaviourActions;
         }
@@ -91,8 +90,12 @@ namespace Model.Game.World.Agents.MinerStates
             goldUntilFoodRequired -= goldMined;
         }
 
-        private void CheckFood(FoodContainer foodContainer, float goldPerFoodUnit)
+        private void CheckFood(float goldPerFoodUnit)
         {
+            if (mine == null) return;
+            
+            FoodContainer foodContainer = mine.FoodContainer;
+            
             if (foodContainer == null || foodContainer.IsEmpty)
             {
                 flag.Invoke(Miner.Flags.FoodDepleted);

@@ -26,7 +26,6 @@ namespace Model.Game.World.Agents
         private Coordinate targetCoordinate;
 
         private GoldContainer GoldContainer { get; }
-        private FoodContainer FoodContainer { get; }
 
         #endregion
         
@@ -69,14 +68,13 @@ namespace Model.Game.World.Agents
 
         public Coordinate NodeCoordinate { get; set; }
 
-        public Miner(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, float mineSpeed, float moveSpeed, float maxGold, int maxFood, float goldQty = 0, int foodQty = 3)
+        public Miner(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, float mineSpeed, float moveSpeed, float maxGold, float goldQty = 0)
         {
             this.mineSpeed = mineSpeed;
             this.moveSpeed = moveSpeed;
             
             this.graph = graph;
             GoldContainer = new GoldContainer(goldQty, maxGold);
-            FoodContainer = new FoodContainer(foodQty, maxFood);
             pathfinder = new AStarPathfinder<Node<Coordinate>, Coordinate>();
             targetCoordinate = new Coordinate();
             this.mineSpeed = mineSpeed;
@@ -99,7 +97,7 @@ namespace Model.Game.World.Agents
         {
             fsm = new FSM<States, Flags>(States.FindMine);
 
-            fsm.AddState<IdleState>(States.Idle, onTickParameters: () => new object[] { FoodContainer });
+            fsm.AddState<IdleState>(States.Idle, onEnterParameters: () => new object[] { graph, NodeCoordinate });
             fsm.AddState<FindMineState>(States.FindMine, onTickParameters: () => new object[] { NodeCoordinate, targetCoordinate });
             fsm.AddState<FindCenterState>(States.FindCenter, onTickParameters: () => new object[] { targetCoordinate });
             fsm.AddState<HideState>(States.Hide);
@@ -111,7 +109,7 @@ namespace Model.Game.World.Agents
                 onTickParameters: () => new object[] { graph, this, moveSpeed });
             fsm.AddState<MineState>(States.Mine, 
                 onEnterParameters: () => new object[] {graph, NodeCoordinate, GoldContainer},
-                onTickParameters: () => new object[] { GoldContainer, FoodContainer, mineSpeed, GoldPerFoodUnit },
+                onTickParameters: () => new object[] { GoldContainer, mineSpeed, GoldPerFoodUnit },
                 onExitParameters: () => new object[] { GoldContainer });
 
             fsm.SetTransition(States.Idle, Flags.IdleEnded, States.Mine);

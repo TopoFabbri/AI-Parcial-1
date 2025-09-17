@@ -19,13 +19,13 @@ namespace Engine
         [TabGroup("Game/Game", "Map"), SerializeField] private float nodeDistance = 1f;
 
         [TabGroup("Game/Game", "Mines"), SerializeField] private int mineQty = 5;
-        [TabGroup("Game/Game", "Mines"), SerializeField] private int minMineGoldQty = 100;
-        [TabGroup("Game/Game", "Mines"), SerializeField] private int maxMineGoldQty = 1000;
+        [TabGroup("Game/Game", "Mines"), SerializeField] private int minMineGoldQty = 10;
+        [TabGroup("Game/Game", "Mines"), SerializeField] private int maxMineGoldQty = 100;
+        [TabGroup("Game/Game", "Mines"), SerializeField] private int maxMineFoodQty = 1000;
 
         [field: TabGroup("Game/Game", "Miners"), SerializeField] public float MinerSpeed{ get; private set; } = 1f;
         [field: TabGroup("Game/Game", "Miners"), SerializeField] public float MinerMineSpeed{ get; private set; } = 1f;
         [field: TabGroup("Game/Game", "Miners"), SerializeField] public float MinerMaxGold{ get; private set; } = 15f;
-        [field: TabGroup("Game/Game", "Miners"), SerializeField] public int MinerMaxFood{ get; private set; } = 500;
         
         [field: TabGroup("Game/Game", "Caravan"), SerializeField] public float CaravanSpeed { get; private set; } = 2f;
         [field: TabGroup("Game/Game", "Caravan"), SerializeField] public int CaravanCapacity { get; private set; } = 10;
@@ -65,7 +65,7 @@ namespace Engine
             model = new Model.Game.Model();
             drawer = new Drawer(prefabs, defaultPrefab);
 
-            graph = model.CreateGraph(mapSize.x, mapSize.y, mineQty, minMineGoldQty, maxMineGoldQty, nodeDistance, circumnavigableMap);
+            graph = model.CreateGraph(mapSize.x, mapSize.y, mineQty, minMineGoldQty, maxMineGoldQty, maxMineFoodQty, nodeDistance, circumnavigableMap);
 
             tileScale = tilePrefab.transform.localScale * drawSize * nodeDistance;
             tileMesh = tilePrefab.GetComponent<MeshFilter>().sharedMesh;

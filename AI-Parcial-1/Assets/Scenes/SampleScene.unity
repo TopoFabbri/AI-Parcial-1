@@ -3110,7 +3110,8 @@ MonoBehaviour:
   mineQty: 10
   minMineGoldQty: 10
   maxMineGoldQty: 11
-  <MinerSpeed>k__BackingField: 1
+  maxMineFoodQty: 1000
+  <MinerSpeed>k__BackingField: 4
   <MinerMineSpeed>k__BackingField: 1
   <MinerMaxGold>k__BackingField: 15
   <MinerMaxFood>k__BackingField: 500

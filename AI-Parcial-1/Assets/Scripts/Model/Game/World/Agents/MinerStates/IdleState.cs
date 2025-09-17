@@ -1,33 +1,57 @@
 ﻿using System;
+using Model.Game.Graph;
+using Model.Game.World.Objects;
 using Model.Game.World.Resource;
 using Model.Tools.FSM;
+using Model.Tools.Pathfinder.Node;
 using Model.Tools.Time;
 
 namespace Model.Game.World.Agents.MinerStates
 {
     public class IdleState : State
     {
-        public override Type[] OnTickParamTypes => new[]
+        private FoodContainer foodContainer;
+        public override Type[] OnEnterParamTypes => new[]
         {
-            typeof(FoodContainer)
+            typeof(Graph<Node<Coordinate>, Coordinate>),
+            typeof(Coordinate)
         };
 
-        public override BehaviourActions GetOnTickBehaviours(params object[] parameters)
+        public override BehaviourActions GetOnEnterBehaviours(params object[] parameters)
         {
-            FoodContainer foodContainer = parameters[0] as FoodContainer;
+            Graph<Node<Coordinate>, Coordinate> graph = parameters[0] as Graph<Node<Coordinate>, Coordinate>;
+            Coordinate coordinate = parameters[1] as Coordinate;
 
             BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
 
-            behaviourActions.AddMultiThreadableBehaviour(0, () => { CheckIfEnded(foodContainer); });
+            behaviourActions.AddMultiThreadableBehaviour(0, () => { SetFoodContainer(graph, coordinate); });
 
             return behaviourActions;
         }
 
-        private void CheckIfEnded(FoodContainer foodContainer)
+        public override BehaviourActions GetOnTickBehaviours(params object[] parameters)
         {
-            if (foodContainer == null) return;
+            BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
 
-            if (!foodContainer.IsEmpty)
+            behaviourActions.AddMultiThreadableBehaviour(0, CheckIfEnded);
+
+            return behaviourActions;
+        }
+
+        private void SetFoodContainer(Graph<Node<Coordinate>, Coordinate> graph, Coordinate coordinate)
+        {
+            if (graph == null) return;
+
+            foreach (INodeContainable<Coordinate> nodeContainable in graph.GetNodeAt(coordinate).GetNodeContainables())
+            {
+                if (nodeContainable is Mine mineContainable)
+                    foodContainer = mineContainable.FoodContainer;
+            }
+        }
+
+        private void CheckIfEnded()
+        {
+            if (foodContainer == null || !foodContainer.IsEmpty)
                 flag.Invoke(Miner.Flags.IdleEnded);
         }
     }

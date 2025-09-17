@@ -18,12 +18,13 @@ namespace Model.Game.World.Objects
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
 
         public GoldContainer GoldContainer { get; }
+        public FoodContainer FoodContainer { get; }
 
         string ILocalizable.Name { get; set; } = "Mine";
         int ILocalizable.Id { get; set; }
         public Coordinate NodeCoordinate { get; set; }
 
-        public Mine(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, int goldQty)
+        public Mine(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, float goldQty, int maxFoodQty, int foodQty = 0)
         {
             this.graph = graph;
 
@@ -31,6 +32,8 @@ namespace Model.Game.World.Objects
 
             GoldContainer = new GoldContainer(goldQty, goldQty);
             GoldContainer.Depleted += Destroy;
+
+            FoodContainer = new FoodContainer(foodQty, maxFoodQty);
 
             node.AddNodeContainable(this);
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);

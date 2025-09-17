@@ -35,7 +35,7 @@ namespace Model.Game
             Graph = null;
         }
         
-        public Graph<Node<Coordinate>, Coordinate> CreateGraph(int width, int height, int mineQty, int minMineGold, int maxMineGold, float nodeDistance = 1f, bool circumnavigable = false)
+        public Graph<Node<Coordinate>, Coordinate> CreateGraph(int width, int height, int mineQty, float minMineGold, float maxMineGold, int maxFoodQty, float nodeDistance = 1f, bool circumnavigable = false)
         {
             Time.Start();
             
@@ -55,7 +55,7 @@ namespace Model.Game
                     coordinate.Set(random.Next(0, Graph.GetSize().X), random.Next(0, Graph.GetSize().Y));
                 } while (Graph.Nodes[coordinate].GetNodeContainables().Count != 0 && --maxIterations > 0);
 
-                Mine mine = new(Graph.Nodes[coordinate], Graph, random.Next(minMineGold, maxMineGold));
+                Mine mine = new(Graph.Nodes[coordinate], Graph, random.Next((int)minMineGold, (int)maxMineGold), maxFoodQty);
             }
             
             VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), Graph, Mine.Mines);
