@@ -16,14 +16,14 @@ namespace Model.Game.World.Agents.MinerStates
 
         public override BehaviourActions GetOnTickBehaviours(params object[] parameters)
         {
-            Coordinate minerCoordinate = parameters[0] as Coordinate;
+            Coordinate moverCoordinate = parameters[0] as Coordinate;
             Coordinate closestMineCoordinate = parameters[1] as Coordinate;
 
             BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
 
             behaviourActions.AddMultiThreadableBehaviour(0, () =>
             {
-                GetClosestMine(minerCoordinate, closestMineCoordinate);
+                GetClosestMine(moverCoordinate, closestMineCoordinate);
                 flag?.Invoke(Miner.Flags.MineFound);
             });
 

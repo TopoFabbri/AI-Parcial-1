@@ -3327,7 +3327,7 @@ MonoBehaviour:
   <MinerSpeed>k__BackingField: 4
   <MinerMineSpeed>k__BackingField: 1
   <MinerMaxGold>k__BackingField: 15
-  <CaravanSpeed>k__BackingField: 2
+  <CaravanSpeed>k__BackingField: 4
   <CaravanCapacity>k__BackingField: 10
   tilePrefab: {fileID: 5679408169038904489, guid: e4f78b30982e81e48aac19bb4d99999a, type: 3}
   drawMode: 2

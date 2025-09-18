@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using Model.Game.Events;
 using Model.Game.Graph;
-using Model.Game.World.Agents.MinerStates;
+using Model.Game.World.Agents.CaravanStates;
 using Model.Game.World.Resource;
 using Model.Tools.Drawing;
 using Model.Tools.EventSystem;
@@ -53,7 +53,7 @@ namespace Model.Game.World.Agents
             FoodDepleted
         }
 
-        private readonly FSM<States, Flags> fsm;
+        private FSM<States, Flags> fsm;
 
         #endregion
 
@@ -63,7 +63,7 @@ namespace Model.Game.World.Agents
             this.graph = graph;
             this.pathfinder = pathfinder;
             this.moveSpeed = moveSpeed;
-            
+
             targetCoordinate = new Coordinate();
 
             FoodContainer = new FoodContainer(startingFood, maxFood);
@@ -71,18 +71,44 @@ namespace Model.Game.World.Agents
             graph.Nodes[coordinate].AddNodeContainable(this);
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
 
-            // FSM start
-            fsm = new FSM<States, Flags>(States.Hide);
-
-            fsm.AddState<MoveState>(States.Move,
-                onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph },
-                onTickParameters: () => new object[] { graph, this, moveSpeed });
-
-            fsm.AddState<MoveState>(States.Move);
-
-            // FSM end
+            InitializeFSM();
 
             EventSystem.Subscribe<RaiseAlarmEvent>(OnAlarmRaised);
+        }
+
+        private void InitializeFSM()
+        {
+            fsm = new FSM<States, Flags>(States.FindCenter);
+
+            fsm.AddState<HideState>(States.Hide);
+            fsm.AddState<MoveState>(States.Move, onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph },
+                onTickParameters: () => new object[] { graph, this, moveSpeed });
+            fsm.AddState<CollectState>(States.Collect, onEnterParameters: () => new object[] { graph, NodeCoordinate }, onTickParameters: () => new object[] { FoodContainer });
+            fsm.AddState<FindMineState>(States.FindMine, () => new object[] { NodeCoordinate, targetCoordinate });
+            fsm.AddState<FindCenterState>(States.FindCenter, () => new object[] { targetCoordinate });
+            fsm.AddState<DepositState>(States.Deposit, onEnterParameters: () => new object[] { graph, NodeCoordinate }, onTickParameters: () => new object[] { FoodContainer });
+            
+            fsm.SetTransition(States.Collect, Flags.FoodFilled, States.FindMine);
+            fsm.SetTransition(States.Collect, Flags.FoodDepleted, States.FindCenter);
+            fsm.SetTransition(States.Collect, Flags.AlarmRaised, States.FindCenter);
+            
+            fsm.SetTransition(States.FindMine, Flags.MineFound, States.Move);
+            fsm.SetTransition(States.FindMine, Flags.AlarmRaised, States.FindCenter);
+            
+            fsm.SetTransition(States.Move, Flags.ReachedCenter, States.Collect);
+            fsm.SetTransition(States.Move, Flags.ReachedMine, States.Deposit);
+            fsm.SetTransition(States.Move, Flags.StayHidden, States.Hide);
+            fsm.SetTransition(States.Move, Flags.AlarmCleared, States.FindMine);
+            fsm.SetTransition(States.Move, Flags.AlarmRaised, States.FindCenter);
+            
+            fsm.SetTransition(States.FindCenter, Flags.CenterFound, States.Move);
+            fsm.SetTransition(States.FindCenter, Flags.AlarmRaised, States.FindCenter);
+            fsm.SetTransition(States.FindCenter, Flags.AlarmCleared, States.FindMine);
+            
+            fsm.SetTransition(States.Hide, Flags.AlarmCleared, States.FindMine);
+            
+            fsm.SetTransition(States.Deposit, Flags.FoodDeposited, States.FindCenter);
+            fsm.SetTransition(States.Deposit, Flags.AlarmRaised, States.FindCenter);
         }
 
         string ILocalizable.Name { get; set; } = "Caravan";
@@ -114,6 +140,7 @@ namespace Model.Game.World.Agents
 
         public void Destroy()
         {
+            graph.Nodes[NodeCoordinate].RemoveNodeContainable(this);
             Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
 
             EventSystem.Unsubscribe<RaiseAlarmEvent>(OnAlarmRaised);
@@ -121,6 +148,7 @@ namespace Model.Game.World.Agents
 
         private void OnAlarmRaised(RaiseAlarmEvent raiseAlarmEvent)
         {
+            fsm.Transition(Model.AlarmRaised ? Flags.AlarmRaised : Flags.AlarmCleared);
         }
     }
 }

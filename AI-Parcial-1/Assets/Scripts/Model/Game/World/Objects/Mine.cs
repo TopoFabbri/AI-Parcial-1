@@ -71,6 +71,7 @@ namespace Model.Game.World.Objects
 
         public void Destroy()
         {
+            graph.Nodes[NodeCoordinate].RemoveNodeContainable(this);
             Mines.Remove(this);
             Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
             

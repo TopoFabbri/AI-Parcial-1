@@ -159,6 +159,7 @@ namespace Model.Game.World.Agents
 
         public void Destroy()
         {
+            graph.Nodes[NodeCoordinate].RemoveNodeContainable(this);
             Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
 
             EventSystem.Unsubscribe<RaiseAlarmEvent>(OnAlarmRaised);

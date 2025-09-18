@@ -4,29 +4,30 @@ namespace Model.Game.World.Resource
 {
     public class GoldContainer : IResourceContainer<float>
     {
-        private readonly float maxQty;
-
         public event Action Depleted;
         public event Action Filled;
 
         public float ContainingQty { get; private set; }
+        public float Max { get; }
+        public float SpaceAvailable => Max - ContainingQty;
+
         public bool IsEmpty => ContainingQty <= 0;
-        public bool IsFull => ContainingQty >= maxQty;
+        public bool IsFull => ContainingQty >= Max;
         
         public GoldContainer(float startingQty, float maxQty)
         {
             ContainingQty = startingQty;
-            this.maxQty = maxQty;
+            Max = maxQty;
         }
         
         public float Add(float qty)
         {
             ContainingQty += qty;
 
-            if (ContainingQty < maxQty) return qty;
+            if (ContainingQty < Max) return qty;
             
-            qty = maxQty - ContainingQty;
-            ContainingQty = maxQty;
+            qty = Max - ContainingQty;
+            ContainingQty = Max;
             Filled?.Invoke();
             
             return qty;

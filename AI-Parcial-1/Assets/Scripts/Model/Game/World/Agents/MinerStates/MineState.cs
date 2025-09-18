@@ -85,6 +85,8 @@ namespace Model.Game.World.Agents.MinerStates
                 return;
             }
             
+            if (goldUntilFoodRequired <= 0f) return;
+            
             float goldMined = mine.GoldContainer.Get(mineSpeed * Time.TickTime);
             goldContainer.Add(goldMined);
             goldUntilFoodRequired -= goldMined;

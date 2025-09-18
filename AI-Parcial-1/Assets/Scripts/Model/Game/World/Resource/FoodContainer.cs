@@ -4,29 +4,29 @@ namespace Model.Game.World.Resource
 {
     public class FoodContainer : IResourceContainer<int>
     {
-        private readonly int maxQty;
-
         public event Action Depleted;
         public event Action Filled;
 
         public int ContainingQty { get; private set; }
+        public int Max { get; }
+        public int SpaceAvailable => Max - ContainingQty;
         public bool IsEmpty => ContainingQty <= 0;
-        public bool IsFull => ContainingQty >= maxQty;
+        public bool IsFull => ContainingQty >= Max;
         
         public FoodContainer(int startingQty, int maxQty)
         {
             ContainingQty = startingQty;
-            this.maxQty = maxQty;
+            Max = maxQty;
         }
         
         public int Add(int qty)
         {
             ContainingQty += qty;
 
-            if (ContainingQty < maxQty) return qty;
+            if (ContainingQty < Max) return qty;
             
-            qty = maxQty - ContainingQty;
-            ContainingQty = maxQty;
+            qty = Max - ContainingQty;
+            ContainingQty = Max;
             Filled?.Invoke();
             
             return qty;
@@ -36,10 +36,11 @@ namespace Model.Game.World.Resource
         {
             if (qty > ContainingQty)
             {
+                qty = ContainingQty;
                 ContainingQty = 0;
                 Depleted?.Invoke();
                 
-                return ContainingQty;
+                return qty;
             }
             
             ContainingQty -= qty;
