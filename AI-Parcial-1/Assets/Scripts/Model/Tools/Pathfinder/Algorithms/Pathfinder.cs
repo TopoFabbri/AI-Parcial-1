@@ -8,7 +8,7 @@ namespace Model.Tools.Pathfinder.Algorithms
 {
     public abstract class Pathfinder<TNodeType, TCoordinate> where TNodeType : INode<TCoordinate>, INode where TCoordinate : ICoordinate
     {
-        public virtual List<TNodeType> FindPath(TNodeType startNode, TNodeType destinationNode, IGraph<TNodeType, TCoordinate> graph)
+        public virtual List<TNodeType> FindPath(TNodeType startNode, TNodeType destinationNode, IGraph<TNodeType, TCoordinate> graph, List<INode.NodeType> blockedTypes)
         {
             Dictionary<TNodeType, (TNodeType Parent, int AcumulativeCost, int Heuristic)> nodes = new();
 
@@ -38,7 +38,7 @@ namespace Model.Tools.Pathfinder.Algorithms
 
                 foreach (TNodeType neighbor in GetAdjacents(currentNode, graph))
                 {
-                    if (!nodes.ContainsKey(neighbor) || IsBlocked(neighbor) || closedList.Contains(neighbor))
+                    if (!nodes.ContainsKey(neighbor) || IsBlocked(neighbor, blockedTypes) || closedList.Contains(neighbor))
                         continue;
 
                     int tentativeNewAccumulatedCost = 0;
@@ -54,7 +54,10 @@ namespace Model.Tools.Pathfinder.Algorithms
                 }
             }
 
-            return null;
+            List<TNodeType> path = new(graph.GetBresenhamNodes(startNode.GetCoordinate(), destinationNode.GetCoordinate()));
+            path.Add(destinationNode);
+            
+            return path;
 
             List<TNodeType> GeneratePath(TNodeType startNode, TNodeType goalNode)
             {
@@ -84,9 +87,9 @@ namespace Model.Tools.Pathfinder.Algorithms
 
         protected abstract int MoveToNeighborCost(TNodeType a, TNodeType b);
 
-        protected virtual bool IsBlocked(TNodeType node)
+        protected virtual bool IsBlocked(TNodeType node, List<INode.NodeType> blockedTypes)
         {
-            return node.IsBlocked();
+            return node.IsBlocked(blockedTypes);
         }
 
         protected abstract ICollection<TNodeType> GetAdjacents(TNodeType node, IGraph<TNodeType, TCoordinate> graph);

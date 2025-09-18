@@ -32,12 +32,12 @@ namespace Engine.Controller.Input
         
         public void OnCreateMiner()
         {
-            EventSystem.Raise<RequestedMinerCreationEvent>(engineManager.MinerSpeed, engineManager.MinerMineSpeed, engineManager.MinerMaxGold);
+            EventSystem.Raise<RequestedMinerCreationEvent>(engineManager.MinerSpeed, engineManager.MinerMineSpeed, engineManager.MinerMaxGold, engineManager.MinerBlockedNodes);
         }
 
         public void CreateCaravan()
         {
-            EventSystem.Raise<RequestedCaravanCreationEvent>(engineManager.CaravanSpeed, engineManager.CaravanCapacity);
+            EventSystem.Raise<RequestedCaravanCreationEvent>(engineManager.CaravanSpeed, engineManager.CaravanCapacity, engineManager.CaravanBlockedNodes);
         }
 
         public void RaiseAlarm()

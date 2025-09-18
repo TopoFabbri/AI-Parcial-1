@@ -2,15 +2,16 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Codice.CM.WorkspaceServer.DataStore;
 using Model.Tools.Pathfinder.Coordinate;
 
 namespace Model.Tools.Pathfinder.Node
 {
     public class Node<TCoordinate> : INode, INode<TCoordinate>, INodeContainer<TCoordinate> where TCoordinate : ICoordinate
     {
-        private bool blocked;
         private TCoordinate coordinate;
         protected int cost;
+        private INode.NodeType type;
         
         private readonly List<INodeContainable<TCoordinate>> nodeContainables = new();
         
@@ -19,9 +20,20 @@ namespace Model.Tools.Pathfinder.Node
             this.cost = cost;
         }
 
-        public bool IsBlocked()
+        public void SetType(INode.NodeType type)
         {
-            return blocked;
+            this.type = type;
+        }
+
+        public bool IsBlocked(List<INode.NodeType> blockedTypes)
+        {
+            foreach (INode.NodeType blockedType in blockedTypes)
+            {
+                if (type == blockedType)
+                    return true;
+            }
+            
+            return false;
         }
 
         public int GetCost()
@@ -29,9 +41,9 @@ namespace Model.Tools.Pathfinder.Node
             return cost;
         }
 
-        public void SetBlocked(bool blocked)
+        public INode.NodeType GetNodeType()
         {
-            this.blocked = blocked;
+            return type;
         }
 
         public void SetCoordinate(TCoordinate coordinate)

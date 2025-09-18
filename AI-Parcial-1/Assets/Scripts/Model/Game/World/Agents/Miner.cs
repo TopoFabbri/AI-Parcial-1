@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 using Model.Game.Events;
 using Model.Game.Graph;
@@ -23,6 +24,7 @@ namespace Model.Game.World.Agents
         private const float HeightDrawOffset = 1f;
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
         private readonly Pathfinder<Node<Coordinate>, Coordinate> pathfinder;
+        private readonly List<INode.NodeType> blockedNodes;
 
         private Coordinate targetCoordinate;
 
@@ -70,19 +72,14 @@ namespace Model.Game.World.Agents
 
         public Coordinate NodeCoordinate { get; set; }
 
-        public Miner(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, float mineSpeed, float moveSpeed, float maxGold, float goldQty = 0)
+        public Miner(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, List<INode.NodeType> blockedNodes, float mineSpeed, float moveSpeed, float maxGold, float goldQty = 0)
         {
             this.mineSpeed = mineSpeed;
             this.moveSpeed = moveSpeed;
             
             this.graph = graph;
-            GoldContainer = new GoldContainer(goldQty, maxGold);
-            pathfinder = new AStarPathfinder<Node<Coordinate>, Coordinate>();
-            targetCoordinate = new Coordinate();
-            this.mineSpeed = mineSpeed;
-            this.moveSpeed = moveSpeed;
+            this.blockedNodes = blockedNodes;
             
-            this.graph = graph;
             GoldContainer = new GoldContainer(goldQty, maxGold);
             pathfinder = new AStarPathfinder<Node<Coordinate>, Coordinate>();
             targetCoordinate = new Coordinate();
@@ -107,7 +104,7 @@ namespace Model.Game.World.Agents
                 onEnterParameters: () => new object[] { graph, NodeCoordinate },
                 onTickParameters: () => new object[] { GoldContainer });
             fsm.AddState<MoveState>(States.Move,
-                onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph },
+                onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph, blockedNodes },
                 onTickParameters: () => new object[] { graph, this, moveSpeed });
             fsm.AddState<MineState>(States.Mine, 
                 onEnterParameters: () => new object[] {graph, NodeCoordinate, GoldContainer},

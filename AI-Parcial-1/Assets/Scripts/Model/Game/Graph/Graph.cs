@@ -25,6 +25,8 @@ namespace Model.Game.Graph
             size = new TCoordinate();
             size.Set(x, y);
 
+            Random random = new();
+            
             for (int i = 0; i < x; i++)
             {
                 for (int j = 0; j < y; j++)
@@ -35,6 +37,7 @@ namespace Model.Game.Graph
                     coordinate.Set(i, j);
 
                     node.SetCoordinate(coordinate);
+                    node.SetType((INode.NodeType)random.Next(0, typeof(INode.NodeType).GetEnumValues().Length));
                     Nodes.Add(coordinate, node);
                 }
             }
@@ -114,18 +117,6 @@ namespace Model.Game.Graph
             int yi = (int)Math.Round(y / nodeDistance);
 
             return GetNodeAtIndexes(xi, yi);
-        }
-        
-        public void BlockNodes(ICollection<TCoordinate> coordinates)
-        {
-            foreach (TCoordinate coordinate in coordinates)
-                Nodes[coordinate].SetBlocked(true);
-        }
-
-        public void BlockNodes(ICollection<TNode> nodes)
-        {
-            foreach (TNode node in nodes)
-                Nodes[node.GetCoordinate()].SetBlocked(true);
         }
 
         public ICollection<TNode> GetBresenhamNodes(TCoordinate start, TCoordinate end)

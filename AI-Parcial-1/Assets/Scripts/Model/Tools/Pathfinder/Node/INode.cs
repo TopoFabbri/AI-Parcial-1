@@ -1,14 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 using Model.Tools.Pathfinder.Coordinate;
 
 namespace Model.Tools.Pathfinder.Node
 {
     public interface INode
     {
-        public bool IsBlocked();
+        public enum NodeType
+        {
+            Grass,
+            Road,
+            Water
+        }
+
+        public bool IsBlocked(List<NodeType> blockedTypes);
         public int GetCost();
-        public void SetBlocked(bool blocked);
         public void SetCost(int cost);
+        public NodeType GetNodeType();
     }
 
     public interface INode<TCoordinate> : IEquatable<INode<TCoordinate>> where TCoordinate : ICoordinate

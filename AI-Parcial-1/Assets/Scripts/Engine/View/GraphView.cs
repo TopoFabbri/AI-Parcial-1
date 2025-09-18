@@ -30,7 +30,7 @@ namespace Engine.View
         private static readonly Dictionary<DrawModes, ConcurrentDictionary<Material, List<Matrix4x4[]>>> DrawMatrices = new();
         private static readonly Dictionary<Material, List<Coordinate>> GroupedCoords = new();
         private static readonly Dictionary<Coordinate, Material> MineMaterials = new();
-
+        
         public static void OnModifiedGraph(GraphModifiedEvent graphModifiedEvent)
         {
             DrawMatrices.Clear();
@@ -38,7 +38,8 @@ namespace Engine.View
             MineMaterials.Clear();
         }
 
-        public static void DrawGraph(Graph<Node<Coordinate>, Coordinate> graph, Vector3 tileScale, Mesh tileMesh, Material tileMaterial, DrawModes drawMode)
+        public static void DrawGraph(Graph<Node<Coordinate>, Coordinate> graph, Dictionary<INode.NodeType, Material> nodeTypeMaterials, Vector3 tileScale, Mesh tileMesh,
+            Material tileMaterial, DrawModes drawMode)
         {
             if (drawMode == DrawModes.None) return;
             if (graph == null || !tileMesh || !tileMaterial) return;
@@ -53,9 +54,15 @@ namespace Engine.View
                 return;
             }
 
-            EnsureMineMaterials(tileMaterial);
+            if (drawMode == DrawModes.Voronoi)
+            {
+                EnsureMineMaterials(tileMaterial);
 
-            DrawAsVoronoi(graph, tileScale, tileMesh, nodeDistance);
+                DrawAsVoronoi(graph, tileScale, tileMesh, nodeDistance);
+            }
+            
+            if (drawMode == DrawModes.Content)
+                DrawAsContent(graph, nodeTypeMaterials, tileScale, tileMesh, nodeDistance);
         }
 
         private static void DrawAsDefault(Graph<Node<Coordinate>, Coordinate> graph, Vector3 tileScale, Mesh tileMesh, Material tileMaterial, float nodeDistance)
@@ -74,7 +81,7 @@ namespace Engine.View
         {
             if (!DrawMatrices.ContainsKey(DrawModes.Voronoi))
                 DrawMatrices[DrawModes.Voronoi] = new ConcurrentDictionary<Material, List<Matrix4x4[]>>();
-            
+
             if (GroupedCoords.Count == 0)
             {
                 foreach (Coordinate coordinate in graph.Nodes.Keys)
@@ -92,13 +99,40 @@ namespace Engine.View
 
             if (DrawMatrices[DrawModes.Voronoi].Count != GroupedCoords.Count)
             {
-                Parallel.ForEach(GroupedCoords, ParallelOptions, coordGroup =>
-                {
-                    DrawMatrices[DrawModes.Voronoi].TryAdd(coordGroup.Key, BuildMatrices(coordGroup.Value, nodeDistance, tileScale));
-                });
+                Parallel.ForEach(GroupedCoords, ParallelOptions,
+                    coordGroup => { DrawMatrices[DrawModes.Voronoi].TryAdd(coordGroup.Key, BuildMatrices(coordGroup.Value, nodeDistance, tileScale)); });
             }
 
             foreach (KeyValuePair<Material, List<Matrix4x4[]>> matGroup in DrawMatrices[DrawModes.Voronoi])
+                DrawMeshInstances(tileMesh, matGroup.Key, matGroup.Value);
+        }
+
+        private static void DrawAsContent(Graph<Node<Coordinate>, Coordinate> graph, Dictionary<INode.NodeType, Material> nodeTypeMaterials, Vector3 tileScale, Mesh tileMesh, float nodeDistance)
+        {
+            if (!DrawMatrices.ContainsKey(DrawModes.Content))
+                DrawMatrices[DrawModes.Content] = new ConcurrentDictionary<Material, List<Matrix4x4[]>>();
+
+            if (DrawMatrices[DrawModes.Content].Count <= 0)
+            {
+                ConcurrentDictionary<Material, List<Coordinate>> mineCoords = new();
+
+                foreach (Coordinate coordinate in graph.Nodes.Keys)
+                {
+                    if (!nodeTypeMaterials.TryGetValue(graph.Nodes[coordinate].GetNodeType(), out Material material)) return;
+                
+                    if (!mineCoords.ContainsKey(material))
+                        mineCoords[material] = new List<Coordinate>();
+
+                    mineCoords[material].Add(coordinate);
+                }
+            
+                Parallel.ForEach(mineCoords, ParallelOptions, coordGroup =>
+                {
+                    DrawMatrices[DrawModes.Content].TryAdd(coordGroup.Key, BuildMatrices(coordGroup.Value, nodeDistance, tileScale));
+                });
+            }
+
+            foreach (KeyValuePair<Material, List<Matrix4x4[]>> matGroup in DrawMatrices[DrawModes.Content])
                 DrawMeshInstances(tileMesh, matGroup.Key, matGroup.Value);
         }
 

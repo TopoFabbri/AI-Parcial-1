@@ -3514,6 +3514,9 @@ MonoBehaviour:
     - {fileID: 6960790978822989182, guid: 0ab5b96666cd5b44fbf37978e99b029f, type: 3}
     - {fileID: 4336546498936164794, guid: 96839874cf40dda44b2e1fa4d3181009, type: 3}
     - {fileID: 6352904742048245964, guid: d2d48f515dd3ade40a64306fb0d309ae, type: 3}
+    - {fileID: 2100000, guid: bc30a4caa408d4b419c4a6da27d01484, type: 2}
+    - {fileID: 2100000, guid: 9ccfde5fbf296a14abef32b2232b355c, type: 2}
+    - {fileID: 2100000, guid: d5cb47deba1ef034882bd4bd8edbad81, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -3587,6 +3590,68 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: tileMaterials
+      Entry: 7
+      Data: 2|System.Collections.Generic.Dictionary`2[[Model.Tools.Pathfinder.Node.INode+NodeType,
+        Model],[UnityEngine.Material, UnityEngine.CoreModule]], mscorlib
+    - Name: comparer
+      Entry: 7
+      Data: 3|System.Collections.Generic.EnumEqualityComparer`1[[Model.Tools.Pathfinder.Node.INode+NodeType,
+        Model]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 12
+      Data: 3
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 3
+      Data: 0
+    - Name: $v
+      Entry: 10
+      Data: 4
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 3
+      Data: 1
+    - Name: $v
+      Entry: 10
+      Data: 5
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 3
+      Data: 2
+    - Name: $v
+      Entry: 10
+      Data: 6
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
   mapSize: {x: 50, y: 50}
   circumnavigableMap: 1
   nodeDistance: 0.5
@@ -3597,8 +3662,10 @@ MonoBehaviour:
   <MinerSpeed>k__BackingField: 4
   <MinerMineSpeed>k__BackingField: 1
   <MinerMaxGold>k__BackingField: 15
+  <MinerBlockedNodes>k__BackingField: 02000000
   <CaravanSpeed>k__BackingField: 4
   <CaravanCapacity>k__BackingField: 10
+  <CaravanBlockedNodes>k__BackingField: 00000000
   tilePrefab: {fileID: 5679408169038904489, guid: e4f78b30982e81e48aac19bb4d99999a, type: 3}
   drawMode: 2
   drawSize: 1

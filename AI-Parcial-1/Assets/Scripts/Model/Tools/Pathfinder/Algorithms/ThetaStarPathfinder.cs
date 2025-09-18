@@ -9,9 +9,9 @@ namespace Model.Tools.Pathfinder.Algorithms
         where TCoordinate : ICoordinate 
         where TNodeType : INode<TCoordinate>, INode
     {
-        public override List<TNodeType> FindPath(TNodeType startNode, TNodeType destinationNode, IGraph<TNodeType, TCoordinate> graph)
+        public override List<TNodeType> FindPath(TNodeType startNode, TNodeType destinationNode, IGraph<TNodeType, TCoordinate> graph, List<INode.NodeType> blockedTypes)
         {
-            List<TNodeType> astarPath = base.FindPath(startNode, destinationNode, graph);
+            List<TNodeType> astarPath = base.FindPath(startNode, destinationNode, graph, blockedTypes);
             
             if (astarPath == null || astarPath.Count == 0) return astarPath;
 
@@ -31,7 +31,7 @@ namespace Model.Tools.Pathfinder.Algorithms
 
                 foreach (TNodeType node in bresenhamPath)
                 {
-                    if (!node.IsBlocked()) continue;
+                    if (!node.IsBlocked(blockedTypes)) continue;
 
                     blocked = true;
                     break;

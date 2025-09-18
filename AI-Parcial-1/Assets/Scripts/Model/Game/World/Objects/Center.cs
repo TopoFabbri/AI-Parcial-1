@@ -20,10 +20,10 @@ namespace Model.Game.World.Objects
         private static Coordinate _centerCoordinate;
 
         private string infoText;
-        
+
         public GoldContainer GoldContainer { get; }
         public FoodContainer FoodContainer { get; private set; }
-        
+
         string ILocalizable.Name { get; set; } = "Center";
 
         int ILocalizable.Id { get; set; }
@@ -71,15 +71,17 @@ namespace Model.Game.World.Objects
 
         private void CreateMiner(RequestedMinerCreationEvent minerCreationRequest)
         {
-            miners.Add(new Miner(graph.GetNodeAt(graph.GetNodeAtIndexes(0, 0).GetCoordinate()), graph, minerCreationRequest.mineSpeed, minerCreationRequest.moveSpeed, minerCreationRequest.maxGold));
+            miners.Add(new Miner(graph.GetNodeAt(graph.GetNodeAtIndexes(0, 0).GetCoordinate()), graph, minerCreationRequest.blockedTypes, minerCreationRequest.mineSpeed,
+                minerCreationRequest.moveSpeed, minerCreationRequest.maxGold));
         }
 
         private void CreateCaravan(RequestedCaravanCreationEvent caravanCreationRequest)
         {
             float caravanSpeed = caravanCreationRequest.moveSpeed;
             int caravanCapacity = caravanCreationRequest.carryCapacity;
-            
-            caravans.Add(new Caravan(graph, new AStarPathfinder<Node<Coordinate>, Coordinate>(), NodeCoordinate, caravanCapacity, caravanSpeed, 0));
+            List<INode.NodeType> blockedNodes = caravanCreationRequest.blockedNodes;
+
+            caravans.Add(new Caravan(graph, new AStarPathfinder<Node<Coordinate>, Coordinate>(), NodeCoordinate, blockedNodes, caravanCapacity, caravanSpeed, 0));
         }
 
         public static Coordinate GetCoordinate()

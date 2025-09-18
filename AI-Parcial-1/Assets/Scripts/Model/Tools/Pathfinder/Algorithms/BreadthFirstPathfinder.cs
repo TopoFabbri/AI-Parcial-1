@@ -7,11 +7,6 @@ namespace Model.Tools.Pathfinder.Algorithms
 {
     public class BreadthFirstPathfinder<TNodeType, TCoordinate> : Pathfinder<TNodeType, TCoordinate> where TCoordinate : ICoordinate where TNodeType : INode<TCoordinate>, INode
     {
-        protected override bool IsBlocked(TNodeType node)
-        {
-            return node.IsBlocked();
-        }
-
         protected override int MoveToNeighborCost(TNodeType a, TNodeType b)
         {
             return 0;

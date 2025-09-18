@@ -12,7 +12,14 @@ namespace Model.Game.World.Agents.CaravanStates
     public class MoveState : State
     {
         public override Type[] OnEnterParamTypes =>
-            new[] { typeof(Pathfinder<Node<Coordinate>, Coordinate>), typeof(Node<Coordinate>), typeof(Node<Coordinate>), typeof(Graph<Node<Coordinate>, Coordinate>) };
+            new[] 
+            { 
+                typeof(Pathfinder<Node<Coordinate>, 
+                Coordinate>), typeof(Node<Coordinate>), 
+                typeof(Node<Coordinate>), 
+                typeof(Graph<Node<Coordinate>, Coordinate>), 
+                typeof(List<INode.NodeType>)
+            };
 
         public override Type[] OnTickParamTypes => new[] { typeof(Graph<Node<Coordinate>, Coordinate>), typeof(INodeContainable<Coordinate>), typeof(float) };
 
@@ -26,6 +33,7 @@ namespace Model.Game.World.Agents.CaravanStates
             Node<Coordinate> startNode = parameters[1] as Node<Coordinate>;
             Node<Coordinate> targetNode = parameters[2] as Node<Coordinate>;
             Graph<Node<Coordinate>, Coordinate> graph = parameters[3] as Graph<Node<Coordinate>, Coordinate>;
+            List<INode.NodeType> blockedTypes = parameters[4] as List<INode.NodeType>;
 
             BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
 
@@ -38,7 +46,7 @@ namespace Model.Game.World.Agents.CaravanStates
             behaviourActions.AddMultiThreadableBehaviour(0, () =>
             {
                 if (pathfinder != null)
-                    path = pathfinder.FindPath(startNode, targetNode, graph);
+                    path = pathfinder.FindPath(startNode, targetNode, graph, blockedTypes);
                 else
                     path = new List<Node<Coordinate>> { targetNode };
 

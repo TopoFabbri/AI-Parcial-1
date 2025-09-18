@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Collections.Generic;
+using System.Numerics;
 using Model.Game.Events;
 using Model.Game.Graph;
 using Model.Game.World.Agents.CaravanStates;
@@ -16,14 +17,15 @@ namespace Model.Game.World.Agents
         #region Fields
 
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
-        private Pathfinder<Node<Coordinate>, Coordinate> pathfinder;
+        private readonly Pathfinder<Node<Coordinate>, Coordinate> pathfinder;
+        private readonly List<INode.NodeType> blockedNodes;
 
-        public FoodContainer FoodContainer { get; private set; }
+        private FoodContainer FoodContainer { get; }
 
         private const float HeightDrawOffset = 1f;
 
-        private float moveSpeed;
-        private Coordinate targetCoordinate;
+        private readonly float moveSpeed;
+        private readonly Coordinate targetCoordinate;
 
         #endregion
 
@@ -58,12 +60,13 @@ namespace Model.Game.World.Agents
 
         #endregion
 
-        public Caravan(Graph<Node<Coordinate>, Coordinate> graph, Pathfinder<Node<Coordinate>, Coordinate> pathfinder, Coordinate coordinate, int maxFood, float moveSpeed,
-            int startingFood)
+        public Caravan(Graph<Node<Coordinate>, Coordinate> graph, Pathfinder<Node<Coordinate>, Coordinate> pathfinder, Coordinate coordinate, List<INode.NodeType> blockedNodes,
+            int maxFood, float moveSpeed, int startingFood)
         {
             this.graph = graph;
             this.pathfinder = pathfinder;
             this.moveSpeed = moveSpeed;
+            this.blockedNodes = blockedNodes;
 
             targetCoordinate = new Coordinate();
 
@@ -82,33 +85,34 @@ namespace Model.Game.World.Agents
             fsm = new FSM<States, Flags>(States.FindCenter);
 
             fsm.AddState<HideState>(States.Hide);
-            fsm.AddState<MoveState>(States.Move, onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph },
+            fsm.AddState<MoveState>(States.Move,
+                onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph, blockedNodes },
                 onTickParameters: () => new object[] { graph, this, moveSpeed });
             fsm.AddState<CollectState>(States.Collect, onEnterParameters: () => new object[] { graph, NodeCoordinate }, onTickParameters: () => new object[] { FoodContainer });
             fsm.AddState<FindMineState>(States.FindMine, () => new object[] { targetCoordinate });
             fsm.AddState<FindCenterState>(States.FindCenter, () => new object[] { targetCoordinate });
             fsm.AddState<DepositState>(States.Deposit, onEnterParameters: () => new object[] { graph, NodeCoordinate }, onTickParameters: () => new object[] { FoodContainer });
-            
+
             fsm.SetTransition(States.Collect, Flags.FoodFilled, States.FindMine);
             fsm.SetTransition(States.Collect, Flags.FoodDepleted, States.FindCenter);
             fsm.SetTransition(States.Collect, Flags.AlarmRaised, States.FindCenter);
-            
+
             fsm.SetTransition(States.FindMine, Flags.MineFound, States.Move);
             fsm.SetTransition(States.FindMine, Flags.AlarmRaised, States.FindCenter);
-            
+
             fsm.SetTransition(States.Move, Flags.ReachedCenter, States.Collect);
             fsm.SetTransition(States.Move, Flags.ReachedMine, States.Deposit);
             fsm.SetTransition(States.Move, Flags.StayHidden, States.Hide);
             fsm.SetTransition(States.Move, Flags.AlarmCleared, States.FindMine);
             fsm.SetTransition(States.Move, Flags.AlarmRaised, States.FindCenter);
             fsm.SetTransition(States.Move, Flags.TargetNotFound, States.FindMine);
-            
+
             fsm.SetTransition(States.FindCenter, Flags.CenterFound, States.Move);
             fsm.SetTransition(States.FindCenter, Flags.AlarmRaised, States.FindCenter);
             fsm.SetTransition(States.FindCenter, Flags.AlarmCleared, States.FindMine);
-            
+
             fsm.SetTransition(States.Hide, Flags.AlarmCleared, States.FindMine);
-            
+
             fsm.SetTransition(States.Deposit, Flags.FoodDeposited, States.FindCenter);
             fsm.SetTransition(States.Deposit, Flags.AlarmRaised, States.FindCenter);
         }

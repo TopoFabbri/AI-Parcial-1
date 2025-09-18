@@ -28,9 +28,11 @@ namespace Engine
         [field: TabGroup("Game/Game", "Miners"), SerializeField] public float MinerSpeed{ get; private set; } = 1f;
         [field: TabGroup("Game/Game", "Miners"), SerializeField] public float MinerMineSpeed{ get; private set; } = 1f;
         [field: TabGroup("Game/Game", "Miners"), SerializeField] public float MinerMaxGold{ get; private set; } = 15f;
+        [field: TabGroup("Game/Game", "Miners"), SerializeField] public List<INode.NodeType> MinerBlockedNodes { get; private set; } = new();
         
         [field: TabGroup("Game/Game", "Caravan"), SerializeField] public float CaravanSpeed { get; private set; } = 2f;
         [field: TabGroup("Game/Game", "Caravan"), SerializeField] public int CaravanCapacity { get; private set; } = 10;
+        [field: TabGroup("Game/Game", "Caravan"), SerializeField] public List<INode.NodeType> CaravanBlockedNodes { get; private set; } = new();
 
         [FoldoutGroup("View", true)]
         [TabGroup("View/View", "Graph"), Required, SerializeField] private GameObject tilePrefab;
@@ -39,6 +41,7 @@ namespace Engine
         [TabGroup("View/View", "Drawing"), SerializeField] private float drawSize = .9f;
         [TabGroup("View/View", "Drawing"), SerializeField] private GameObject defaultPrefab;
         [TabGroup("View/View", "Drawing"), SerializeField] private Dictionary<string, GameObject> prefabs = new();
+        [TabGroup("View/View", "Drawing"), SerializeField] private Dictionary<INode.NodeType, Material> tileMaterials = new();
 
         [FoldoutGroup("References"), Required, SerializeField] private CameraController cameraController;
         [FoldoutGroup("References"), Required, SerializeField] private Image cursorImage;
@@ -91,7 +94,7 @@ namespace Engine
 
         private void LateUpdate()
         {
-            GraphView.DrawGraph(model.Graph, tileScale, tileMesh, tileMaterial, drawMode);
+            GraphView.DrawGraph(model.Graph, tileMaterials, tileScale, tileMesh, tileMaterial, drawMode);
             drawer.Draw();
             UpdateHudTxt();
         }
