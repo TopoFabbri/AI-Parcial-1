@@ -2,6 +2,7 @@
 using Model.Game.Events;
 using Model.Game.Graph;
 using Model.Game.World.Objects;
+using Model.Game.World.Resource;
 using Model.Tools.Drawing;
 using Model.Tools.EventSystem;
 using Model.Tools.Pathfinder.Node;

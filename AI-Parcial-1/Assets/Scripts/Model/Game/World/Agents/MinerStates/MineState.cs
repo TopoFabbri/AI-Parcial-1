@@ -100,6 +100,7 @@ namespace Model.Game.World.Agents.MinerStates
             
             if (foodContainer == null || foodContainer.IsEmpty)
             {
+                FoodRequestSystem.RequestFood(mine.NodeCoordinate);
                 flag.Invoke(Miner.Flags.FoodDepleted);
                 return;
             }

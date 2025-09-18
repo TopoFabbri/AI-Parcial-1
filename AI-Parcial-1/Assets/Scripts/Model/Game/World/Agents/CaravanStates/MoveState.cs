@@ -7,24 +7,14 @@ using Model.Tools.Pathfinder.Algorithms;
 using Model.Tools.Pathfinder.Node;
 using Model.Tools.Time;
 
-namespace Model.Game.World.Agents.MinerStates
+namespace Model.Game.World.Agents.CaravanStates
 {
     public class MoveState : State
     {
-        public override Type[] OnEnterParamTypes => new[]
-        {
-            typeof(Pathfinder<Node<Coordinate>, Coordinate>), 
-            typeof(Node<Coordinate>), 
-            typeof(Node<Coordinate>), 
-            typeof(Graph<Node<Coordinate>, Coordinate>)
-        };
+        public override Type[] OnEnterParamTypes =>
+            new[] { typeof(Pathfinder<Node<Coordinate>, Coordinate>), typeof(Node<Coordinate>), typeof(Node<Coordinate>), typeof(Graph<Node<Coordinate>, Coordinate>) };
 
-        public override Type[] OnTickParamTypes => new[]
-        {
-            typeof(Graph<Node<Coordinate>, Coordinate>), 
-            typeof(INodeContainable<Coordinate>), 
-            typeof(float)
-        };
+        public override Type[] OnTickParamTypes => new[] { typeof(Graph<Node<Coordinate>, Coordinate>), typeof(INodeContainable<Coordinate>), typeof(float) };
 
         private DateTime enterTime;
         private List<Node<Coordinate>> path;
@@ -78,27 +68,27 @@ namespace Model.Game.World.Agents.MinerStates
             if (currentNodeIndex >= path.Count)
             {
                 currentNodeIndex = path.Count - 1;
-                bool targetFound = false;
+                bool foundTarget = false;
 
                 foreach (INodeContainable<Coordinate> nodeContainable in graph.Nodes[path[currentNodeIndex].GetCoordinate()].GetNodeContainables())
                 {
                     if (nodeContainable is Mine)
                     {
-                        flag?.Invoke(Miner.Flags.ReachedMine);
-                        targetFound = true;
+                        flag?.Invoke(Caravan.Flags.ReachedMine);
+                        foundTarget = true;
                         break;
                     }
 
                     if (nodeContainable is Center)
                     {
-                        flag?.Invoke(Model.AlarmRaised ? Miner.Flags.StayHidden : Miner.Flags.ReachedCenter);
-                        targetFound = true;
+                        flag?.Invoke(Model.AlarmRaised ? Caravan.Flags.StayHidden : Caravan.Flags.ReachedCenter);
+                        foundTarget = true;
                         break;
                     }
                 }
                 
-                if (!targetFound)
-                    flag?.Invoke(Miner.Flags.TargetNotFound);
+                if (!foundTarget)
+                    flag?.Invoke(Caravan.Flags.TargetNotFound);
             }
 
             graph.MoveContainableTo(miner, path[currentNodeIndex].GetCoordinate());

@@ -71,7 +71,7 @@ namespace Model.Game.World.Objects
 
         private void CreateMiner(RequestedMinerCreationEvent minerCreationRequest)
         {
-            miners.Add(new Miner(graph.GetNodeAt(NodeCoordinate), graph, minerCreationRequest.mineSpeed, minerCreationRequest.moveSpeed, minerCreationRequest.maxGold));
+            miners.Add(new Miner(graph.GetNodeAt(graph.GetNodeAtIndexes(0, 0).GetCoordinate()), graph, minerCreationRequest.mineSpeed, minerCreationRequest.moveSpeed, minerCreationRequest.maxGold));
         }
 
         private void CreateCaravan(RequestedCaravanCreationEvent caravanCreationRequest)

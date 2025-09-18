@@ -50,7 +50,8 @@ namespace Model.Game.World.Agents
             FoodFilled,
             FoodDeposited,
             StayHidden,
-            FoodDepleted
+            FoodDepleted,
+            TargetNotFound
         }
 
         private FSM<States, Flags> fsm;
@@ -84,7 +85,7 @@ namespace Model.Game.World.Agents
             fsm.AddState<MoveState>(States.Move, onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph },
                 onTickParameters: () => new object[] { graph, this, moveSpeed });
             fsm.AddState<CollectState>(States.Collect, onEnterParameters: () => new object[] { graph, NodeCoordinate }, onTickParameters: () => new object[] { FoodContainer });
-            fsm.AddState<FindMineState>(States.FindMine, () => new object[] { NodeCoordinate, targetCoordinate });
+            fsm.AddState<FindMineState>(States.FindMine, () => new object[] { targetCoordinate });
             fsm.AddState<FindCenterState>(States.FindCenter, () => new object[] { targetCoordinate });
             fsm.AddState<DepositState>(States.Deposit, onEnterParameters: () => new object[] { graph, NodeCoordinate }, onTickParameters: () => new object[] { FoodContainer });
             
@@ -100,6 +101,7 @@ namespace Model.Game.World.Agents
             fsm.SetTransition(States.Move, Flags.StayHidden, States.Hide);
             fsm.SetTransition(States.Move, Flags.AlarmCleared, States.FindMine);
             fsm.SetTransition(States.Move, Flags.AlarmRaised, States.FindCenter);
+            fsm.SetTransition(States.Move, Flags.TargetNotFound, States.FindMine);
             
             fsm.SetTransition(States.FindCenter, Flags.CenterFound, States.Move);
             fsm.SetTransition(States.FindCenter, Flags.AlarmRaised, States.FindCenter);

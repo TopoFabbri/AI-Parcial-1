@@ -56,7 +56,8 @@ namespace Model.Game.World.Agents
             GoldDeposited,
             ReachedCenter,
             StayHidden,
-            FoodDepleted
+            FoodDepleted,
+            TargetNotFound
         }
 
         private FSM<States, Flags> fsm;
@@ -124,6 +125,7 @@ namespace Model.Game.World.Agents
             fsm.SetTransition(States.Move, Flags.ReachedCenter, States.Deposit);
             fsm.SetTransition(States.Move, Flags.StayHidden, States.Hide);
             fsm.SetTransition(States.Move, Flags.AlarmCleared, States.FindMine);
+            fsm.SetTransition(States.Move, Flags.TargetNotFound, States.FindMine);
             
             fsm.SetTransition(States.FindCenter, Flags.CenterFound, States.Move);
             
