@@ -7,6 +7,7 @@ using Model.Game.World.Agents;
 using Model.Game.World.Resource;
 using Model.Tools.Drawing;
 using Model.Tools.EventSystem;
+using Model.Tools.Pathfinder.Algorithms;
 using Model.Tools.Pathfinder.Node;
 
 namespace Model.Game.World.Objects
@@ -14,25 +15,29 @@ namespace Model.Game.World.Objects
     public class Center : ILocalizable, INodeContainable<Coordinate>
     {
         private const float MaxGold = 10000f;
+        private const int MaxFood = 10000;
         private const float HeightDrawOffset = 1f;
         private static Coordinate _centerCoordinate;
 
         private string infoText;
         
-        public GoldContainer GoldContainer { get; private set; }
-
+        public GoldContainer GoldContainer { get; }
+        public FoodContainer FoodContainer { get; private set; }
+        
         string ILocalizable.Name { get; set; } = "Center";
 
         int ILocalizable.Id { get; set; }
 
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
         private readonly List<Miner> miners = new();
+        private readonly List<Caravan> caravans = new();
         public Coordinate NodeCoordinate { get; set; }
 
         public Center(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph)
         {
             this.graph = graph;
             GoldContainer = new GoldContainer(0, MaxGold);
+            FoodContainer = new FoodContainer(MaxFood, MaxFood);
 
             node.AddNodeContainable(this);
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
@@ -73,6 +78,8 @@ namespace Model.Game.World.Objects
         {
             float caravanSpeed = caravanCreationRequest.moveSpeed;
             int caravanCapacity = caravanCreationRequest.carryCapacity;
+            
+            caravans.Add(new Caravan(graph, new AStarPathfinder<Node<Coordinate>, Coordinate>(), NodeCoordinate, caravanCapacity, caravanSpeed, 0));
         }
 
         public static Coordinate GetCoordinate()
@@ -84,8 +91,8 @@ namespace Model.Game.World.Objects
         {
             infoText = ((ILocalizable)this).Name + " " + ((ILocalizable)this).Id + ":\n";
             infoText += "Gold " + Math.Round(GoldContainer.ContainingQty, 2) + "\n";
-            infoText += "Miners " + miners.Count;
-            
+            infoText += "Miners " + miners.Count + "\n";
+            infoText += "Caravans " + caravans.Count;
             return infoText;
         }
     }

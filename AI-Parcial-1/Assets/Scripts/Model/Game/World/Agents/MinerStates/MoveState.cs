@@ -11,10 +11,20 @@ namespace Model.Game.World.Agents.MinerStates
 {
     public class MoveState : State
     {
-        public override Type[] OnEnterParamTypes =>
-            new[] { typeof(Pathfinder<Node<Coordinate>, Coordinate>), typeof(Node<Coordinate>), typeof(Node<Coordinate>), typeof(Graph<Node<Coordinate>, Coordinate>) };
+        public override Type[] OnEnterParamTypes => new[]
+        {
+            typeof(Pathfinder<Node<Coordinate>, Coordinate>), 
+            typeof(Node<Coordinate>), 
+            typeof(Node<Coordinate>), 
+            typeof(Graph<Node<Coordinate>, Coordinate>)
+        };
 
-        public override Type[] OnTickParamTypes => new[] { typeof(Graph<Node<Coordinate>, Coordinate>), typeof(INodeContainable<Coordinate>), typeof(float) };
+        public override Type[] OnTickParamTypes => new[]
+        {
+            typeof(Graph<Node<Coordinate>, Coordinate>), 
+            typeof(INodeContainable<Coordinate>), 
+            typeof(float)
+        };
 
         private DateTime enterTime;
         private List<Node<Coordinate>> path;
@@ -87,9 +97,5 @@ namespace Model.Game.World.Agents.MinerStates
 
             graph.MoveContainableTo(miner, path[currentNodeIndex].GetCoordinate());
         }
-    }
-
-    public class HideState : State
-    {
     }
 }
