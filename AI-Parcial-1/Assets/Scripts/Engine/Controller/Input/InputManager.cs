@@ -25,6 +25,11 @@ namespace Engine.Controller.Input
             Application.Quit();
         }
 
+        public void ToggleDrawMode()
+        {
+            engineManager.ToggleDrawMode();
+        }
+        
         public void OnCreateMiner()
         {
             EventSystem.Raise<RequestedMinerCreationEvent>(engineManager.MinerSpeed, engineManager.MinerMineSpeed, engineManager.MinerMaxGold);

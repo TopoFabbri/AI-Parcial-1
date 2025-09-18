@@ -45,6 +45,7 @@ namespace Engine
         [FoldoutGroup("References"), Required, SerializeField] private TextMeshProUGUI goldTxt;
         [FoldoutGroup("References"), Required, SerializeField] private TextMeshProUGUI alarmTxt;
         [FoldoutGroup("References"), Required, SerializeField] private TextMeshProUGUI cursorTxt;
+        [FoldoutGroup("References"), Required, SerializeField] private TextMeshProUGUI drawModeTxt;
         
         #region Fields
 
@@ -116,6 +117,7 @@ namespace Engine
         {
             goldTxt.text = "Gold: " + model.GetCenterGold();
             alarmTxt.text = Model.Game.Model.AlarmRaised ? "CANCEL" : "ALARM";
+            drawModeTxt.text = drawMode.ToString();
             
             if (selectedNode != null)
             {
@@ -151,6 +153,14 @@ namespace Engine
                 cursorImage.rectTransform.position = new Vector3(mousePos.x - imageSize.x / 2f, mousePos.y - imageSize.y / 2f);
             
             selectedNode = graph.GetNodeFromPosition(pos.x, pos.z);
+        }
+
+        public void ToggleDrawMode()
+        {
+            drawMode++;
+            
+            if ((int)drawMode >= System.Enum.GetValues(typeof(GraphView.DrawModes)).Length)
+                drawMode = 0;
         }
     }
 }

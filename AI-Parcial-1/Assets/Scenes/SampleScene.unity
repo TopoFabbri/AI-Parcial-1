@@ -1743,7 +1743,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1158650463}
         m_TargetAssemblyTypeName: Engine.Controller.Input.InputManager, Engine
-        m_MethodName: EndGame
+        m_MethodName: ToggleDrawMode
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3608,6 +3608,7 @@ MonoBehaviour:
   goldTxt: {fileID: 36213642}
   alarmTxt: {fileID: 264892010}
   cursorTxt: {fileID: 680297877}
+  drawModeTxt: {fileID: 110864320}
 --- !u!1 &2021485476
 GameObject:
   m_ObjectHideFlags: 0
