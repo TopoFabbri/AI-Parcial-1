@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Codice.CM.WorkspaceServer.DataStore;
 using Model.Tools.Pathfinder.Coordinate;
 
 namespace Model.Tools.Pathfinder.Node
