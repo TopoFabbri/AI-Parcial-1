@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using Model.Game.Events;
 using Model.Game.Graph;
 using Model.Game.World.Agents.MinerStates;
@@ -145,8 +146,8 @@ namespace Model.Game.World.Agents
 
         public string GetHoverText()
         {
-            string infoText = ((ILocalizable)this).Name + " " + ((ILocalizable)this).Id + ": ";
-            infoText += "Gold " + GoldContainer.ContainingQty + ".";
+            string infoText = ((ILocalizable)this).Name + " " + ((ILocalizable)this).Id + ":\n";
+            infoText += "Gold " + Math.Round(GoldContainer.ContainingQty, 2);
 
             return infoText;
         }

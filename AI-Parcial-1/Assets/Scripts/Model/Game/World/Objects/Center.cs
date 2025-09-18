@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 using Model.Game.Events;
 using Model.Game.Graph;
@@ -81,9 +82,9 @@ namespace Model.Game.World.Objects
 
         public string GetHoverText()
         {
-            infoText = ((ILocalizable)this).Name + " " + ((ILocalizable)this).Id + ": ";
-            infoText += "Gold " + GoldContainer.ContainingQty + ". ";
-            infoText += "Miners " + miners.Count + ".";
+            infoText = ((ILocalizable)this).Name + " " + ((ILocalizable)this).Id + ":\n";
+            infoText += "Gold " + Math.Round(GoldContainer.ContainingQty, 2) + "\n";
+            infoText += "Miners " + miners.Count;
             
             return infoText;
         }

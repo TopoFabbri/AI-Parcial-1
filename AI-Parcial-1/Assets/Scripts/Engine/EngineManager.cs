@@ -3,11 +3,13 @@ using Engine.Controller;
 using Engine.View;
 using Model.Game.Events;
 using Model.Game.Graph;
+using Model.Tools.Drawing;
 using Model.Tools.EventSystem;
 using Model.Tools.Pathfinder.Node;
 using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Engine
 {
@@ -39,8 +41,10 @@ namespace Engine
         [TabGroup("View/View", "Drawing"), SerializeField] private Dictionary<string, GameObject> prefabs = new();
 
         [FoldoutGroup("References"), Required, SerializeField] private CameraController cameraController;
+        [FoldoutGroup("References"), Required, SerializeField] private Image cursorImage;
         [FoldoutGroup("References"), Required, SerializeField] private TextMeshProUGUI goldTxt;
         [FoldoutGroup("References"), Required, SerializeField] private TextMeshProUGUI alarmTxt;
+        [FoldoutGroup("References"), Required, SerializeField] private TextMeshProUGUI cursorTxt;
         
         #region Fields
 
@@ -48,6 +52,9 @@ namespace Engine
         private Mesh tileMesh;
         private Material tileMaterial;
 
+        private Camera cam;
+        private Node<Coordinate> selectedNode;
+        
         #endregion
 
         private Model.Game.Model model;
@@ -62,6 +69,7 @@ namespace Engine
 
         private void Start()
         {
+            cam = Camera.main;
             model = new Model.Game.Model();
             drawer = new Drawer(prefabs, defaultPrefab);
 
@@ -77,6 +85,7 @@ namespace Engine
         private void Update()
         {
             model.Update();
+            UpdateCursor();
         }
 
         private void LateUpdate()
@@ -107,6 +116,41 @@ namespace Engine
         {
             goldTxt.text = "Gold: " + model.GetCenterGold();
             alarmTxt.text = Model.Game.Model.AlarmRaised ? "CANCEL" : "ALARM";
+            
+            if (selectedNode != null)
+            {
+                cursorImage.gameObject.SetActive(false);
+                cursorTxt.text = "";
+                
+                foreach (INodeContainable<Coordinate> nodeContainable in selectedNode.GetNodeContainables())
+                {
+                    cursorImage.gameObject.SetActive(true);
+                    cursorTxt.text += "\n" + ((ITextable)nodeContainable).GetHoverText();
+                }
+            }
+            else
+            {
+                cursorImage.gameObject.SetActive(false);
+            }
+        }
+
+        private void UpdateCursor()
+        {
+            Vector3 pos = cam.ScreenToWorldPoint(Input.mousePosition);
+            
+            Vector3 imageSize = cursorImage.rectTransform.rect.size;
+            Vector3 mousePos = Input.mousePosition;
+            Vector3 worldPoint1 = cam.ScreenToWorldPoint(new Vector3(mousePos.x + imageSize.x, mousePos.y - imageSize.y));
+            Vector3 worldPoint2 = cam.ScreenToWorldPoint(new Vector3(mousePos.x + imageSize.x, mousePos.y + imageSize.y));
+            
+            if (graph.GetNodeFromPosition(worldPoint1.x, worldPoint1.z) != null)
+                cursorImage.rectTransform.position = new Vector3(mousePos.x + imageSize.x / 2f, mousePos.y - imageSize.y / 2f);
+            else if (graph.GetNodeFromPosition(worldPoint2.x, worldPoint2.z) != null)
+                cursorImage.rectTransform.position = new Vector3(mousePos.x + imageSize.x / 2f, mousePos.y + imageSize.y / 2f);
+            else
+                cursorImage.rectTransform.position = new Vector3(mousePos.x - imageSize.x / 2f, mousePos.y - imageSize.y / 2f);
+            
+            selectedNode = graph.GetNodeFromPosition(pos.x, pos.z);
         }
     }
 }

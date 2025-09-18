@@ -108,6 +108,14 @@ namespace Model.Game.Graph
             return Nodes.GetValueOrDefault(coordinate);
         }
 
+        public Node<TCoordinate> GetNodeFromPosition(float x, float y)
+        {
+            int xi = (int)Math.Round(x / nodeDistance);
+            int yi = (int)Math.Round(y / nodeDistance);
+
+            return GetNodeAtIndexes(xi, yi);
+        }
+        
         public void BlockNodes(ICollection<TCoordinate> coordinates)
         {
             foreach (TCoordinate coordinate in coordinates)

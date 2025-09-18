@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 using Model.Game.Events;
 using Model.Game.Graph;
@@ -24,7 +25,7 @@ namespace Model.Game.World.Objects
         int ILocalizable.Id { get; set; }
         public Coordinate NodeCoordinate { get; set; }
 
-        public Mine(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, float goldQty, int maxFoodQty, int foodQty = 0)
+        public Mine(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph, float goldQty, int maxFoodQty, int foodQty = 2)
         {
             this.graph = graph;
 
@@ -48,9 +49,9 @@ namespace Model.Game.World.Objects
 
         public string GetHoverText()
         {
-            string infoText = ((ILocalizable)this).Name + " " + ((ILocalizable)this).Id + ": ";
-            infoText += "Gold " + GoldContainer.ContainingQty + ". ";
-            infoText += "Food " + FoodContainer.ContainingQty + ".";
+            string infoText = ((ILocalizable)this).Name + " " + ((ILocalizable)this).Id + ":\n";
+            infoText += "Gold " + Math.Round(GoldContainer.ContainingQty, 2) + "\n";
+            infoText += "Food " + FoodContainer.ContainingQty;
 
             return infoText;
         }
