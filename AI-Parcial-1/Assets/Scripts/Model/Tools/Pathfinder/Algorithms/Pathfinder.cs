@@ -54,10 +54,10 @@ namespace Model.Tools.Pathfinder.Algorithms
                 }
             }
 
-            List<TNodeType> path = new(graph.GetBresenhamNodes(startNode.GetCoordinate(), destinationNode.GetCoordinate()));
-            path.Add(destinationNode);
+            List<TNodeType> bresenhamPath = new(graph.GetBresenhamNodes(startNode.GetCoordinate(), destinationNode.GetCoordinate()));
+            bresenhamPath.Add(destinationNode);
             
-            return path;
+            return bresenhamPath;
 
             List<TNodeType> GeneratePath(TNodeType startNode, TNodeType goalNode)
             {
@@ -69,6 +69,8 @@ namespace Model.Tools.Pathfinder.Algorithms
                     path.Add(currentNode);
                     currentNode = nodes[currentNode].Parent;
                 }
+                
+                path.Add(startNode);
 
                 path.Reverse();
                 return path;

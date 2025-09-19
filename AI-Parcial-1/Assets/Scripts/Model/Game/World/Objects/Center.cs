@@ -31,7 +31,12 @@ namespace Model.Game.World.Objects
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
         private readonly List<Miner> miners = new();
         private readonly List<Caravan> caravans = new();
-        public Coordinate NodeCoordinate { get; set; }
+
+        public Coordinate NodeCoordinate
+        {
+            get => _centerCoordinate;
+            set => _centerCoordinate = value;
+        }
 
         public Center(Node<Coordinate> node, Graph<Node<Coordinate>, Coordinate> graph)
         {

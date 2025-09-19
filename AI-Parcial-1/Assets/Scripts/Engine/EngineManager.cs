@@ -11,9 +11,11 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+using NodeType = Model.Tools.Pathfinder.Node.INode.NodeType;
+
 namespace Engine
 {
-    public class EngineManager : SerializedMonoBehaviour
+    public sealed class EngineManager : SerializedMonoBehaviour
     {
         [FoldoutGroup("Game", true)]
         [TabGroup("Game/Game", "Map"), SerializeField] private Vector2Int mapSize = new(10, 10);
@@ -24,15 +26,16 @@ namespace Engine
         [TabGroup("Game/Game", "Mines"), SerializeField] private int minMineGoldQty = 10;
         [TabGroup("Game/Game", "Mines"), SerializeField] private int maxMineGoldQty = 100;
         [TabGroup("Game/Game", "Mines"), SerializeField] private int maxMineFoodQty = 1000;
+        [TabGroup("Game/Game", "Mines"), SerializeField] private List<NodeType> mineBlockedTypes = new();
 
         [field: TabGroup("Game/Game", "Miners"), SerializeField] public float MinerSpeed{ get; private set; } = 1f;
         [field: TabGroup("Game/Game", "Miners"), SerializeField] public float MinerMineSpeed{ get; private set; } = 1f;
         [field: TabGroup("Game/Game", "Miners"), SerializeField] public float MinerMaxGold{ get; private set; } = 15f;
-        [field: TabGroup("Game/Game", "Miners"), SerializeField] public List<INode.NodeType> MinerBlockedNodes { get; private set; } = new();
+        [field: TabGroup("Game/Game", "Miners"), SerializeField] public List<NodeType> MinerBlockedNodes { get; private set; } = new();
         
         [field: TabGroup("Game/Game", "Caravan"), SerializeField] public float CaravanSpeed { get; private set; } = 2f;
         [field: TabGroup("Game/Game", "Caravan"), SerializeField] public int CaravanCapacity { get; private set; } = 10;
-        [field: TabGroup("Game/Game", "Caravan"), SerializeField] public List<INode.NodeType> CaravanBlockedNodes { get; private set; } = new();
+        [field: TabGroup("Game/Game", "Caravan"), SerializeField] public List<NodeType> CaravanBlockedNodes { get; private set; } = new();
 
         [FoldoutGroup("View", true)]
         [TabGroup("View/View", "Graph"), Required, SerializeField] private GameObject tilePrefab;
@@ -41,7 +44,7 @@ namespace Engine
         [TabGroup("View/View", "Drawing"), SerializeField] private float drawSize = .9f;
         [TabGroup("View/View", "Drawing"), SerializeField] private GameObject defaultPrefab;
         [TabGroup("View/View", "Drawing"), SerializeField] private Dictionary<string, GameObject> prefabs = new();
-        [TabGroup("View/View", "Drawing"), SerializeField] private Dictionary<INode.NodeType, Material> tileMaterials = new();
+        [TabGroup("View/View", "Drawing"), SerializeField] private Dictionary<NodeType, Material> tileMaterials = new();
 
         [FoldoutGroup("References"), Required, SerializeField] private CameraController cameraController;
         [FoldoutGroup("References"), Required, SerializeField] private Image cursorImage;
@@ -77,7 +80,7 @@ namespace Engine
             model = new Model.Game.Model();
             drawer = new Drawer(prefabs, defaultPrefab);
 
-            graph = model.CreateGraph(mapSize.x, mapSize.y, mineQty, minMineGoldQty, maxMineGoldQty, maxMineFoodQty, nodeDistance, circumnavigableMap);
+            graph = model.CreateGraph(mapSize.x, mapSize.y, mineQty, minMineGoldQty, maxMineGoldQty, maxMineFoodQty, mineBlockedTypes, nodeDistance, circumnavigableMap);
 
             tileScale = tilePrefab.transform.localScale * drawSize * nodeDistance;
             tileMesh = tilePrefab.GetComponent<MeshFilter>().sharedMesh;

@@ -103,7 +103,7 @@ namespace Model.Game.World.Agents
             fsm.SetTransition(States.Move, Flags.ReachedCenter, States.Collect);
             fsm.SetTransition(States.Move, Flags.ReachedMine, States.Deposit);
             fsm.SetTransition(States.Move, Flags.StayHidden, States.Hide);
-            fsm.SetTransition(States.Move, Flags.AlarmCleared, States.FindMine);
+            fsm.SetTransition(States.Move, Flags.AlarmCleared, States.FindCenter);
             fsm.SetTransition(States.Move, Flags.AlarmRaised, States.FindCenter);
             fsm.SetTransition(States.Move, Flags.TargetNotFound, States.FindMine);
 
@@ -111,7 +111,7 @@ namespace Model.Game.World.Agents
             fsm.SetTransition(States.FindCenter, Flags.AlarmRaised, States.FindCenter);
             fsm.SetTransition(States.FindCenter, Flags.AlarmCleared, States.FindMine);
 
-            fsm.SetTransition(States.Hide, Flags.AlarmCleared, States.FindMine);
+            fsm.SetTransition(States.Hide, Flags.AlarmCleared, States.FindCenter);
 
             fsm.SetTransition(States.Deposit, Flags.FoodDeposited, States.FindCenter);
             fsm.SetTransition(States.Deposit, Flags.AlarmRaised, States.FindCenter);

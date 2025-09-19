@@ -53,8 +53,6 @@ namespace Model.Game.World.Agents.MinerStates
                     path = pathfinder.FindPath(startNode, targetNode, graph, blockedTypes);
                 else
                     path = new List<Node<Coordinate>> { targetNode };
-
-                path.Insert(0, startNode);
             });
 
             return behaviourActions;

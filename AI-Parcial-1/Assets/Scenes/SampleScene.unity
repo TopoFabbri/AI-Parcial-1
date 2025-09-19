@@ -3659,6 +3659,7 @@ MonoBehaviour:
   minMineGoldQty: 10
   maxMineGoldQty: 11
   maxMineFoodQty: 1000
+  mineBlockedTypes: 0000000002000000
   <MinerSpeed>k__BackingField: 4
   <MinerMineSpeed>k__BackingField: 1
   <MinerMaxGold>k__BackingField: 15
