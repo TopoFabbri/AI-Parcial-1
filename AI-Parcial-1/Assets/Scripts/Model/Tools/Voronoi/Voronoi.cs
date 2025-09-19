@@ -10,17 +10,17 @@ namespace Model.Tools.Voronoi
 {
     internal class Voronoi<TNode, TCoordinate> where TNode : INode<TCoordinate>, INode where TCoordinate : ICoordinate
     {
-        private readonly ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 32 };
+        protected readonly ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 32 };
 
-        private readonly ConcurrentDictionary<TCoordinate, TCoordinate> voronoiMap = new();
-        private readonly IVoronoiPolicy<TNode, TCoordinate> policy;
+        protected readonly ConcurrentDictionary<TCoordinate, TCoordinate> voronoiMap = new();
+        protected readonly IVoronoiPolicy<TNode, TCoordinate> policy;
 
         internal Voronoi(IVoronoiPolicy<TNode, TCoordinate> policy)
         {
             this.policy = policy;
         }
 
-        internal void Generate(IGraph<TNode, TCoordinate> graph, List<IVoronoiObject<TCoordinate>> voronoiObjects)
+        internal virtual void Generate(IGraph<TNode, TCoordinate> graph, List<IVoronoiObject<TCoordinate>> voronoiObjects)
         {
             voronoiMap.Clear();
 
@@ -56,7 +56,7 @@ namespace Model.Tools.Voronoi
             });
         }
 
-        internal TCoordinate GetClosestTo(TCoordinate coordinate)
+        internal virtual TCoordinate GetClosestTo(TCoordinate coordinate)
         {
             return voronoiMap.GetValueOrDefault(coordinate, coordinate);
         }
