@@ -39,18 +39,18 @@ namespace Model.Game.World.Objects
             node.AddNodeContainable(this);
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
         }
-        
+
         ~Mine()
         {
             Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
-            
+
             GoldContainer.Depleted -= Destroy;
         }
 
         public string GetHoverText()
         {
             string infoText = ((ILocalizable)this).Name + " " + ((ILocalizable)this).Id + ":\n";
-            infoText += "Gold " + Math.Round(GoldContainer.ContainingQty, 2) + "\n";
+            infoText += "Gold " + Math.Round(GoldContainer.ContainingQty) + "\n";
             infoText += "Food " + FoodContainer.ContainingQty;
 
             return infoText;
@@ -74,8 +74,9 @@ namespace Model.Game.World.Objects
             graph.Nodes[NodeCoordinate].RemoveNodeContainable(this);
             Mines.Remove(this);
             Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
-            
-            VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), graph, Mines);
+
+            VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), Mine.Mines,
+                new Voronoi<Node<Coordinate>, Coordinate>(new DistanceBasedVoronoiPolicy<Node<Coordinate>, Coordinate>(), graph));
             EventSystem.Raise<GraphModifiedEvent>();
         }
 

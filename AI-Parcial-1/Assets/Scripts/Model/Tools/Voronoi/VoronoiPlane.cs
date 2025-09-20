@@ -13,14 +13,15 @@ namespace Model.Tools.Voronoi
             distance = -Vector3.Dot(this.normal, point);
         }
 
-        public float GetDistanceToPoint(Vector3 point)
+        internal float GetDistanceToPoint(Vector3 point)
         {
             return Vector3.Dot(normal, point) + distance;
         }
         
         public bool GetSide(Vector3 point)
         {
-            return GetDistanceToPoint(point) >= 0;
+            const float Epsilon = 1e-5f;
+            return GetDistanceToPoint(point) >= -Epsilon;
         }
 
         public Vector3 GetClosestPoint(Vector3 point)

@@ -1,26 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using Model.Game.Graph;
+using System.Globalization;
+using Model.Game.Events;
 using Model.Tools.Pathfinder.Coordinate;
-using Model.Tools.Pathfinder.Graph;
 using Model.Tools.Pathfinder.Node;
+using Model.Tools.Time;
 
 namespace Model.Tools.Voronoi
 {
     public static class VoronoiRegistry<TNode, TCoordinate> where TNode : INode<TCoordinate>, INode, new() where TCoordinate : ICoordinate
     {
-        private static readonly Dictionary<Type, BisectorVoronoi> Registries = new();
+        private static readonly Dictionary<Type, IVoronoi<TNode, TCoordinate>> Registries = new();
 
-        public static void GenerateVoronoi(Type type, IGraph<Node<Coordinate>, Coordinate> graph, List<IVoronoiObject<Coordinate>> voronoiObjects, IVoronoiPolicy<TNode, TCoordinate> policy = null)
+        public static void GenerateVoronoi(Type type, List<IVoronoiObject<TCoordinate>> voronoiObjects, IVoronoi<TNode, TCoordinate> voronoi)
         {
-            Registries[type] = new BisectorVoronoi(new DistanceBasedVoronoiPolicy<Node<Coordinate>, Coordinate>());
-            Registries[type].Generate(graph, voronoiObjects);
+            Registries[type] = voronoi;
+            
+            Timer timer = new();
+
+            Registries[type].Generate(voronoiObjects);
+            
+            EventSystem.EventSystem.Raise<DebugEvent>(timer.TimeElapsed.ToString(CultureInfo.InvariantCulture));
         }
 
-        public static Coordinate GetClosestTo(Type type, Coordinate coordinate)
+        public static TCoordinate GetClosestTo(Type type, TCoordinate coordinate)
         {
-            if (!Registries.TryGetValue(type, out BisectorVoronoi registry))
-                throw new ArgumentException($"There is no voronoi for type " + type.Namespace);
+            if (!Registries.TryGetValue(type, out IVoronoi<TNode, TCoordinate> registry))
+                throw new ArgumentException("There is no voronoi for type " + type.Namespace);
             
             return registry.GetClosestTo(coordinate);
         }

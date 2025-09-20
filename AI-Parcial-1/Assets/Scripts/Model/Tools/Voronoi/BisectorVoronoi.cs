@@ -1,44 +1,41 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Numerics;
 using System.Threading.Tasks;
-using Model.Game.Events;
 using Model.Game.Graph;
 using Model.Tools.Pathfinder.Graph;
 using Model.Tools.Pathfinder.Node;
-using Model.Tools.Time;
 
 namespace Model.Tools.Voronoi
 {
-    internal sealed class BisectorVoronoi : Voronoi<Node<Coordinate>, Coordinate>
+    internal sealed class BisectorVoronoi : IVoronoi<Node<Coordinate>, Coordinate>
     {
+        private IGraph<Node<Coordinate>, Coordinate> graph;
         private readonly ConcurrentDictionary<Coordinate, List<VoronoiPlane>> bisectorPlanes = new();
         
-        internal BisectorVoronoi(IVoronoiPolicy<Node<Coordinate>, Coordinate> policy) : base(policy)
+        public ParallelOptions ParallelOptions { get; } = new() { MaxDegreeOfParallelism = 32 };
+
+        internal BisectorVoronoi(IGraph<Node<Coordinate>, Coordinate> graph)
         {
+            this.graph = graph;
         }
 
-        internal override void Generate(IGraph<Node<Coordinate>, Coordinate> graph, List<IVoronoiObject<Coordinate>> voronoiObjects)
+        public void Generate(List<IVoronoiObject<Coordinate>> voronoiObjects)
         {
-            Timer timer = new();
-            
             bisectorPlanes.Clear();
             ConcurrentBag<Coordinate> sites = new();
             ConcurrentDictionary<VoronoiPlane, Vector3> intersections = new();
 
-            Parallel.ForEach(voronoiObjects, parallelOptions, voronoiObject =>
+            Parallel.ForEach(voronoiObjects, ParallelOptions, voronoiObject =>
             {
                 sites.Add(voronoiObject.GetCoordinates());
             });
 
             CalculateBisectorPlanes(sites, intersections);
             RemoveOuterPlanes(intersections);
-            
-            EventSystem.EventSystem.Raise<DebugEvent>(timer.TimeElapsed.ToString(CultureInfo.InvariantCulture));
         }
 
-        internal override Coordinate GetClosestTo(Coordinate coordinate)
+        public Coordinate GetClosestTo(Coordinate coordinate)
         {
             Vector3 coordAsPoint = new(coordinate.X, coordinate.Y, 0);
             Coordinate closest = new();

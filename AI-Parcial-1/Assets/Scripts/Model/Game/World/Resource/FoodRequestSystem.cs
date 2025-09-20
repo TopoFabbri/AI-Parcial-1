@@ -18,5 +18,10 @@ namespace Model.Game.World.Resource
             if (FoodRequests.Count == 0) return null;
             return FoodRequests.Dequeue();
         }
+
+        public static void Clear()
+        {
+            FoodRequests.Clear();
+        }
     }
 }

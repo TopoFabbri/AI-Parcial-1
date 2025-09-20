@@ -97,7 +97,7 @@ namespace Model.Game.World.Objects
         public string GetHoverText()
         {
             infoText = ((ILocalizable)this).Name + " " + ((ILocalizable)this).Id + ":\n";
-            infoText += "Gold " + Math.Round(GoldContainer.ContainingQty, 2) + "\n";
+            infoText += "Gold " + Math.Round(GoldContainer.ContainingQty) + "\n";
             infoText += "Miners " + miners.Count + "\n";
             infoText += "Caravans " + caravans.Count;
             return infoText;

@@ -8,24 +8,26 @@ using Model.Tools.Pathfinder.Node;
 
 namespace Model.Tools.Voronoi
 {
-    internal class Voronoi<TNode, TCoordinate> where TNode : INode<TCoordinate>, INode where TCoordinate : ICoordinate
+    internal class Voronoi<TNode, TCoordinate> : IVoronoi<TNode, TCoordinate> where TNode : INode<TCoordinate>, INode where TCoordinate : ICoordinate
     {
-        protected readonly ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 32 };
+        private readonly ConcurrentDictionary<TCoordinate, TCoordinate> voronoiMap = new();
+        private readonly IVoronoiPolicy<TNode, TCoordinate> policy;
+        private readonly IGraph<TNode, TCoordinate> graph;
+        
+        public ParallelOptions ParallelOptions { get; } = new() { MaxDegreeOfParallelism = 32 };
 
-        protected readonly ConcurrentDictionary<TCoordinate, TCoordinate> voronoiMap = new();
-        protected readonly IVoronoiPolicy<TNode, TCoordinate> policy;
-
-        internal Voronoi(IVoronoiPolicy<TNode, TCoordinate> policy)
+        internal Voronoi(IVoronoiPolicy<TNode, TCoordinate> policy, IGraph<TNode, TCoordinate> graph)
         {
             this.policy = policy;
+            this.graph = graph;
         }
 
-        internal virtual void Generate(IGraph<TNode, TCoordinate> graph, List<IVoronoiObject<TCoordinate>> voronoiObjects)
+        public void Generate(List<IVoronoiObject<TCoordinate>> voronoiObjects)
         {
             voronoiMap.Clear();
 
             ConcurrentBag<TCoordinate> sites = new();
-            Parallel.ForEach(voronoiObjects, parallelOptions, voronoiObject =>
+            Parallel.ForEach(voronoiObjects, ParallelOptions, voronoiObject =>
             {
                 TCoordinate site = voronoiObject.GetCoordinates();
 
@@ -38,7 +40,7 @@ namespace Model.Tools.Voronoi
             if (sites.Count == 0)
                 return;
 
-            Parallel.ForEach(graph.GetNodes(), parallelOptions, node =>
+            Parallel.ForEach(graph.GetNodes(), ParallelOptions, node =>
             {
                 TCoordinate point = node.GetCoordinate();
                 TCoordinate winner = sites.ElementAt(0);
@@ -56,9 +58,17 @@ namespace Model.Tools.Voronoi
             });
         }
 
-        internal virtual TCoordinate GetClosestTo(TCoordinate coordinate)
+        public TCoordinate GetClosestTo(TCoordinate coordinate)
         {
             return voronoiMap.GetValueOrDefault(coordinate, coordinate);
         }
+    }
+    
+    public interface IVoronoi<TNode, TCoordinate> where TNode : INode<TCoordinate>, INode where TCoordinate : ICoordinate
+    {
+        ParallelOptions ParallelOptions { get; }
+        
+        void Generate(List<IVoronoiObject<TCoordinate>> voronoiObjects);
+        TCoordinate GetClosestTo(TCoordinate coordinate);
     }
 }

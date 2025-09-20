@@ -146,7 +146,7 @@ namespace Model.Game.World.Agents
         public string GetHoverText()
         {
             string infoText = ((ILocalizable)this).Name + " " + ((ILocalizable)this).Id + ":\n";
-            infoText += "Gold " + Math.Round(GoldContainer.ContainingQty, 2);
+            infoText += "Gold " + Math.Round(GoldContainer.ContainingQty);
 
             return infoText;
         }

@@ -33,6 +33,7 @@ namespace Model.Game
 
             Mine.Mines.Clear();
             Localizables.Clear();
+            FoodRequestSystem.Clear();
 
             Graph = null;
         }
@@ -47,7 +48,7 @@ namespace Model.Game
             center = new Center(Graph.GetNodeAtIndexes(width / 2, height / 2), Graph);
 
             int maxIterations = 100;
-            
+
             while (Graph.Nodes[center.NodeCoordinate].IsBlocked(mineBlockedTypes) && maxIterations-- > 0)
             {
                 foreach (Coordinate coordinate in Graph.GetAdjacents(center.NodeCoordinate))
@@ -72,7 +73,8 @@ namespace Model.Game
                 Mine mine = new(Graph.Nodes[coordinate], Graph, random.Next((int)minMineGold, (int)maxMineGold), maxFoodQty);
             }
 
-            VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), Graph, Mine.Mines);
+            VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), Mine.Mines,
+                new Voronoi<Node<Coordinate>, Coordinate>(new DistanceBasedVoronoiPolicy<Node<Coordinate>, Coordinate>(), Graph));
             EventSystem.Raise<GraphModifiedEvent>();
 
             return Graph;
