@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using Engine.Controller;
 using Engine.View;
 using Model.Game.Events;
@@ -55,6 +56,8 @@ namespace Engine
         
         #region Fields
 
+        private string mapPath;
+        
         private Vector3 tileScale;
         private Mesh tileMesh;
         private Material tileMaterial;
@@ -70,6 +73,11 @@ namespace Engine
 
         private void Awake()
         {
+            mapPath = Path.Combine(Application.dataPath, "Maps", "Map.csv");
+
+            if (!File.Exists(mapPath))
+                throw new FileNotFoundException("Map file not found at: " + mapPath);
+            
             EventSystem.Subscribe<DebugEvent>(OnModelDebugEvent);
             EventSystem.Subscribe<GraphModifiedEvent>(GraphView.OnModifiedGraph);
         }
@@ -80,13 +88,62 @@ namespace Engine
             model = new Model.Game.Model();
             drawer = new Drawer(prefabs, defaultPrefab);
 
-            graph = model.CreateGraph(mapSize.x, mapSize.y, mineQty, minMineGoldQty, maxMineGoldQty, maxMineFoodQty, mineBlockedTypes, nodeDistance, circumnavigableMap);
+            CreateGraphFromCsv();
 
             tileScale = tilePrefab.transform.localScale * drawSize * nodeDistance;
             tileMesh = tilePrefab.GetComponent<MeshFilter>().sharedMesh;
             tileMaterial = tilePrefab.GetComponent<MeshRenderer>().sharedMaterial;
 
             cameraController.PositionCamera(graph);
+        }
+
+        private void CreateGraphFromCsv()
+        {
+            string mapCsv = File.ReadAllText(mapPath);
+
+            List<List<NodeType>> mapLists = new();
+            
+            int x = 0;
+            int y = 0;
+
+            int minSizeX = mapCsv.Length;
+            
+            foreach (char c in mapCsv)
+            {
+                if (mapLists.Count <= x)
+                    mapLists.Add(new List<NodeType>());
+                
+                if (c == '\n')
+                {
+                    minSizeX = Mathf.Min(minSizeX, x);
+                    x = 0;
+                    y++;
+                    continue;
+                }
+                
+                if (c == ',')
+                {
+                    x++;
+                    continue;
+                }
+                
+                if (c == '0')
+                    mapLists[x].Add(NodeType.Grass);
+                else if (c == '1')
+                    mapLists[x].Add(NodeType.Road);
+                else
+                    mapLists[x].Add(NodeType.Water);
+            }
+            
+            NodeType[,] nodeTypes = new NodeType[minSizeX, y];
+            
+            for (int i = 0; i < minSizeX; i++)
+            {
+                for (int j = 0; j < y; j++)
+                    nodeTypes[i, j] = mapLists[i][j];
+            }
+
+            graph = model.CreateGraph(nodeTypes, mineQty, minMineGoldQty, maxMineGoldQty, maxMineFoodQty, mineBlockedTypes, nodeDistance, circumnavigableMap);
         }
 
         private void Update()

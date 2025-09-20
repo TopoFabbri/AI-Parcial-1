@@ -24,13 +24,7 @@ namespace Model.Tools.Pathfinder.Node
 
         public bool IsBlocked(List<INode.NodeType> blockedTypes)
         {
-            foreach (INode.NodeType blockedType in blockedTypes)
-            {
-                if (type == blockedType)
-                    return true;
-            }
-            
-            return false;
+            return blockedTypes.Contains(type);
         }
 
         public int GetCost()

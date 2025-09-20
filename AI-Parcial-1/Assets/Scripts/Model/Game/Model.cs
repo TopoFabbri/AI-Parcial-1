@@ -45,6 +45,27 @@ namespace Model.Game
 
             Graph = new Graph<Node<Coordinate>, Coordinate>(width, height, nodeDistance, circumnavigable);
 
+            CreateCenter(width, height, mineBlockedTypes);
+            GenerateMines(mineQty, minMineGold, maxMineGold, maxFoodQty, mineBlockedTypes);
+
+            return Graph;
+        }
+        
+        public Graph<Node<Coordinate>, Coordinate> CreateGraph(INode.NodeType[,] nodeTypes, int mineQty, float minMineGold, float maxMineGold, int maxFoodQty,
+            List<INode.NodeType> mineBlockedTypes, float nodeDistance = 1f, bool circumnavigable = false)
+        {
+            Time.Start();
+
+            Graph = new Graph<Node<Coordinate>, Coordinate>(nodeTypes, nodeDistance, circumnavigable);
+
+            CreateCenter(Graph.GetSize().X, Graph.GetSize().Y, mineBlockedTypes);;
+            GenerateMines(mineQty, minMineGold, maxMineGold, maxFoodQty, mineBlockedTypes);
+
+            return Graph;
+        }
+
+        private void CreateCenter(int width, int height, List<INode.NodeType> mineBlockedTypes)
+        {
             center = new Center(Graph.GetNodeAtIndexes(width / 2, height / 2), Graph);
 
             int maxIterations = 100;
@@ -57,18 +78,21 @@ namespace Model.Game
                         Graph.MoveContainableTo(center, coordinate);
                 }
             }
-
+        }
+        
+        private void GenerateMines(int mineQty, float minMineGold, float maxMineGold, int maxFoodQty, List<INode.NodeType> mineBlockedTypes)
+        {
             Random random = new();
 
             for (int i = 0; i < mineQty; i++)
             {
                 Coordinate coordinate = new();
-                maxIterations = 100;
+                int maxIterations = 100;
 
                 do
                 {
                     coordinate.Set(random.Next(0, Graph.GetSize().X), random.Next(0, Graph.GetSize().Y));
-                } while (Graph.Nodes[coordinate].GetNodeContainables().Count != 0 && Graph.Nodes[coordinate].IsBlocked(mineBlockedTypes) && --maxIterations > 0);
+                } while ((Graph.Nodes[coordinate].GetNodeContainables().Count != 0 || Graph.Nodes[coordinate].IsBlocked(mineBlockedTypes)) && --maxIterations > 0);
 
                 Mine mine = new(Graph.Nodes[coordinate], Graph, random.Next((int)minMineGold, (int)maxMineGold), maxFoodQty);
             }
@@ -76,8 +100,6 @@ namespace Model.Game
             VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), Mine.Mines,
                 new Voronoi<Node<Coordinate>, Coordinate>(new DistanceBasedVoronoiPolicy<Node<Coordinate>, Coordinate>(), Graph));
             EventSystem.Raise<GraphModifiedEvent>();
-
-            return Graph;
         }
 
         public void Update()

@@ -43,6 +43,30 @@ namespace Model.Game.Graph
             }
         }
 
+        public Graph(INode.NodeType[,] nodeTypes, float nodeDistance = 1f, bool circumnavigable = false)
+        {
+            this.circumnavigable = circumnavigable;
+            this.nodeDistance = nodeDistance;
+            
+            size = new TCoordinate();
+            size.Set(nodeTypes.GetLength(0), nodeTypes.GetLength(1));
+            
+            for (int i = 0; i < size.X; i++)
+            {
+                for (int j = 0; j < size.Y; j++)
+                {
+                    TCoordinate coordinate = new();
+                    TNode node = new();
+
+                    coordinate.Set(i, size.Y - 1 - j);
+
+                    node.SetCoordinate(coordinate);
+                    node.SetType(nodeTypes[i, j]);
+                    Nodes.Add(coordinate, node);
+                }
+            }
+        }
+
         ~Graph()
         {
             Nodes.Clear();
