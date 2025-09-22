@@ -56,8 +56,6 @@ namespace Engine
         
         #region Fields
 
-        private string mapPath;
-        
         private Vector3 tileScale;
         private Mesh tileMesh;
         private Material tileMaterial;
@@ -73,11 +71,6 @@ namespace Engine
 
         private void Awake()
         {
-            mapPath = Path.Combine(Application.dataPath, "Maps", "Map.csv");
-
-            if (!File.Exists(mapPath))
-                throw new FileNotFoundException("Map file not found at: " + mapPath);
-            
             EventSystem.Subscribe<DebugEvent>(OnModelDebugEvent);
             EventSystem.Subscribe<GraphModifiedEvent>(GraphView.OnModifiedGraph);
         }
@@ -99,9 +92,15 @@ namespace Engine
 
         private void CreateGraphFromCsv()
         {
-            string mapCsv = File.ReadAllText(mapPath);
+            string mapCsv;
+            TextAsset csvAsset = Resources.Load<TextAsset>("Maps/Map");
+            
+            if (csvAsset)
+                mapCsv = csvAsset.text;
+            else
+                throw new FileNotFoundException("Map CSV not found. Ensure it exists at Resources/Maps/Map.csv.");
 
-            List<List<NodeType>> mapLists = new();
+            List<List<NodeType>> mapColumns = new();
             
             int x = 0;
             int y = 0;
@@ -110,12 +109,12 @@ namespace Engine
             
             foreach (char c in mapCsv)
             {
-                if (mapLists.Count <= x)
-                    mapLists.Add(new List<NodeType>());
+                if (mapColumns.Count <= x)
+                    mapColumns.Add(new List<NodeType>());
                 
                 if (c == '\n')
                 {
-                    minSizeX = Mathf.Min(minSizeX, x);
+                    minSizeX = Mathf.Min(minSizeX, x + 1);
                     x = 0;
                     y++;
                     continue;
@@ -128,11 +127,11 @@ namespace Engine
                 }
                 
                 if (c == '0')
-                    mapLists[x].Add(NodeType.Grass);
+                    mapColumns[x].Add(NodeType.Grass);
                 else if (c == '1')
-                    mapLists[x].Add(NodeType.Road);
-                else
-                    mapLists[x].Add(NodeType.Water);
+                    mapColumns[x].Add(NodeType.Road);
+                else if (c == '2')
+                    mapColumns[x].Add(NodeType.Water);
             }
             
             NodeType[,] nodeTypes = new NodeType[minSizeX, y];
@@ -140,7 +139,7 @@ namespace Engine
             for (int i = 0; i < minSizeX; i++)
             {
                 for (int j = 0; j < y; j++)
-                    nodeTypes[i, j] = mapLists[i][j];
+                    nodeTypes[i, j] = mapColumns[i][j];
             }
 
             graph = model.CreateGraph(nodeTypes, mineQty, minMineGoldQty, maxMineGoldQty, maxMineFoodQty, mineBlockedTypes, nodeDistance, circumnavigableMap);
