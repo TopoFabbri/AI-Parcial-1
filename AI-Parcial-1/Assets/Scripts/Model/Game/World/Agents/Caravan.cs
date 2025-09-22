@@ -9,6 +9,7 @@ using Model.Tools.EventSystem;
 using Model.Tools.FSM;
 using Model.Tools.Pathfinder.Algorithms;
 using Model.Tools.Pathfinder.Node;
+using Model.Tools.Time;
 
 namespace Model.Game.World.Agents
 {
@@ -26,6 +27,8 @@ namespace Model.Game.World.Agents
 
         private readonly float moveSpeed;
         private readonly Coordinate targetCoordinate;
+        
+        private Vector3 position;
 
         #endregion
 
@@ -75,6 +78,10 @@ namespace Model.Game.World.Agents
             graph.Nodes[coordinate].AddNodeContainable(this);
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
 
+            (float x, float y) = graph.GetPositionFromCoordinate(NodeCoordinate);
+            
+            position = new Vector3(x , 0f, y);
+            
             InitializeFSM();
 
             EventSystem.Subscribe<RaiseAlarmEvent>(OnAlarmRaised);
@@ -87,7 +94,7 @@ namespace Model.Game.World.Agents
             fsm.AddState<HideState>(States.Hide);
             fsm.AddState<MoveState>(States.Move,
                 onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph, blockedNodes },
-                onTickParameters: () => new object[] { graph, this, moveSpeed });
+                onTickParameters: () => new object[] { graph, this });
             fsm.AddState<CollectState>(States.Collect, onEnterParameters: () => new object[] { graph, NodeCoordinate }, onTickParameters: () => new object[] { FoodContainer });
             fsm.AddState<FindMineState>(States.FindMine, () => new object[] { targetCoordinate });
             fsm.AddState<FindCenterState>(States.FindCenter, () => new object[] { targetCoordinate });
@@ -133,10 +140,21 @@ namespace Model.Game.World.Agents
 
         public Vector3 GetPosition()
         {
-            float x = NodeCoordinate.X * graph.GetNodeDistance();
-            float y = NodeCoordinate.Y * graph.GetNodeDistance();
+            return position + Vector3.UnitY * HeightDrawOffset;
+        }
 
-            return new Vector3(x, HeightDrawOffset, y);
+        public Vector3 MoveTowards(Vector3 target)
+        {
+            Vector3 direction = target - position;
+            
+            if (direction.LengthSquared() > (Vector3.Normalize(direction) * moveSpeed * Time.TickTime).LengthSquared())
+                direction = Vector3.Normalize(direction) * moveSpeed * Time.TickTime;
+            
+            position += direction;
+            
+            graph.MoveContainableTo(this, graph.GetNodeFromPosition(position.X, position.Z).GetCoordinate());
+
+            return position;
         }
 
         public void Update()

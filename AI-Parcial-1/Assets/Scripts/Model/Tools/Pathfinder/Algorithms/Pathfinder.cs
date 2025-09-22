@@ -59,18 +59,18 @@ namespace Model.Tools.Pathfinder.Algorithms
             
             return bresenhamPath;
 
-            List<TNodeType> GeneratePath(TNodeType startNode, TNodeType goalNode)
+            List<TNodeType> GeneratePath(TNodeType firstNode, TNodeType goalNode)
             {
                 List<TNodeType> path = new();
                 TNodeType currentNode = goalNode;
 
-                while (!NodesEquals(currentNode, startNode))
+                while (!NodesEquals(currentNode, firstNode))
                 {
                     path.Add(currentNode);
                     currentNode = nodes[currentNode].Parent;
                 }
                 
-                path.Add(startNode);
+                path.Add(firstNode);
 
                 path.Reverse();
                 return path;

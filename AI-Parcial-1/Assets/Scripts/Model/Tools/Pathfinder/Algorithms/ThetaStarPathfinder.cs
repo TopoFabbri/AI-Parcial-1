@@ -39,6 +39,8 @@ namespace Model.Tools.Pathfinder.Algorithms
 
                 if (blocked)
                 {
+                    if (tmpPath.Count <= 2) return astarPath;
+                    
                     tmpPath.RemoveAt(tmpPath.Count - 1);
                 }
                 else
@@ -51,7 +53,7 @@ namespace Model.Tools.Pathfinder.Algorithms
                         tmpPath.Add(node);
                 }
             } while (!currentNode.Equals(destinationNode));
-
+            
             return newPath;
         }
     }

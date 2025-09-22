@@ -81,19 +81,9 @@ namespace Model.Game.Graph
                 if (adjacentCoordinate is not TCoordinate coordinate) continue;
 
                 if (circumnavigable)
-                {
-                    while (coordinate.X < 0)
-                        coordinate.Set(coordinate.X + size.X, coordinate.Y);
-
-                    while (coordinate.X >= size.X)
-                        coordinate.Set(coordinate.X - size.X, coordinate.Y);
-
-                    while (coordinate.Y < 0)
-                        coordinate.Set(coordinate.X, coordinate.Y + size.Y);
-
-                    while (coordinate.Y >= size.Y)
-                        coordinate.Set(coordinate.X, coordinate.Y - size.Y);
-                }
+                    WrapCoordinate(coordinate);
+                else
+                    ClampCoordinate(coordinate);
 
                 if (Nodes.TryGetValue(coordinate, out TNode adjacentNode))
                     adjacents.Add(adjacentNode);
@@ -132,7 +122,38 @@ namespace Model.Game.Graph
 
         public Node<TCoordinate> GetNodeAt(TCoordinate coordinate)
         {
+            if (circumnavigable)
+                WrapCoordinate(coordinate);
+            else
+                ClampCoordinate(coordinate);
+            
             return Nodes.GetValueOrDefault(coordinate);
+        }
+
+        private void ClampCoordinate(TCoordinate coordinate)
+        {
+            if (coordinate.X < 0)
+                coordinate.Set(0, coordinate.Y);
+            else if (coordinate.X >= size.X)
+                coordinate.Set(size.X - 1, coordinate.Y);
+
+            if (coordinate.Y < 0)
+                coordinate.Set(coordinate.X, 0);
+            else if (coordinate.Y >= size.Y)
+                coordinate.Set(coordinate.X, size.Y - 1);
+        }
+
+        private void WrapCoordinate(TCoordinate coordinate)
+        {
+            while (coordinate.X < 0)
+                coordinate.Set(coordinate.X + size.X, coordinate.Y);
+            while (coordinate.X >= size.X)
+                coordinate.Set(coordinate.X - size.X, coordinate.Y);
+                
+            while (coordinate.Y < 0)
+                coordinate.Set(coordinate.X, coordinate.Y + size.Y);
+            while (coordinate.Y >= size.Y)
+                coordinate.Set(coordinate.X, coordinate.Y - size.Y);
         }
 
         public Node<TCoordinate> GetNodeFromPosition(float x, float y)
@@ -143,84 +164,132 @@ namespace Model.Game.Graph
             return GetNodeAtIndexes(xi, yi);
         }
 
+        public (float x, float y) GetPositionFromCoordinate(Coordinate coordinate)
+        {
+            return (coordinate.X * nodeDistance, coordinate.Y * nodeDistance);
+        }
+
         public ICollection<TNode> GetBresenhamNodes(TCoordinate start, TCoordinate end)
         {
-            // Returns all nodes that lie on the integer grid line between start and end (inclusive)
-            // using the classic integer Bresenham line algorithm. This implementation is adapted to:
-            // - Work with generic TCoordinate/TNode types stored in a dictionary (Nodes)
-            // - Skip coordinates that are outside the graph (by TryGetValue check)
-            // - Avoid emitting duplicate nodes (a guard for safety when generics/hash collide)
-            // Pure Bresenham, by contrast, outputs every (x, y) integer point regardless of bounds/availability
-            // and does not need to create or look up objects in a container.
             List<TNode> result = new();
 
-            // dx, dy are the absolute deltas along X and Y. In the "pure" algorithm dy is commonly negated
-            // to allow a single error accumulator (err) and symmetric stepping for all octants.
-            int dx = Math.Abs(end.X - start.X);
-            int sx = start.X < end.X ? 1 : -1; // sx: step direction on X (pure Bresenham uses the same)
-            int dy = -Math.Abs(end.Y - start.Y);
-            int sy = start.Y < end.Y ? 1 : -1; // sy: step direction on Y (pure Bresenham uses the same)
-            int err = dx + dy; // err starts as dx + dy (dy is negative). Classic variant uses this form.
+            if (start == null || end == null) return result;
 
-            // Current integer position, initialised to start
-            int x = start.X;
-            int y = start.Y;
+            int x0 = start.X;
+            int y0 = start.Y;
+            int x1 = end.X;
+            int y1 = end.Y;
 
-            // Main loop (identical structure to the classic integer Bresenham)
-            while (x != end.X || y != end.Y)
+            // If the graph wraps around, choose the shortest wrapped delta to the end
+            if (circumnavigable)
             {
-                // PURE BRESENHAM: would directly record the integer point (x, y)
-                // HERE: we adapt it to the graph by creating a coordinate key and trying to fetch the node
-                TCoordinate key = new();
-                key.Set(x, y);
-                if (Nodes.TryGetValue(key, out TNode value))
+                // Choose x1 and y1 in an expanded grid so that |x1-x0| and |y1-y0| are minimal
+                int bestX = x1;
+                int bestY = y1;
+
+                // Evaluate wrapping options for X
+                int[] xCandidates = { x1, x1 + size.X, x1 - size.X };
+                int minDx = int.MaxValue;
+                foreach (int xc in xCandidates)
                 {
-                    // PURE BRESENHAM: no duplication concern because points are unique
-                    // HERE: we add a defensive duplicate guard due to generic equality/hash behaviour
-                    if (result.Count == 0 || !EqualityComparer<TNode>.Default.Equals(result[^1], value))
-                        result.Add(value);
-                }
-
-                // Inclusive termination condition: once we reached the end point, we stop.
-                if (x == end.X && y == end.Y)
-                    break;
-
-                // Error-doubling trick: compare 2*err against dx/dy to decide which axis to step.
-                // Modified to advance only one axis per iteration to ensure orthogonal adjacency between nodes.
-                int e2 = 2 * err;
-                bool stepX = e2 >= dy;
-                bool stepY = e2 <= dx;
-
-                if (stepX && stepY)
-                {
-                    // Both steps are possible; pick one axis this iteration to avoid diagonal advancement.
-                    // Prefer stepping along the dominant axis (shallow vs. steep):
-                    if (dx >= -dy) // shallow (|dx| >= |dy|) -> step X first
+                    int dxc = Math.Abs(xc - x0);
+                    if (dxc < minDx)
                     {
-                        err += dy;
-                        x += sx;
-                    }
-                    else // steep -> step Y first
-                    {
-                        err += dx;
-                        y += sy;
+                        minDx = dxc;
+                        bestX = xc;
                     }
                 }
-                else if (stepX)
+
+                // Evaluate wrapping options for Y
+                int[] yCandidates = { y1, y1 + size.Y, y1 - size.Y };
+                int minDy = int.MaxValue;
+                foreach (int yc in yCandidates)
                 {
-                    err += dy;
+                    int dyc = Math.Abs(yc - y0);
+                    if (dyc < minDy)
+                    {
+                        minDy = dyc;
+                        bestY = yc;
+                    }
+                }
+
+                x1 = bestX;
+                y1 = bestY;
+            }
+
+            int dx = Math.Abs(x1 - x0);
+            int dy = Math.Abs(y1 - y0);
+            int sx = x0 < x1 ? 1 : -1;
+            int sy = y0 < y1 ? 1 : -1;
+
+            int x = x0;
+            int y = y0;
+
+            AddNodeAt(x, y);
+
+            if (dx >= dy)
+            {
+                int err = dx / 2;
+                while (x != x1)
+                {
                     x += sx;
+                    err -= dy;
+                    if (err < 0)
+                    {
+                        y += sy;
+                        err += dx;
+                    }
+                    AddNodeAt(x, y);
                 }
-                else // stepY
+            }
+            else
+            {
+                int err = dy / 2;
+                while (y != y1)
                 {
-                    err += dx;
                     y += sy;
+                    err -= dx;
+                    if (err < 0)
+                    {
+                        x += sx;
+                        err += dy;
+                    }
+                    AddNodeAt(x, y);
                 }
             }
 
-            // PURE BRESENHAM: would return all integer points. We return the nodes that exist in the graph
-            // along that line. Points outside the graph are silently ignored by TryGetValue.
             return result;
+
+            // Local helper to add a node at the (possibly wrapped) position, avoiding consecutive duplicates
+            void AddNodeAt(int xi, int yi)
+            {
+                int wx = xi;
+                int wy = yi;
+
+                if (circumnavigable)
+                {
+                    if (size.X > 0)
+                    {
+                        wx %= size.X;
+                        if (wx < 0) wx += size.X;
+                    }
+
+                    if (size.Y > 0)
+                    {
+                        wy %= size.Y;
+                        if (wy < 0) wy += size.Y;
+                    }
+                }
+
+                TCoordinate coord = new();
+                coord.Set(wx, wy);
+
+                if (Nodes.TryGetValue(coord, out TNode node))
+                {
+                    if (result.Count == 0 || !result[^1].GetCoordinate().Equals(coord))
+                        result.Add(node);
+                }
+            }
         }
 
         public float GetNodeDistance()

@@ -86,7 +86,7 @@ namespace Model.Game.World.Objects
             int caravanCapacity = caravanCreationRequest.carryCapacity;
             List<INode.NodeType> blockedNodes = caravanCreationRequest.blockedNodes;
 
-            caravans.Add(new Caravan(graph, new AStarPathfinder<Node<Coordinate>, Coordinate>(), NodeCoordinate, blockedNodes, caravanCapacity, caravanSpeed, 0));
+            caravans.Add(new Caravan(graph, new ThetaStarPathfinder<Node<Coordinate>, Coordinate>(), NodeCoordinate, blockedNodes, caravanCapacity, caravanSpeed, 0));
         }
 
         public static Coordinate GetCoordinate()

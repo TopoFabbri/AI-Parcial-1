@@ -10,6 +10,7 @@ using Model.Tools.EventSystem;
 using Model.Tools.FSM;
 using Model.Tools.Pathfinder.Algorithms;
 using Model.Tools.Pathfinder.Node;
+using Model.Tools.Time;
 
 namespace Model.Game.World.Agents
 {
@@ -19,6 +20,8 @@ namespace Model.Game.World.Agents
 
         private readonly float mineSpeed;
         private readonly float moveSpeed;
+        
+        private Vector3 position;
         
         private const float GoldPerFoodUnit = 3f;
         private const float HeightDrawOffset = 1f;
@@ -81,11 +84,15 @@ namespace Model.Game.World.Agents
             this.blockedNodes = blockedNodes;
             
             GoldContainer = new GoldContainer(goldQty, maxGold);
-            pathfinder = new AStarPathfinder<Node<Coordinate>, Coordinate>();
+            pathfinder = new ThetaStarPathfinder<Node<Coordinate>, Coordinate>();
             targetCoordinate = new Coordinate();
             
             node.AddNodeContainable(this);
             ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
+            
+            (float x, float y) = graph.GetPositionFromCoordinate(NodeCoordinate);
+            
+            position = new Vector3(x, 0f, y);
             
             InitializeFSM();
 
@@ -105,7 +112,7 @@ namespace Model.Game.World.Agents
                 onTickParameters: () => new object[] { GoldContainer });
             fsm.AddState<MoveState>(States.Move,
                 onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph, blockedNodes },
-                onTickParameters: () => new object[] { graph, this, moveSpeed });
+                onTickParameters: () => new object[] { graph, this });
             fsm.AddState<MineState>(States.Mine, 
                 onEnterParameters: () => new object[] {graph, NodeCoordinate, GoldContainer},
                 onTickParameters: () => new object[] { GoldContainer, mineSpeed, GoldPerFoodUnit },
@@ -166,15 +173,26 @@ namespace Model.Game.World.Agents
 
         public Vector3 GetPosition()
         {
-            float x = NodeCoordinate.X * graph.GetNodeDistance();
-            float y = NodeCoordinate.Y * graph.GetNodeDistance();
-            
-            return new Vector3(x, HeightDrawOffset, y);
+            return position + Vector3.UnitY * HeightDrawOffset;;
         }
         
         private void OnAlarmRaised(RaiseAlarmEvent raiseAlarmEvent)
         {
             fsm.Transition(Model.AlarmRaised ? Flags.AlarmRaised : Flags.AlarmCleared);
+        }
+
+        public Vector3 MoveTowards(Vector3 target)
+        {
+            Vector3 direction = target - position;
+            
+            if (direction.LengthSquared() > (Vector3.Normalize(direction) * moveSpeed * Time.TickTime).LengthSquared())
+                direction = Vector3.Normalize(direction) * moveSpeed * Time.TickTime;
+            
+            position += direction;
+            
+            graph.MoveContainableTo(this, graph.GetNodeFromPosition(position.X, position.Z).GetCoordinate());
+
+            return position;
         }
     }
 }
