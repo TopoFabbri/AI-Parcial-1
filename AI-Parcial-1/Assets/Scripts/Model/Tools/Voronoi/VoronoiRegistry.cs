@@ -15,12 +15,7 @@ namespace Model.Tools.Voronoi
         public static void GenerateVoronoi(Type type, List<IVoronoiObject<TCoordinate>> voronoiObjects, IVoronoi<TNode, TCoordinate> voronoi)
         {
             Registries[type] = voronoi;
-            
-            Timer timer = new();
-
             Registries[type].Generate(voronoiObjects);
-            
-            EventSystem.EventSystem.Raise<DebugEvent>(timer.TimeElapsed.ToString(CultureInfo.InvariantCulture));
         }
 
         public static TCoordinate GetClosestTo(Type type, TCoordinate coordinate)

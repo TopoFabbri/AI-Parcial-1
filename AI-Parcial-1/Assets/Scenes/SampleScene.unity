@@ -3654,7 +3654,7 @@ MonoBehaviour:
       Data: 
   mapSize: {x: 50, y: 50}
   circumnavigableMap: 1
-  nodeDistance: 0.5
+  nodeDistance: 0.75
   mineQty: 10
   minMineGoldQty: 10
   maxMineGoldQty: 11
