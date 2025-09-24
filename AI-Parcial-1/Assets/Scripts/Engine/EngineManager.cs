@@ -19,11 +19,8 @@ namespace Engine
     public sealed class EngineManager : SerializedMonoBehaviour
     {
         [FoldoutGroup("Game", true)]
-        [TabGroup("Game/Game", "Map"), SerializeField] private Vector2Int mapSize = new(10, 10);
         [TabGroup("Game/Game", "Map"), SerializeField] private bool circumnavigableMap = true;
-        [TabGroup("Game/Game", "Map"), SerializeField] private float nodeDistance = 1f;
 
-        [TabGroup("Game/Game", "Mines"), SerializeField] private int mineQty = 5;
         [TabGroup("Game/Game", "Mines"), SerializeField] private int minMineGoldQty = 10;
         [TabGroup("Game/Game", "Mines"), SerializeField] private int maxMineGoldQty = 100;
         [TabGroup("Game/Game", "Mines"), SerializeField] private int maxMineFoodQty = 1000;
@@ -83,7 +80,7 @@ namespace Engine
 
             CreateGraphFromCsv();
 
-            tileScale = tilePrefab.transform.localScale * drawSize * nodeDistance;
+            tileScale = tilePrefab.transform.localScale * drawSize * MapCreationData.NodeDistance;
             tileMesh = tilePrefab.GetComponent<MeshFilter>().sharedMesh;
             tileMaterial = tilePrefab.GetComponent<MeshRenderer>().sharedMaterial;
 
@@ -142,7 +139,7 @@ namespace Engine
                     nodeTypes[i, j] = mapColumns[i][j];
             }
 
-            graph = model.CreateGraph(nodeTypes, mineQty, minMineGoldQty, maxMineGoldQty, maxMineFoodQty, mineBlockedTypes, nodeDistance, circumnavigableMap);
+            graph = model.CreateGraph(nodeTypes, MapCreationData.MineQty, minMineGoldQty, maxMineGoldQty, maxMineFoodQty, mineBlockedTypes, MapCreationData.NodeDistance, circumnavigableMap);
         }
 
         private void Update()

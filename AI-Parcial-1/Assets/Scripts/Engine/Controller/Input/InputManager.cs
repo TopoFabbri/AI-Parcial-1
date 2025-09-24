@@ -19,10 +19,7 @@ namespace Engine.Controller.Input
         
         public void EndGame()
         {
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#endif
-            Application.Quit();
+            SceneManager.LoadScene("Scenes/MapCreationScene");
         }
 
         public void ToggleDrawMode()
