@@ -173,7 +173,7 @@ namespace Model.Game.World.Agents
 
         public Vector3 GetPosition()
         {
-            return position + Vector3.UnitY * HeightDrawOffset;;
+            return position + Vector3.UnitY * HeightDrawOffset;
         }
         
         private void OnAlarmRaised(RaiseAlarmEvent raiseAlarmEvent)
@@ -183,15 +183,55 @@ namespace Model.Game.World.Agents
 
         public Vector3 MoveTowards(Vector3 target)
         {
+            if (graph == null) return position;
+            
             Vector3 direction = target - position;
+            
+            if (graph.IsCircumnavigable())
+            {
+                Coordinate size = graph.GetSize();
+                float worldWidth = size.X * graph.GetNodeDistance();
+                float worldHeight = size.Y * graph.GetNodeDistance();
+
+                if (worldWidth > 0)
+                {
+                    if (MathF.Abs(direction.X) > worldWidth / 2f)
+                        direction.X -= MathF.Sign(direction.X) * worldWidth;
+                }
+
+                if (worldHeight > 0)
+                {
+                    if (MathF.Abs(direction.Z) > worldHeight / 2f)
+                        direction.Z -= MathF.Sign(direction.Z) * worldHeight;
+                }
+            }
             
             if (direction.LengthSquared() > (Vector3.Normalize(direction) * moveSpeed * Time.TickTime).LengthSquared())
                 direction = Vector3.Normalize(direction) * moveSpeed * Time.TickTime;
             
             position += direction;
             
-            graph.MoveContainableTo(this, graph.GetNodeFromPosition(position.X, position.Z).GetCoordinate());
+            if (graph.IsCircumnavigable())
+            {
+                Coordinate size = graph.GetSize();
+                float worldWidth = size.X * graph.GetNodeDistance();
+                float worldHeight = size.Y * graph.GetNodeDistance();
 
+                if (worldWidth > 0)
+                {
+                    // Wrap X into [0, worldWidth)
+                    position.X %= worldWidth;
+                    if (position.X < 0) position.X += worldWidth;
+                }
+                if (worldHeight > 0)
+                {
+                    position.Z %= worldHeight;
+                    if (position.Z < 0) position.Z += worldHeight;
+                }
+            }
+            
+            graph.MoveContainableTo(this, graph.GetNodeFromPosition(position.X, position.Z).GetCoordinate());
+            
             return position;
         }
     }
