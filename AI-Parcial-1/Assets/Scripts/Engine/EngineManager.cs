@@ -1,15 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using Engine.Controller;
+using Engine.Controller.Input;
 using Engine.View;
 using Model.Game.Events;
 using Model.Game.Graph;
+using Model.Game.World.Objects;
 using Model.Tools.Drawing;
 using Model.Tools.EventSystem;
 using Model.Tools.Pathfinder.Node;
 using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 using NodeType = Model.Tools.Pathfinder.Node.INode.NodeType;
@@ -146,6 +149,14 @@ namespace Engine
         {
             model.Update();
             UpdateCursor();
+
+            if (Mine.Mines.Count <= 0)
+                EndSimulation();
+        }
+
+        public static void EndSimulation()
+        {
+            SceneManager.LoadScene("Scenes/MapCreationScene");
         }
 
         private void LateUpdate()

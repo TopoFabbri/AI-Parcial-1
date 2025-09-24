@@ -19,7 +19,7 @@ namespace Engine.Controller.Input
         
         public void EndGame()
         {
-            SceneManager.LoadScene("Scenes/MapCreationScene");
+            EngineManager.EndSimulation();
         }
 
         public void ToggleDrawMode()
