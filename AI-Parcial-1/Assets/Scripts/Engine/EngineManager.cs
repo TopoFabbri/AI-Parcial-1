@@ -80,8 +80,8 @@ namespace Engine
             cam = Camera.main;
             model = new Model.Game.Model();
             drawer = new Drawer(prefabs, defaultPrefab);
-
-            CreateGraphFromCsv();
+            
+            CreateGraph();
 
             tileScale = tilePrefab.transform.localScale * drawSize * MapCreationData.NodeDistance;
             tileMesh = tilePrefab.GetComponent<MeshFilter>().sharedMesh;
@@ -90,59 +90,9 @@ namespace Engine
             cameraController.PositionCamera(graph);
         }
 
-        private void CreateGraphFromCsv()
+        private void CreateGraph()
         {
-            string mapCsv;
-            TextAsset csvAsset = Resources.Load<TextAsset>("Maps/Map");
-            
-            if (csvAsset)
-                mapCsv = csvAsset.text;
-            else
-                throw new FileNotFoundException("Map CSV not found. Ensure it exists at Resources/Maps/Map.csv.");
-
-            List<List<NodeType>> mapColumns = new();
-            
-            int x = 0;
-            int y = 0;
-
-            int minSizeX = mapCsv.Length;
-            
-            foreach (char c in mapCsv)
-            {
-                if (mapColumns.Count <= x)
-                    mapColumns.Add(new List<NodeType>());
-                
-                if (c == '\n')
-                {
-                    minSizeX = Mathf.Min(minSizeX, x + 1);
-                    x = 0;
-                    y++;
-                    continue;
-                }
-                
-                if (c == ',')
-                {
-                    x++;
-                    continue;
-                }
-                
-                if (c == '0')
-                    mapColumns[x].Add(NodeType.Grass);
-                else if (c == '1')
-                    mapColumns[x].Add(NodeType.Road);
-                else if (c == '2')
-                    mapColumns[x].Add(NodeType.Water);
-            }
-            
-            NodeType[,] nodeTypes = new NodeType[minSizeX, y];
-            
-            for (int i = 0; i < minSizeX; i++)
-            {
-                for (int j = 0; j < y; j++)
-                    nodeTypes[i, j] = mapColumns[i][j];
-            }
-
-            graph = model.CreateGraph(nodeTypes, MapCreationData.MineQty, minMineGoldQty, maxMineGoldQty, maxMineFoodQty, mineBlockedTypes, MapCreationData.NodeDistance, circumnavigableMap);
+            graph = model.CreateGraph(MapCreationData.NodeTypes, MapCreationData.MineQty, minMineGoldQty, maxMineGoldQty, maxMineFoodQty, mineBlockedTypes, MapCreationData.NodeDistance, circumnavigableMap);
         }
 
         private void Update()

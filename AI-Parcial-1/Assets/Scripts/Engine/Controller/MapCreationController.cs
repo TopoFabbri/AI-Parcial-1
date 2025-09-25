@@ -53,10 +53,4 @@ namespace Engine.Controller
             Application.Quit();
         }
     }
-
-    public static class MapCreationData
-    {
-        public static float NodeDistance { get; set; } = 1f;
-        public static int MineQty { get; set; } = 10;
-    }
 }

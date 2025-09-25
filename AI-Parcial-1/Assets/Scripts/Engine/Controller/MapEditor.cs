@@ -1,13 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Engine.View;
 using Model.Game.Events;
 using Model.Game.Graph;
-using Model.Tools.Pathfinder.Coordinate;
-using Model.Tools.Pathfinder.Graph;
+using Model.Tools.EventSystem;
 using Model.Tools.Pathfinder.Node;
 using Sirenix.OdinInspector;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Engine.Controller
 {
@@ -23,6 +25,10 @@ namespace Engine.Controller
         [Required, SerializeField] private GameObject tilePrefab;
         [Required, SerializeField] private CameraController cameraController;
         [Required, SerializeField] private GameObject nodeTypeMenu;
+        [Required, SerializeField] private Slider widthSlider;
+        [Required, SerializeField] private Slider heightSlider;
+        [SerializeField] private TextMeshProUGUI widthTxt;
+        [SerializeField] private TextMeshProUGUI heightTxt;
         
         private Material tileMaterial;
         private Mesh tileMesh;
@@ -42,7 +48,7 @@ namespace Engine.Controller
             
             selectedNode.SetType(INode.NodeType.Grass);
             nodeTypeMenu.SetActive(false);
-            GraphView.OnModifiedGraph(new GraphModifiedEvent());
+            EventSystem.Raise<GraphModifiedEvent>(new GraphModifiedEvent());
         }
         
         public void OnRoadClicked()
@@ -53,7 +59,7 @@ namespace Engine.Controller
             
             selectedNode.SetType(INode.NodeType.Road);
             nodeTypeMenu.SetActive(false);
-            GraphView.OnModifiedGraph(new GraphModifiedEvent());
+            EventSystem.Raise<GraphModifiedEvent>(new GraphModifiedEvent());
         }
         
         public void OnWaterClicked()
@@ -64,22 +70,53 @@ namespace Engine.Controller
             
             selectedNode.SetType(INode.NodeType.Water);
             nodeTypeMenu.SetActive(false);
-            GraphView.OnModifiedGraph(new GraphModifiedEvent());
+            EventSystem.Raise<GraphModifiedEvent>(new GraphModifiedEvent());
         }
         
         public void OnSwitchMode(int newMode)
         {
             curMode = (Mode)newMode;
+            
+            if (curMode == Mode.MapData)
+                graph.SaveGraph();
+        }
+        
+        public void OnMapWidthChanged(float value)
+        {
+            MapCreationData.Size = new Coordinate(Mathf.RoundToInt(value), MapCreationData.Size.Y);
+            
+            CreateGraph();
+
+            if (widthTxt)
+                widthTxt.text = MapCreationData.Size.X.ToString();
+        }
+        
+        public void OnMapHeightChanged(float value)
+        {
+            MapCreationData.Size = new Coordinate(MapCreationData.Size.X, Mathf.RoundToInt(value));
+
+            CreateGraph();
+
+            if (heightTxt)
+                heightTxt.text = MapCreationData.Size.Y.ToString();
         }
         
         private void Awake()
         {
             cam = Camera.main;
-            graph = new MapEditorGraph<Node<Coordinate>, Coordinate>(new Coordinate(5, 5));
+            CreateGraph();
             cameraController.PositionCamera(graph);
             
             tileMaterial = tilePrefab.GetComponent<MeshRenderer>().sharedMaterial;
             tileMesh = tilePrefab.GetComponent<MeshFilter>().sharedMesh;
+        }
+
+        private void Start()
+        {
+            widthSlider.value = MapCreationData.Size.X;
+            heightSlider.value = MapCreationData.Size.Y;
+            
+            gameObject.SetActive(false);
         }
 
         private void Update()
@@ -89,10 +126,12 @@ namespace Engine.Controller
                 if (nodeTypeMenu.activeSelf || curMode != Mode.MapEdit) return;
 
                 Vector3 pos = cam.ScreenToWorldPoint(UnityEngine.Input.mousePosition);
+                selectedCoordinate = new Coordinate(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.z));
+                
+                if (graph.GetNodeAt(selectedCoordinate).GetCoordinate() == null) return;
+                
                 nodeTypeMenu.SetActive(true);
                 nodeTypeMenu.transform.position = UnityEngine.Input.mousePosition;
-                
-                selectedCoordinate = new Coordinate(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.z));
             }
         }
 
@@ -100,98 +139,11 @@ namespace Engine.Controller
         {
             GraphView.DrawGraph(graph, nodeTypeMaterials, tilePrefab.transform.localScale * 0.9f, tileMesh, tileMaterial, GraphView.DrawModes.Content);
         }
-    }
-    
-    public class MapEditorGraph<TNode, TCoordinate> : IGraph<TNode, TCoordinate> where TNode : INode<TCoordinate>, INode, new() where TCoordinate : Coordinate, new()
-    {
-        private Dictionary<TCoordinate, TNode> nodes;
-        private TCoordinate size;
 
-        public MapEditorGraph(TCoordinate size)
+        private void CreateGraph()
         {
-            nodes = new Dictionary<TCoordinate, TNode>();
-            this.size = size;
-
-            for (int i = 0; i < size.X; i++)
-            {
-                for (int j = 0; j < size.Y; j++)
-                {
-                    TNode node = new();
-                    TCoordinate coordinate = new();
-            
-                    coordinate.Set(i, j);
-                    node.SetCoordinate(coordinate);
-                    node.SetType(INode.NodeType.Road);
-            
-                    nodes.Add(coordinate, node);
-                }
-            }
-        }
-        
-        public ICollection<TNode> GetBresenhamNodes(TCoordinate start, TCoordinate end)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ICollection<TNode> GetNodes()
-        {
-            return nodes.Values;
-        }
-
-        public TCoordinate GetSize()
-        {
-            return size;
-        }
-
-        public ICollection<TNode> GetAdjacents(TNode node)
-        {
-            List<TNode> adjacents = new();
-
-            foreach (ICoordinate adjacentCoordinate in node.GetCoordinate().GetAdjacents())
-            {
-                if (adjacentCoordinate is not TCoordinate coordinate) continue;
-
-                if (nodes.TryGetValue(coordinate, out TNode adjacentNode))
-                    adjacents.Add(adjacentNode);
-            }
-
-            return adjacents;
-        }
-
-        public ICollection<TCoordinate> GetAdjacents(TCoordinate coordinate)
-        {
-            List<TCoordinate> adjacents = new();
-            
-            foreach (TNode node in GetAdjacents(nodes[coordinate]))
-                adjacents.Add(node.GetCoordinate());
-
-            return adjacents;
-        }
-
-        public float GetNodeDistance()
-        {
-            return 1f;
-        }
-
-        public float GetDistanceBetweenNodes(TNode a, TNode b)
-        {
-            return GetDistanceBetweenCoordinates(a.GetCoordinate(), b.GetCoordinate());
-        }
-
-        public float GetDistanceBetweenCoordinates(TCoordinate a, TCoordinate b)
-        {
-            return a.GetDistanceTo(b);
-        }
-
-        public bool IsCircumnavigable()
-        {
-            return false;
-        }
-
-        public TNode GetNodeAt(TCoordinate coordinate)
-        {
-            if (!nodes.TryGetValue(coordinate, out TNode node)) return new TNode();
-            return node;
+            graph = new MapEditorGraph<Node<Coordinate>, Coordinate>(MapCreationData.NodeTypes);
+            EventSystem.Raise<GraphModifiedEvent>(new GraphModifiedEvent());
         }
     }
 }
