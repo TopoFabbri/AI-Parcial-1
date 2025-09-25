@@ -17,6 +17,7 @@ namespace Model.Tools.Pathfinder.Node
         public int GetCost();
         public void SetCost(int cost);
         public NodeType GetNodeType();
+        public void SetType(INode.NodeType type);
     }
 
     public interface INode<TCoordinate> : IEquatable<INode<TCoordinate>> where TCoordinate : ICoordinate

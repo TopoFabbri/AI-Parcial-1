@@ -120,7 +120,7 @@ namespace Model.Game.Graph
             return GetNodeAt(coordinate);
         }
 
-        public Node<TCoordinate> GetNodeAt(TCoordinate coordinate)
+        public TNode GetNodeAt(TCoordinate coordinate)
         {
             if (circumnavigable)
                 WrapCoordinate(coordinate);

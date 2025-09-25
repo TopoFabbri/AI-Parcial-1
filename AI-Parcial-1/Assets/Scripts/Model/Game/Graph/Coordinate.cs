@@ -26,6 +26,13 @@ namespace Model.Game.Graph
             X = x;
             Y = y;
         }
+        
+        public void Set(params object[] parameters)
+        {
+            if (parameters.Length != 2) return;
+            
+            Set((int)parameters[0], (int)parameters[1]);
+        }
 
         public int GetDistanceTo(ICoordinate coordinate)
         {

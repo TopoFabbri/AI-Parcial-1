@@ -7,5 +7,6 @@ namespace Model.Tools.Pathfinder.Coordinate
     {
         int GetDistanceTo(ICoordinate other);
         List<ICoordinate> GetAdjacents();
+        void Set(params object[] parameters);
     }
 }
