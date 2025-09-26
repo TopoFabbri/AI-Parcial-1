@@ -58,7 +58,7 @@ namespace Model.Game.Graph
                     TCoordinate coordinate = new();
                     TNode node = new();
 
-                    coordinate.Set(i, size.Y - 1 - j);
+                    coordinate.Set(i, j);
 
                     node.SetCoordinate(coordinate);
                     node.SetType(nodeTypes[i, j]);

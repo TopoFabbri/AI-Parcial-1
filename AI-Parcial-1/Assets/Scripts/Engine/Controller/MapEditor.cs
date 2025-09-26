@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Engine.View;
 using Model.Game.Events;
 using Model.Game.Graph;
@@ -43,33 +42,36 @@ namespace Engine.Controller
         public void OnGrassClicked()
         {
             Node<Coordinate> selectedNode = graph.GetNodeAt(selectedCoordinate);
+            nodeTypeMenu.SetActive(false);
             
             if (selectedNode == null) return;
             
             selectedNode.SetType(INode.NodeType.Grass);
-            nodeTypeMenu.SetActive(false);
+            
             EventSystem.Raise<GraphModifiedEvent>(new GraphModifiedEvent());
         }
         
         public void OnRoadClicked()
         {
             Node<Coordinate> selectedNode = graph.GetNodeAt(selectedCoordinate);
-            
+            nodeTypeMenu.SetActive(false);
+
             if (selectedNode == null) return;
             
             selectedNode.SetType(INode.NodeType.Road);
-            nodeTypeMenu.SetActive(false);
+            
             EventSystem.Raise<GraphModifiedEvent>(new GraphModifiedEvent());
         }
         
         public void OnWaterClicked()
         {
             Node<Coordinate> selectedNode = graph.GetNodeAt(selectedCoordinate);
-            
+            nodeTypeMenu.SetActive(false);
+
             if (selectedNode == null) return;
             
             selectedNode.SetType(INode.NodeType.Water);
-            nodeTypeMenu.SetActive(false);
+            
             EventSystem.Raise<GraphModifiedEvent>(new GraphModifiedEvent());
         }
         
@@ -103,12 +105,19 @@ namespace Engine.Controller
         
         private void Awake()
         {
+            EventSystem.Subscribe<GraphModifiedEvent>(GraphView.OnModifiedGraph);
+
             cam = Camera.main;
             CreateGraph();
             cameraController.PositionCamera(graph);
             
             tileMaterial = tilePrefab.GetComponent<MeshRenderer>().sharedMaterial;
             tileMesh = tilePrefab.GetComponent<MeshFilter>().sharedMesh;
+        }
+
+        private void OnDestroy()
+        {
+            EventSystem.Unsubscribe<GraphModifiedEvent>(GraphView.OnModifiedGraph);
         }
 
         private void Start()

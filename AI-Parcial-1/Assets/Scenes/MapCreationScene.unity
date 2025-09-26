@@ -1425,7 +1425,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1994577163}
         m_TargetAssemblyTypeName: Engine.Controller.MapEditor, Engine
         m_MethodName: OnGrassClicked
         m_Mode: 1
@@ -4314,7 +4314,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1994577163}
         m_TargetAssemblyTypeName: Engine.Controller.MapEditor, Engine
         m_MethodName: OnRoadClicked
         m_Mode: 1
@@ -4719,7 +4719,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1994577163}
         m_TargetAssemblyTypeName: Engine.Controller.MapEditor, Engine
         m_MethodName: OnSwitchMode
         m_Mode: 3
@@ -5200,7 +5200,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1994577163}
         m_TargetAssemblyTypeName: Engine.Controller.MapEditor, Engine
         m_MethodName: OnWaterClicked
         m_Mode: 1
@@ -5493,7 +5493,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1994577163}
         m_TargetAssemblyTypeName: Engine.Controller.MapEditor, Engine
         m_MethodName: OnSwitchMode
         m_Mode: 3
