@@ -164,6 +164,14 @@ namespace Model.Game.Graph
             return GetNodeAtIndexes(xi, yi);
         }
 
+        public bool IsPointInGraph(float x, float y)
+        {
+            int xi = (int)Math.Round(x / nodeDistance);
+            int yi = (int)Math.Round(y / nodeDistance);
+            
+            return xi  >= 0 && xi < size.X && yi >= 0 && yi < size.Y;
+        }
+        
         public (float x, float y) GetPositionFromCoordinate(Coordinate coordinate)
         {
             return (coordinate.X * nodeDistance, coordinate.Y * nodeDistance);

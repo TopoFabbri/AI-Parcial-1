@@ -65,8 +65,10 @@ namespace Model.Game.World.Agents.MinerStates
 
         private void CheckTimer()
         {
-            if (timer != null && timer.TimeElapsed > TimeToRequestFood)
-                FoodRequestSystem.RequestFood(currentCoordinate);
+            if (timer == null || timer.TimeElapsed > TimeToRequestFood) return;
+            
+            FoodRequestSystem.RequestFood(currentCoordinate);
+            timer = new Timer();
         }
 
         private void StartTimer()

@@ -165,9 +165,9 @@ namespace Engine
             Vector3 worldPoint1 = cam.ScreenToWorldPoint(new Vector3(mousePos.x + imageSize.x, mousePos.y - imageSize.y));
             Vector3 worldPoint2 = cam.ScreenToWorldPoint(new Vector3(mousePos.x + imageSize.x, mousePos.y + imageSize.y));
             
-            if (graph.GetNodeFromPosition(worldPoint1.x, worldPoint1.z) != null)
+            if (graph.IsPointInGraph(worldPoint1.x, worldPoint1.z))
                 cursorImage.rectTransform.position = new Vector3(mousePos.x + imageSize.x / 2f, mousePos.y - imageSize.y / 2f);
-            else if (graph.GetNodeFromPosition(worldPoint2.x, worldPoint2.z) != null)
+            else if (graph.IsPointInGraph(worldPoint2.x, worldPoint2.z))
                 cursorImage.rectTransform.position = new Vector3(mousePos.x + imageSize.x / 2f, mousePos.y + imageSize.y / 2f);
             else
                 cursorImage.rectTransform.position = new Vector3(mousePos.x - imageSize.x / 2f, mousePos.y - imageSize.y / 2f);
