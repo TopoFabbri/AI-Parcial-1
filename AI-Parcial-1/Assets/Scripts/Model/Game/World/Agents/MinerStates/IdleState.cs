@@ -10,7 +10,12 @@ namespace Model.Game.World.Agents.MinerStates
 {
     public class IdleState : State
     {
+        private Timer timer;
         private FoodContainer foodContainer;
+        private Coordinate currentCoordinate;
+
+        private const float TimeToRequestFood = 5f;
+
         public override Type[] OnEnterParamTypes => new[]
         {
             typeof(Graph<Node<Coordinate>, Coordinate>),
@@ -25,6 +30,7 @@ namespace Model.Game.World.Agents.MinerStates
             BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
 
             behaviourActions.AddMultiThreadableBehaviour(0, () => { SetFoodContainer(graph, coordinate); });
+            behaviourActions.AddMultiThreadableBehaviour(0, StartTimer);
 
             return behaviourActions;
         }
@@ -34,12 +40,14 @@ namespace Model.Game.World.Agents.MinerStates
             BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
 
             behaviourActions.AddMultiThreadableBehaviour(0, CheckIfEnded);
+            behaviourActions.AddMultiThreadableBehaviour(0, CheckTimer);
 
             return behaviourActions;
         }
 
         private void SetFoodContainer(Graph<Node<Coordinate>, Coordinate> graph, Coordinate coordinate)
         {
+            currentCoordinate = coordinate;
             if (graph == null) return;
 
             foreach (INodeContainable<Coordinate> nodeContainable in graph.GetNodeAt(coordinate).GetNodeContainables())
@@ -53,6 +61,17 @@ namespace Model.Game.World.Agents.MinerStates
         {
             if (foodContainer == null || !foodContainer.IsEmpty)
                 flag.Invoke(Miner.Flags.IdleEnded);
+        }
+
+        private void CheckTimer()
+        {
+            if (timer != null && timer.TimeElapsed > TimeToRequestFood)
+                FoodRequestSystem.RequestFood(currentCoordinate);
+        }
+
+        private void StartTimer()
+        {
+            timer = new Timer();
         }
     }
 }
