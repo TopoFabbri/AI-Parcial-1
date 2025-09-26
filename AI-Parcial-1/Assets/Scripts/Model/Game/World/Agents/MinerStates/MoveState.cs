@@ -21,7 +21,7 @@ namespace Model.Game.World.Agents.MinerStates
                 typeof(List<INode.NodeType>)
             };
 
-        public override Type[] OnTickParamTypes => new[] { typeof(Graph<Node<Coordinate>, Coordinate>), typeof(Miner) };
+        public override Type[] OnTickParamTypes => new[] { typeof(Graph<Node<Coordinate>, Coordinate>), typeof(Func<Vector3, Vector3>), typeof(Coordinate) };
 
         private List<Vector3> path = new();
         private int currentNodeIndex;
@@ -46,11 +46,12 @@ namespace Model.Game.World.Agents.MinerStates
         public override BehaviourActions GetOnTickBehaviours(params object[] parameters)
         {
             Graph<Node<Coordinate>, Coordinate> graph = parameters[0] as Graph<Node<Coordinate>, Coordinate>;
-            Miner miner = parameters[1] as Miner;
+            Func<Vector3, Vector3> moveFunc = parameters[1] as Func<Vector3, Vector3>;
+            Coordinate minerCoordinate = parameters[2] as Coordinate;
 
             BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
 
-            behaviourActions.AddMultiThreadableBehaviour(0, () => { MoveTowardsCoordinate(graph, miner); });
+            behaviourActions.AddMultiThreadableBehaviour(0, () => { MoveTowardsCoordinate(graph, moveFunc, minerCoordinate); });
 
             return behaviourActions;
         }
@@ -80,11 +81,11 @@ namespace Model.Game.World.Agents.MinerStates
             path = new List<Vector3> { new(startX, 0, startY), new(targetX, 0, targetY) };
         }
 
-        private void MoveTowardsCoordinate(Graph<Node<Coordinate>, Coordinate> graph, Miner miner)
+        private void MoveTowardsCoordinate(Graph<Node<Coordinate>, Coordinate> graph, Func<Vector3, Vector3> moveTowards, Coordinate minerCoordinate)
         {
             if (currentNodeIndex < path.Count)
             {
-                Vector3 position = miner.MoveTowards(path[currentNodeIndex]);
+                Vector3 position = moveTowards.Invoke(path[currentNodeIndex]);
 
                 if (Vector3.Distance(position, path[currentNodeIndex]) <= float.Epsilon)
                     currentNodeIndex++;
@@ -95,7 +96,7 @@ namespace Model.Game.World.Agents.MinerStates
 
             bool targetFound = false;
 
-            foreach (INodeContainable<Coordinate> nodeContainable in graph.Nodes[miner.NodeCoordinate].GetNodeContainables())
+            foreach (INodeContainable<Coordinate> nodeContainable in graph.Nodes[minerCoordinate].GetNodeContainables())
             {
                 if (nodeContainable is Mine)
                 {

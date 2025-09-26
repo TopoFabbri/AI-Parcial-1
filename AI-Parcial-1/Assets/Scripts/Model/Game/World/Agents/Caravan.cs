@@ -64,6 +64,8 @@ namespace Model.Game.World.Agents
 
         #endregion
 
+        Func<Vector3, Vector3> moveTowardsFunc => MoveTowards;
+        
         public Caravan(Graph<Node<Coordinate>, Coordinate> graph, Pathfinder<Node<Coordinate>, Coordinate> pathfinder, Coordinate coordinate, List<INode.NodeType> blockedNodes,
             int maxFood, float moveSpeed, int startingFood)
         {
@@ -95,7 +97,7 @@ namespace Model.Game.World.Agents
             fsm.AddState<HideState>(States.Hide);
             fsm.AddState<MoveState>(States.Move,
                 onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph, blockedNodes },
-                onTickParameters: () => new object[] { graph, this });
+                onTickParameters: () => new object[] { graph, moveTowardsFunc, NodeCoordinate });
             fsm.AddState<CollectState>(States.Collect, onEnterParameters: () => new object[] { graph, NodeCoordinate }, onTickParameters: () => new object[] { FoodContainer });
             fsm.AddState<FindMineState>(States.FindMine, () => new object[] { targetCoordinate });
             fsm.AddState<FindCenterState>(States.FindCenter, () => new object[] { targetCoordinate });

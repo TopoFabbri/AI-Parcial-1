@@ -99,6 +99,8 @@ namespace Model.Game.World.Agents
             EventSystem.Subscribe<RaiseAlarmEvent>(OnAlarmRaised);
         }
 
+        private Func<Vector3, Vector3> MoveTowardsFunc => MoveTowards;
+        
         private void InitializeFSM()
         {
             fsm = new FSM<States, Flags>(States.FindMine);
@@ -112,7 +114,7 @@ namespace Model.Game.World.Agents
                 onTickParameters: () => new object[] { GoldContainer });
             fsm.AddState<MoveState>(States.Move,
                 onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph, blockedNodes },
-                onTickParameters: () => new object[] { graph, this });
+                onTickParameters: () => new object[] { graph, MoveTowardsFunc, NodeCoordinate });
             fsm.AddState<MineState>(States.Mine, 
                 onEnterParameters: () => new object[] {graph, NodeCoordinate, GoldContainer},
                 onTickParameters: () => new object[] { GoldContainer, mineSpeed, GoldPerFoodUnit },

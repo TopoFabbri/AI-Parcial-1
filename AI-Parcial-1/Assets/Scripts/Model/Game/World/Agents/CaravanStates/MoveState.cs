@@ -21,7 +21,7 @@ namespace Model.Game.World.Agents.CaravanStates
                 typeof(List<INode.NodeType>)
             };
 
-        public override Type[] OnTickParamTypes => new[] { typeof(Graph<Node<Coordinate>, Coordinate>), typeof(Caravan) };
+        public override Type[] OnTickParamTypes => new[] { typeof(Graph<Node<Coordinate>, Coordinate>), typeof(Func<Vector3, Vector3>), typeof(Coordinate) };
 
         private List<Vector3> path = new();
         private int currentNodeIndex;
@@ -46,11 +46,12 @@ namespace Model.Game.World.Agents.CaravanStates
         public override BehaviourActions GetOnTickBehaviours(params object[] parameters)
         {
             Graph<Node<Coordinate>, Coordinate> graph = parameters[0] as Graph<Node<Coordinate>, Coordinate>;
-            Caravan caravan = parameters[1] as Caravan;
+            Func<Vector3, Vector3> moveFunc = parameters[1] as Func<Vector3, Vector3>;
+            Coordinate caravanCoordinate = parameters[2] as Coordinate;
 
             BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
 
-            behaviourActions.AddMultiThreadableBehaviour(0, () => { MoveTowardsCoordinate(graph, caravan); });
+            behaviourActions.AddMultiThreadableBehaviour(0, () => { MoveTowardsCoordinate(graph, moveFunc, caravanCoordinate); });
 
             return behaviourActions;
         }
@@ -80,11 +81,11 @@ namespace Model.Game.World.Agents.CaravanStates
             path = new List<Vector3> { new(startX, 0, startY), new(targetX, 0, targetY) };
         }
 
-        private void MoveTowardsCoordinate(Graph<Node<Coordinate>, Coordinate> graph, Caravan caravan)
+        private void MoveTowardsCoordinate(Graph<Node<Coordinate>, Coordinate> graph, Func<Vector3, Vector3> moveTowards, Coordinate caravanCoordinate)
         {
             if (currentNodeIndex < path.Count)
             {
-                Vector3 position = caravan.MoveTowards(path[currentNodeIndex]);
+                Vector3 position = moveTowards.Invoke(path[currentNodeIndex]);
 
                 if (Vector3.Distance(position, path[currentNodeIndex]) <= float.Epsilon)
                     currentNodeIndex++;
@@ -95,7 +96,7 @@ namespace Model.Game.World.Agents.CaravanStates
 
             bool targetFound = false;
 
-            foreach (INodeContainable<Coordinate> nodeContainable in graph.Nodes[caravan.NodeCoordinate].GetNodeContainables())
+            foreach (INodeContainable<Coordinate> nodeContainable in graph.Nodes[caravanCoordinate].GetNodeContainables())
             {
                 if (nodeContainable is Mine)
                 {
