@@ -57,7 +57,7 @@ namespace Engine.View
 
             if (drawMode == DrawModes.Voronoi)
             {
-                EnsureMineMaterials(tileMaterial);
+                EnsureMineMaterials(tileMaterial, graph);
 
                 DrawAsVoronoi(graph, tileScale, tileMesh, nodeDistance);
             }
@@ -183,40 +183,73 @@ namespace Engine.View
                 Graphics.DrawMeshInstanced(mesh, 0, material, matrixArray);
         }
 
-        private static void EnsureMineMaterials(Material baseMaterial)
+        private static void EnsureMineMaterials(Material baseMaterial, IGraph<Node<Coordinate>, Coordinate> graph)
         {
             List<IVoronoiObject<Coordinate>> mines = Mine.Mines;
-            if (mines == null) return;
+            if (mines == null || mines.Count == 0) return;
 
+            // Collect site coordinates
+            List<Coordinate> sites = new();
             foreach (IVoronoiObject<Coordinate> vorObj in mines)
-            {
-                Coordinate coord = vorObj.GetCoordinates();
+                sites.Add(vorObj.GetCoordinates());
 
-                if (!MineMaterials.ContainsKey(coord))
-                    MineMaterials[coord] = CreateColoredMaterial(baseMaterial, coord);
+            // Initialize adjacency map
+            Dictionary<Coordinate, HashSet<Coordinate>> adjacency = new();
+            foreach (Coordinate s in sites)
+                adjacency[s] = new HashSet<Coordinate>();
+
+            // Build adjacency by checking neighboring tiles that belong to different sites
+            foreach (Node<Coordinate> node in graph.GetNodes())
+            {
+                Coordinate p = node.GetCoordinate();
+                Coordinate siteA = VoronoiRegistry<Node<Coordinate>, Coordinate>.GetClosestTo(typeof(Mine), p);
+                foreach (Coordinate n in graph.GetAdjacents(p))
+                {
+                    Coordinate siteB = VoronoiRegistry<Node<Coordinate>, Coordinate>.GetClosestTo(typeof(Mine), n);
+                    if (!siteA.Equals(siteB))
+                    {
+                        adjacency[siteA].Add(siteB);
+                        adjacency[siteB].Add(siteA);
+                    }
+                }
+            }
+
+            // Greedy 4-coloring (sufficient for planar graphs like Voronoi adjacencies)
+            Dictionary<Coordinate, int> colorIndex = new();
+            // Order sites by descending degree to improve greedy coloring success
+            sites.Sort((a, b) => adjacency[b].Count.CompareTo(adjacency[a].Count));
+            foreach (Coordinate s in sites)
+            {
+                bool[] used = new bool[4];
+                foreach (Coordinate nei in adjacency[s])
+                {
+                    if (colorIndex.TryGetValue(nei, out int idx) && idx >= 0 && idx < 4)
+                        used[idx] = true;
+                }
+                int chosen = 0;
+                while (chosen < 4 && used[chosen]) chosen++;
+                if (chosen >= 4) chosen = 0; // Fallback (should rarely/never happen)
+                colorIndex[s] = chosen;
+            }
+
+            Color[] palette = { Color.red, Color.green, Color.blue, Color.yellow };
+            foreach (Coordinate s in sites)
+            {
+                if (!MineMaterials.ContainsKey(s))
+                {
+                    Color c = palette[colorIndex[s] % 4];
+                    MineMaterials[s] = CreateColoredMaterial(baseMaterial, c);
+                }
             }
         }
 
-        private static Material CreateColoredMaterial(Material baseMaterial, Coordinate coord)
+        private static Material CreateColoredMaterial(Material baseMaterial, Color c)
         {
             Material mat = new(baseMaterial);
-            Color c = GetVibrantColor(coord);
             if (mat.HasProperty(BaseColorPropertyID)) mat.SetColor(BaseColorPropertyID, c);
             if (mat.HasProperty(ColorPropertyID)) mat.SetColor(ColorPropertyID, c);
             if (mat.HasProperty(EmissionColorPropertyID)) mat.SetColor(EmissionColorPropertyID, c * 0.5f);
             return mat;
-        }
-
-        private static Color GetVibrantColor(Coordinate coord)
-        {
-            int hash = coord.GetHashCode() & 0x7FFFFFFF;
-            float u = hash / (float)int.MaxValue;
-            float h = Mathf.Repeat(u * 0.983f + 0.123f, 1f);
-            float s = 0.65f + 0.35f * Mathf.Repeat(u * 3.137f, 1f);
-            float v = 0.85f + 0.15f * Mathf.Repeat(u * 5.789f, 1f);
-            Color c = Color.HSVToRGB(h, s, v);
-            c.a = 1f;
-            return c;
         }
     }
 }

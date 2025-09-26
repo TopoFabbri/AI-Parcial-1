@@ -149,7 +149,6 @@ namespace Model.Game.World.Agents
         ~Miner()
         {
             EventSystem.Unsubscribe<RaiseAlarmEvent>(OnAlarmRaised);
-            Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
         }
 
         public string GetHoverText()

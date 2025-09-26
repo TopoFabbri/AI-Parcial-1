@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
 using Model.Game.Graph;
@@ -11,7 +10,7 @@ namespace Model.Tools.Voronoi
     internal sealed class BisectorVoronoi : IVoronoi<Node<Coordinate>, Coordinate>
     {
         private IGraph<Node<Coordinate>, Coordinate> graph;
-        private readonly ConcurrentDictionary<Coordinate, List<VoronoiPlane>> bisectorPlanes = new();
+        private readonly Dictionary<Coordinate, List<VoronoiPlane>> bisectorPlanes = new();
         
         public ParallelOptions ParallelOptions { get; } = new() { MaxDegreeOfParallelism = 32 };
 
@@ -23,13 +22,13 @@ namespace Model.Tools.Voronoi
         public void Generate(List<IVoronoiObject<Coordinate>> voronoiObjects)
         {
             bisectorPlanes.Clear();
-            ConcurrentBag<Coordinate> sites = new();
-            ConcurrentDictionary<VoronoiPlane, Vector3> intersections = new();
+            List<Coordinate> sites = new();
+            Dictionary<VoronoiPlane, Vector3> intersections = new();
 
-            Parallel.ForEach(voronoiObjects, ParallelOptions, voronoiObject =>
+            foreach (IVoronoiObject<Coordinate> voronoiObject in voronoiObjects)
             {
                 sites.Add(voronoiObject.GetCoordinates());
-            });
+            }
 
             CalculateBisectorPlanes(sites, intersections);
             RemoveOuterPlanes(intersections);
@@ -57,12 +56,23 @@ namespace Model.Tools.Voronoi
             return closest;
         }
 
-        private void RemoveOuterPlanes(ConcurrentDictionary<VoronoiPlane, Vector3> intersections)
+        public Dictionary<Coordinate, List<VoronoiPlane>> GetPlanes()
+        {
+            return bisectorPlanes;
+        }
+        
+        private void RemoveOuterPlanes(Dictionary<VoronoiPlane, Vector3> intersections)
         {
             foreach (KeyValuePair<Coordinate, List<VoronoiPlane>> planeGroup in bisectorPlanes)
             {
                 List<VoronoiPlane> planesToRemove = new();
+                Vector3 coordAsVector = new(planeGroup.Key.X, planeGroup.Key.Y, 0);
 
+                foreach (VoronoiPlane voronoiPlane in planeGroup.Value)
+                    voronoiPlane.distanceFromNode = Vector3.Distance(intersections[voronoiPlane], coordAsVector);
+
+                planeGroup.Value.Sort((a, b) => a.distanceFromNode.CompareTo(b.distanceFromNode));
+                
                 for (int i = 0; i < planeGroup.Value.Count; i++)
                 {
                     for (int j = 0; j < planeGroup.Value.Count; j++)
@@ -82,7 +92,7 @@ namespace Model.Tools.Voronoi
             }
         }
 
-        private void CalculateBisectorPlanes(ConcurrentBag<Coordinate> sites, ConcurrentDictionary<VoronoiPlane, Vector3> intersections)
+        private void CalculateBisectorPlanes(List<Coordinate> sites, Dictionary<VoronoiPlane, Vector3> intersections)
         {
             foreach (Coordinate siteA in sites)
             {

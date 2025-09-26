@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using Model.Game.Events;
+using Model.Game.Graph;
 using Model.Tools.Pathfinder.Coordinate;
 using Model.Tools.Pathfinder.Node;
 using Model.Tools.Time;
@@ -24,6 +26,11 @@ namespace Model.Tools.Voronoi
                 throw new ArgumentException("There is no voronoi for type " + type.Namespace);
             
             return registry.GetClosestTo(coordinate);
+        }
+        
+        public static Dictionary<Coordinate, List<VoronoiPlane>> GetPlanes(Type key)
+        {
+            return (Registries[key] as BisectorVoronoi)?.GetPlanes();
         }
     }
 }

@@ -6,6 +6,8 @@ namespace Model.Tools.Voronoi
     {
         private readonly Vector3 normal;
         private readonly float distance;
+        
+        public float distanceFromNode;
 
         public VoronoiPlane(Vector3 normal, Vector3 point)
         {
@@ -29,5 +31,18 @@ namespace Model.Tools.Voronoi
             float dis = GetDistanceToPoint(point);
             return point - normal * dis;
         }
+        
+        // Expose plane data for drawing/debug visualization
+        public Vector3 GetNormal()
+        {
+            return normal;
+        }
+        
+        public Vector3 GetAnyPoint()
+        {
+            // Closest point to origin lies on the plane
+            return GetClosestPoint(Vector3.Zero);
+        }
+
     }
 }
