@@ -20,22 +20,26 @@ namespace Model.Tools.Pathfinder.Algorithms
 
             do
             {
-                ICollection<TNodeType> bresenhamPath = graph.GetBresenhamNodes(astarPath[currentIndex].GetCoordinate(), astarPath[targetIndex].GetCoordinate());
-
-                bool blocked = false;
-
-                foreach (TNodeType node in bresenhamPath)
+                if (targetIndex > currentIndex + 1)
                 {
-                    if (!node.IsBlocked(blockedTypes)) continue;
+                    ICollection<TNodeType> bresenhamPath = graph.GetBresenhamNodes(astarPath[currentIndex].GetCoordinate(), astarPath[targetIndex].GetCoordinate());
 
-                    blocked = true;
-                    break;
-                }
+                    INode.NodeType type = astarPath[currentIndex].GetNodeType();
+                    bool sameType = true;
 
-                if (blocked)
-                {
-                    targetIndex--;
-                    continue;
+                    foreach (TNodeType node in bresenhamPath)
+                    {
+                        if (node.GetNodeType() == type) continue;
+
+                        sameType = false;
+                        break;
+                    }
+
+                    if (!sameType)
+                    {
+                        targetIndex--;
+                        continue;
+                    }
                 }
 
                 thetaPath.Add(astarPath[currentIndex]);
