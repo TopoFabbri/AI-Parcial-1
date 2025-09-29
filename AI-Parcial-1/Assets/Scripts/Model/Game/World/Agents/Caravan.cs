@@ -64,7 +64,7 @@ namespace Model.Game.World.Agents
 
         #endregion
 
-        Func<Vector3, Vector3> moveTowardsFunc => MoveTowards;
+        private Func<Vector3, Vector3> MoveTowardsFunc => MoveTowards;
         
         public Caravan(Graph<Node<Coordinate>, Coordinate> graph, Pathfinder<Node<Coordinate>, Coordinate> pathfinder, Coordinate coordinate, List<INode.NodeType> blockedNodes,
             int maxFood, float moveSpeed, int startingFood)
@@ -79,7 +79,7 @@ namespace Model.Game.World.Agents
             FoodContainer = new FoodContainer(startingFood, maxFood);
 
             graph.Nodes[coordinate].AddNodeContainable(this);
-            ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
+            Id = Localizables.AddLocalizable(this);
 
             (float x, float y) = graph.GetPositionFromCoordinate(NodeCoordinate);
             
@@ -97,11 +97,11 @@ namespace Model.Game.World.Agents
             fsm.AddState<HideState>(States.Hide);
             fsm.AddState<MoveState>(States.Move,
                 onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph, blockedNodes },
-                onTickParameters: () => new object[] { graph, moveTowardsFunc, NodeCoordinate });
+                onTickParameters: () => new object[] { graph, MoveTowardsFunc, NodeCoordinate });
             fsm.AddState<CollectState>(States.Collect, onEnterParameters: () => new object[] { graph, NodeCoordinate }, onTickParameters: () => new object[] { FoodContainer });
-            fsm.AddState<FindMineState>(States.FindMine, () => new object[] { targetCoordinate });
+            fsm.AddState<FindMineState>(States.FindMine, () => new object[] { targetCoordinate, Id });
             fsm.AddState<FindCenterState>(States.FindCenter, () => new object[] { targetCoordinate });
-            fsm.AddState<DepositState>(States.Deposit, onEnterParameters: () => new object[] { graph, NodeCoordinate }, onTickParameters: () => new object[] { FoodContainer });
+            fsm.AddState<DepositState>(States.Deposit, onEnterParameters: () => new object[] { graph, NodeCoordinate, Id }, onTickParameters: () => new object[] { FoodContainer });
 
             fsm.SetTransition(States.Collect, Flags.FoodFilled, States.FindMine);
             fsm.SetTransition(States.Collect, Flags.FoodDepleted, States.FindCenter);
@@ -127,9 +127,9 @@ namespace Model.Game.World.Agents
             fsm.SetTransition(States.Deposit, Flags.AlarmRaised, States.FindCenter);
         }
 
-        string ILocalizable.Name { get; set; } = "Caravan";
+        public string Name => "Caravan";
 
-        int ILocalizable.Id { get; set; }
+        public int Id { get; }
 
         public string GetHoverText()
         {

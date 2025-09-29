@@ -4,8 +4,8 @@ namespace Model.Tools.Drawing
 {
     public interface ILocalizable : ITextable
     {
-        public string Name { get; protected set; }
-        public int Id { get; internal set; }
+        public string Name { get; }
+        public int Id { get; }
         
         public Vector3 GetPosition();
         public void Update();

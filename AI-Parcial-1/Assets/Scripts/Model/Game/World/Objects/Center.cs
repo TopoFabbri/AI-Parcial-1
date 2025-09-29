@@ -24,9 +24,9 @@ namespace Model.Game.World.Objects
         public GoldContainer GoldContainer { get; }
         public FoodContainer FoodContainer { get; private set; }
 
-        string ILocalizable.Name { get; set; } = "Center";
+        public string Name => "Center";
 
-        int ILocalizable.Id { get; set; }
+        public int Id { get; }
 
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
         private readonly List<Miner> miners = new();
@@ -45,7 +45,7 @@ namespace Model.Game.World.Objects
             FoodContainer = new FoodContainer(MaxFood, MaxFood);
 
             node.AddNodeContainable(this);
-            ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
+            Id = Localizables.AddLocalizable(this);
 
             _centerCoordinate = NodeCoordinate;
 

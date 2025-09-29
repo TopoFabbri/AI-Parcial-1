@@ -69,9 +69,9 @@ namespace Model.Game.World.Agents
 
         #endregion
 
-        string ILocalizable.Name { get; set; } = "Miner";
+        public string Name => "Miner";
 
-        int ILocalizable.Id { get; set; }
+        public int Id { get; }
 
         public Coordinate NodeCoordinate { get; set; }
 
@@ -88,7 +88,7 @@ namespace Model.Game.World.Agents
             targetCoordinate = new Coordinate();
             
             node.AddNodeContainable(this);
-            ((ILocalizable)this).Id = Localizables.AddLocalizable(this);
+            Id = Localizables.AddLocalizable(this);
             
             (float x, float y) = graph.GetPositionFromCoordinate(NodeCoordinate);
             
