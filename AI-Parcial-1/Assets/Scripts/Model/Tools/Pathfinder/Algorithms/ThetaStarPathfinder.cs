@@ -20,26 +20,24 @@ namespace Model.Tools.Pathfinder.Algorithms
 
             do
             {
-                if (targetIndex > currentIndex + 1)
+                if (!IsPathSameType(astarPath, currentIndex, targetIndex))
                 {
-                    ICollection<TNodeType> bresenhamPath = graph.GetBresenhamNodes(astarPath[currentIndex].GetCoordinate(), astarPath[targetIndex].GetCoordinate());
+                    targetIndex--;
 
-                    INode.NodeType type = astarPath[currentIndex].GetNodeType();
-                    bool sameType = true;
-
-                    foreach (TNodeType node in bresenhamPath)
+                    if (targetIndex <= currentIndex)
                     {
-                        if (node.GetNodeType() == type) continue;
-
-                        sameType = false;
-                        break;
+                        thetaPath.Add(astarPath[currentIndex]);
+                        currentIndex++;
+                        targetIndex = astarPath.Count - 1;
                     }
-
-                    if (!sameType)
-                    {
-                        targetIndex--;
-                        continue;
-                    }
+                    
+                    continue;
+                }
+                
+                if (IsBresenhamPathBlocked(graph, blockedTypes, astarPath, currentIndex, targetIndex))
+                {
+                    targetIndex--;
+                    continue;
                 }
 
                 thetaPath.Add(astarPath[currentIndex]);
@@ -52,6 +50,40 @@ namespace Model.Tools.Pathfinder.Algorithms
             thetaPath.Add(destinationNode);
 
             return thetaPath;
+        }
+
+        private static bool IsPathSameType(List<TNodeType> astarPath, int currentIndex, int targetIndex)
+        {
+            INode.NodeType nodeType = astarPath[currentIndex].GetNodeType();
+
+            bool sameType = true;
+
+            for (int i = currentIndex + 1; i <= targetIndex; i++)
+            {
+                if (astarPath[i].GetNodeType() == nodeType) continue;
+                    
+                sameType = false;
+                break;
+            }
+
+            return sameType;
+        }
+
+        private static bool IsBresenhamPathBlocked(IGraph<TNodeType, TCoordinate> graph, List<INode.NodeType> blockedTypes, List<TNodeType> astarPath, int currentIndex, int targetIndex)
+        {
+            ICollection<TNodeType> bresenhamPath = graph.GetBresenhamNodes(astarPath[currentIndex].GetCoordinate(), astarPath[targetIndex].GetCoordinate());
+
+            bool blocked = false;
+
+            foreach (TNodeType node in bresenhamPath)
+            {
+                if (!node.IsBlocked(blockedTypes)) continue;
+
+                blocked = true;
+                break;
+            }
+
+            return blocked;
         }
     }
 }
