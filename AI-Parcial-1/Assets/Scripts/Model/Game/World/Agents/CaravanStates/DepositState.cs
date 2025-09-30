@@ -70,8 +70,8 @@ namespace Model.Game.World.Agents.CaravanStates
         {
             if (foodContainer == null)
             {
-                flag.Invoke(Caravan.Flags.FoodDeposited);
                 FoodRequestSystem.RequestReleased(caravanId);
+                flag.Invoke(Caravan.Flags.FoodDeposited);
                 return;
             }
 
@@ -79,8 +79,8 @@ namespace Model.Game.World.Agents.CaravanStates
 
             if (!foodContainer.IsEmpty) return;
             
-            flag.Invoke(Caravan.Flags.FoodDeposited);
             FoodRequestSystem.RequestCompleted(caravanId);
+            flag.Invoke(Caravan.Flags.FoodDeposited);
         }
     }
 }
