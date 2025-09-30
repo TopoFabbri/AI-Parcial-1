@@ -3329,6 +3329,53 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1747768455}
   m_CullTransparentMesh: 1
+--- !u!1 &1803624210
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1803624212}
+  - component: {fileID: 1803624211}
+  m_Layer: 0
+  m_Name: PathDebugger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1803624211
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1803624210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 247e8cb5a4af4e40b9a97fac5112d5cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colour: {r: 1, g: 0, b: 0, a: 1}
+  lineWidth: 0.2
+  offset: {x: 0, y: 1, z: 0}
+--- !u!4 &1803624212
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1803624210}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 976.9726, y: 462.53226, z: 4.2509212}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1848257993
 GameObject:
   m_ObjectHideFlags: 0
@@ -3685,7 +3732,7 @@ GameObject:
   - component: {fileID: 1890958370}
   - component: {fileID: 1890958369}
   m_Layer: 0
-  m_Name: PlaneDraw
+  m_Name: PlaneDebugger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4112,3 +4159,4 @@ SceneRoots:
   - {fileID: 410087041}
   - {fileID: 1170897730}
   - {fileID: 1890958370}
+  - {fileID: 1803624212}

@@ -67,7 +67,7 @@ namespace Engine
 
         private Model.Game.Model model;
         private Drawer drawer;
-        private Graph<Node<Coordinate>, Coordinate> graph;
+        public Graph<Node<Coordinate>, Coordinate> Graph { get; private set; }
 
         private void Awake()
         {
@@ -87,12 +87,12 @@ namespace Engine
             tileMesh = tilePrefab.GetComponent<MeshFilter>().sharedMesh;
             tileMaterial = tilePrefab.GetComponent<MeshRenderer>().sharedMaterial;
 
-            cameraController.PositionCamera(graph);
+            cameraController.PositionCamera(Graph);
         }
 
         private void CreateGraph()
         {
-            graph = model.CreateGraph(MapCreationData.NodeTypes, MapCreationData.MineQty, minMineGoldQty, maxMineGoldQty, maxMineFoodQty, mineBlockedTypes, MapCreationData.NodeDistance, circumnavigableMap);
+            Graph = model.CreateGraph(MapCreationData.NodeTypes, MapCreationData.MineQty, minMineGoldQty, maxMineGoldQty, maxMineFoodQty, mineBlockedTypes, MapCreationData.NodeDistance, circumnavigableMap);
         }
 
         private void Update()
@@ -120,7 +120,7 @@ namespace Engine
         {
             model = null;
             drawer = null;
-            graph = null;
+            Graph = null;
             
             GraphView.ClearMaterials();
             
@@ -165,14 +165,14 @@ namespace Engine
             Vector3 worldPoint1 = cam.ScreenToWorldPoint(new Vector3(mousePos.x + imageSize.x, mousePos.y - imageSize.y));
             Vector3 worldPoint2 = cam.ScreenToWorldPoint(new Vector3(mousePos.x + imageSize.x, mousePos.y + imageSize.y));
             
-            if (graph.IsPointInGraph(worldPoint1.x, worldPoint1.z))
+            if (Graph.IsPointInGraph(worldPoint1.x, worldPoint1.z))
                 cursorImage.rectTransform.position = new Vector3(mousePos.x + imageSize.x / 2f, mousePos.y - imageSize.y / 2f);
-            else if (graph.IsPointInGraph(worldPoint2.x, worldPoint2.z))
+            else if (Graph.IsPointInGraph(worldPoint2.x, worldPoint2.z))
                 cursorImage.rectTransform.position = new Vector3(mousePos.x + imageSize.x / 2f, mousePos.y + imageSize.y / 2f);
             else
                 cursorImage.rectTransform.position = new Vector3(mousePos.x - imageSize.x / 2f, mousePos.y - imageSize.y / 2f);
             
-            selectedNode = graph.GetNodeFromPosition(pos.x, pos.z);
+            selectedNode = Graph.GetNodeFromPosition(pos.x, pos.z);
         }
 
         public void ToggleDrawMode()

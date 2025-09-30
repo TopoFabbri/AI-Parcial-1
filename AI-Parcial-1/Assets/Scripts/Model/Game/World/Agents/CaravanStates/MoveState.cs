@@ -18,7 +18,8 @@ namespace Model.Game.World.Agents.CaravanStates
                 typeof(Node<Coordinate>), 
                 typeof(Node<Coordinate>), 
                 typeof(Graph<Node<Coordinate>, Coordinate>),
-                typeof(List<INode.NodeType>)
+                typeof(List<INode.NodeType>),
+                typeof(List<Vector3>)
             };
 
         public override Type[] OnTickParamTypes => new[] { typeof(Graph<Node<Coordinate>, Coordinate>), typeof(Func<Vector3, Vector3>), typeof(Coordinate) };
@@ -33,6 +34,7 @@ namespace Model.Game.World.Agents.CaravanStates
             Node<Coordinate> targetNode = parameters[2] as Node<Coordinate>;
             Graph<Node<Coordinate>, Coordinate> graph = parameters[3] as Graph<Node<Coordinate>, Coordinate>;
             List<INode.NodeType> blockedTypes = parameters[4] as List<INode.NodeType>;
+            path = parameters[5] as List<Vector3>;
 
             BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
 
@@ -52,6 +54,15 @@ namespace Model.Game.World.Agents.CaravanStates
             BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
 
             behaviourActions.AddMultiThreadableBehaviour(0, () => { MoveTowardsCoordinate(graph, moveFunc, caravanCoordinate); });
+
+            return behaviourActions;
+        }
+
+        public override BehaviourActions GetOnExitBehaviour(params object[] parameters)
+        {
+            BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
+
+            behaviourActions.AddMultiThreadableBehaviour(0, () => { path.Clear(); });
 
             return behaviourActions;
         }

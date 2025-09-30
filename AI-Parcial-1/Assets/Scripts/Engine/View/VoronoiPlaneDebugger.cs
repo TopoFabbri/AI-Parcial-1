@@ -8,7 +8,7 @@ using Vector3 = System.Numerics.Vector3;
 
 namespace Engine.View
 {
-    public class VoronoiPlaneView : MonoBehaviour
+    public class VoronoiPlaneDebugger : MonoBehaviour
     {
         [SerializeField] private float drawHeight = 0.2f;
         [SerializeField] private float drawDistance = 20f;

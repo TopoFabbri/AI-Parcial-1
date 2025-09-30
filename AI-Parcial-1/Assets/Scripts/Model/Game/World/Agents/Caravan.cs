@@ -65,6 +65,9 @@ namespace Model.Game.World.Agents
         #endregion
 
         private Func<Vector3, Vector3> MoveTowardsFunc => MoveTowards;
+
+        public Coordinate NodeCoordinate { get; set; }
+        public List<Vector3> Path { get; } = new();
         
         public Caravan(Graph<Node<Coordinate>, Coordinate> graph, Pathfinder<Node<Coordinate>, Coordinate> pathfinder, Coordinate coordinate, List<INode.NodeType> blockedNodes,
             int maxFood, float moveSpeed, int startingFood)
@@ -96,7 +99,7 @@ namespace Model.Game.World.Agents
 
             fsm.AddState<HideState>(States.Hide);
             fsm.AddState<MoveState>(States.Move,
-                onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph, blockedNodes },
+                onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph, blockedNodes, Path },
                 onTickParameters: () => new object[] { graph, MoveTowardsFunc, NodeCoordinate });
             fsm.AddState<CollectState>(States.Collect, onEnterParameters: () => new object[] { graph, NodeCoordinate }, onTickParameters: () => new object[] { FoodContainer });
             fsm.AddState<FindMineState>(States.FindMine, () => new object[] { targetCoordinate, Id });
@@ -138,8 +141,6 @@ namespace Model.Game.World.Agents
 
             return infoText;
         }
-
-        public Coordinate NodeCoordinate { get; set; }
 
         public Vector3 GetPosition()
         {
