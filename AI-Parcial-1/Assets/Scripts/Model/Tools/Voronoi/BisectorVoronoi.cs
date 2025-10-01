@@ -11,7 +11,7 @@ namespace Model.Tools.Voronoi
     {
         private IGraph<Node<Coordinate>, Coordinate> graph;
         private readonly Dictionary<Coordinate, List<VoronoiPlane>> bisectorPlanes = new();
-        
+
         public ParallelOptions ParallelOptions { get; } = new() { MaxDegreeOfParallelism = 32 };
 
         internal BisectorVoronoi(IGraph<Node<Coordinate>, Coordinate> graph)
@@ -42,13 +42,13 @@ namespace Model.Tools.Voronoi
             foreach (KeyValuePair<Coordinate, List<VoronoiPlane>> planeGroup in bisectorPlanes)
             {
                 bool isOnRegion = true;
-                
+
                 foreach (VoronoiPlane plane in planeGroup.Value)
                 {
                     if (!plane.GetSide(coordAsPoint))
                         isOnRegion = false;
                 }
-                
+
                 if (isOnRegion)
                     closest = planeGroup.Key;
             }
@@ -60,35 +60,45 @@ namespace Model.Tools.Voronoi
         {
             return bisectorPlanes;
         }
-        
+
         private void RemoveOuterPlanes(Dictionary<VoronoiPlane, Vector3> intersections)
         {
             foreach (KeyValuePair<Coordinate, List<VoronoiPlane>> planeGroup in bisectorPlanes)
             {
-                List<VoronoiPlane> planesToRemove = new();
                 Vector3 coordAsVector = new(planeGroup.Key.X, planeGroup.Key.Y, 0);
 
-                foreach (VoronoiPlane voronoiPlane in planeGroup.Value)
-                    voronoiPlane.distanceFromNode = Vector3.Distance(intersections[voronoiPlane], coordAsVector);
-
-                planeGroup.Value.Sort((a, b) => a.distanceFromNode.CompareTo(b.distanceFromNode));
-                
-                for (int i = 0; i < planeGroup.Value.Count; i++)
+                planeGroup.Value.Sort((planeA, planeB) =>
                 {
-                    for (int j = 0; j < planeGroup.Value.Count; j++)
+                    float distanceA = Vector3.Distance(coordAsVector, intersections[planeA]);
+                    float distanceB = Vector3.Distance(coordAsVector, intersections[planeB]);
+                    return distanceA.CompareTo(distanceB);
+                });
+
+                List<VoronoiPlane> insidePlanes = new() { planeGroup.Value[0] };
+
+                foreach (VoronoiPlane planeA in planeGroup.Value)
+                {
+                    bool isInside = true;
+                    
+                    foreach (VoronoiPlane planeB in insidePlanes)
                     {
-                        if (i == j)
+                        if (planeA == planeB)
                             continue;
 
-                        if (!planeGroup.Value[j].GetSide(intersections[planeGroup.Value[i]]))
-                            planesToRemove.Add(planeGroup.Value[i]);
+                        if (planeA.GetSide(intersections[planeB])) continue;
+                        
+                        isInside = false;
+                        break;
                     }
+                    
+                    if (isInside)
+                        insidePlanes.Add(planeA);
                 }
 
-                foreach (VoronoiPlane plane in planesToRemove)
-                {
-                    bisectorPlanes[planeGroup.Key].Remove(plane); 
-                }
+                planeGroup.Value.Clear();
+                
+                foreach (VoronoiPlane plane in insidePlanes)
+                    planeGroup.Value.Add(plane);
             }
         }
 
@@ -100,15 +110,15 @@ namespace Model.Tools.Voronoi
                 {
                     if (siteA.Equals(siteB))
                         continue;
-                    
-                    Vector3 point = new ((siteA.X + siteB.X) / 2f, (siteA.Y + siteB.Y) / 2f, 0);
+
+                    Vector3 point = new((siteA.X + siteB.X) / 2f, (siteA.Y + siteB.Y) / 2f, 0);
                     Vector3 normal = Vector3.Normalize(new Vector3(siteA.X - point.X, siteA.Y - point.Y, 0));
 
                     VoronoiPlane plane = new(normal, point);
-                    
+
                     if (!bisectorPlanes.ContainsKey(siteA))
                         bisectorPlanes.TryAdd(siteA, new List<VoronoiPlane>());
-                    
+
                     bisectorPlanes[siteA].Add(plane);
                     intersections.TryAdd(plane, point);
                 }

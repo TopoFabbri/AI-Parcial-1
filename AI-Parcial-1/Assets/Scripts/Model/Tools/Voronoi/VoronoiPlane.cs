@@ -6,8 +6,6 @@ namespace Model.Tools.Voronoi
     {
         private readonly Vector3 normal;
         private readonly float distance;
-        
-        public float distanceFromNode;
 
         public VoronoiPlane(Vector3 normal, Vector3 point)
         {
@@ -22,8 +20,7 @@ namespace Model.Tools.Voronoi
         
         public bool GetSide(Vector3 point)
         {
-            const float Epsilon = 1e-5f;
-            return GetDistanceToPoint(point) >= -Epsilon;
+            return GetDistanceToPoint(point) >= -float.Epsilon;
         }
 
         public Vector3 GetClosestPoint(Vector3 point)

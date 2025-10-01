@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System;
+using System.Collections.Generic;
 using Engine.Controller;
-using Engine.Controller.Input;
 using Engine.View;
 using Model.Game.Events;
 using Model.Game.Graph;
@@ -14,7 +13,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
 using NodeType = Model.Tools.Pathfinder.Node.INode.NodeType;
 
 namespace Engine
@@ -179,7 +177,7 @@ namespace Engine
         {
             drawMode++;
             
-            if ((int)drawMode >= System.Enum.GetValues(typeof(GraphView.DrawModes)).Length)
+            if ((int)drawMode >= Enum.GetValues(typeof(GraphView.DrawModes)).Length)
                 drawMode = 0;
         }
     }
