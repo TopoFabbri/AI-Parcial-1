@@ -14,10 +14,8 @@ namespace Model.Tools.Pathfinder.Node
         }
 
         public bool IsBlocked(List<NodeType> blockedTypes);
-        public int GetCost();
-        public void SetCost(int cost);
         public NodeType GetNodeType();
-        public void SetType(INode.NodeType type);
+        public void SetType(NodeType type);
     }
 
     public interface INode<TCoordinate> : IEquatable<INode<TCoordinate>> where TCoordinate : ICoordinate

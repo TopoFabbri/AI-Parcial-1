@@ -21,6 +21,7 @@ namespace Model.Game.World.Agents
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
         private readonly Pathfinder<Node<Coordinate>, Coordinate> pathfinder;
         private readonly List<INode.NodeType> blockedNodes;
+        private readonly Dictionary<INode.NodeType, int> nodeCosts = new() { { INode.NodeType.Grass, 3 }, { INode.NodeType.Road, 1 }, { INode.NodeType.Water, 2 } };
 
         private FoodContainer FoodContainer { get; }
 
@@ -28,7 +29,7 @@ namespace Model.Game.World.Agents
 
         private readonly float moveSpeed;
         private readonly Coordinate targetCoordinate;
-        
+
         private Vector3 position;
 
         #endregion
@@ -68,7 +69,7 @@ namespace Model.Game.World.Agents
 
         public Coordinate NodeCoordinate { get; set; }
         public List<Vector3> Path { get; } = new();
-        
+
         public Caravan(Graph<Node<Coordinate>, Coordinate> graph, Pathfinder<Node<Coordinate>, Coordinate> pathfinder, Coordinate coordinate, List<INode.NodeType> blockedNodes,
             int maxFood, float moveSpeed, int startingFood)
         {
@@ -85,9 +86,9 @@ namespace Model.Game.World.Agents
             Id = Localizables.AddLocalizable(this);
 
             (float x, float y) = graph.GetPositionFromCoordinate(NodeCoordinate);
-            
-            position = new Vector3(x , 0f, y);
-            
+
+            position = new Vector3(x, 0f, y);
+
             InitializeFSM();
 
             EventSystem.Subscribe<RaiseAlarmEvent>(OnAlarmRaised);
@@ -99,7 +100,7 @@ namespace Model.Game.World.Agents
 
             fsm.AddState<HideState>(States.Hide);
             fsm.AddState<MoveState>(States.Move,
-                onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph, blockedNodes, Path },
+                onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph, blockedNodes, Path, nodeCosts },
                 onTickParameters: () => new object[] { graph, MoveTowardsFunc, NodeCoordinate });
             fsm.AddState<CollectState>(States.Collect, onEnterParameters: () => new object[] { graph, NodeCoordinate }, onTickParameters: () => new object[] { FoodContainer });
             fsm.AddState<FindMineState>(States.FindMine, () => new object[] { targetCoordinate, Id });
@@ -150,9 +151,9 @@ namespace Model.Game.World.Agents
         public Vector3 MoveTowards(Vector3 target)
         {
             if (graph == null) return position;
-            
+
             Vector3 direction = target - position;
-            
+
             if (graph.IsCircumnavigable())
             {
                 Coordinate size = graph.GetSize();
@@ -171,12 +172,12 @@ namespace Model.Game.World.Agents
                         direction.Z -= MathF.Sign(direction.Z) * worldHeight;
                 }
             }
-            
+
             if (direction.LengthSquared() > (Vector3.Normalize(direction) * moveSpeed * Time.TickTime).LengthSquared())
                 direction = Vector3.Normalize(direction) * moveSpeed * Time.TickTime;
-            
+
             position += direction;
-            
+
             if (graph.IsCircumnavigable())
             {
                 Coordinate size = graph.GetSize();
@@ -188,15 +189,16 @@ namespace Model.Game.World.Agents
                     position.X %= worldWidth;
                     if (position.X < 0) position.X += worldWidth;
                 }
+
                 if (worldHeight > 0)
                 {
                     position.Z %= worldHeight;
                     if (position.Z < 0) position.Z += worldHeight;
                 }
             }
-            
+
             graph.MoveContainableTo(this, graph.GetNodeFromPosition(position.X, position.Z).GetCoordinate());
-            
+
             return position;
         }
 

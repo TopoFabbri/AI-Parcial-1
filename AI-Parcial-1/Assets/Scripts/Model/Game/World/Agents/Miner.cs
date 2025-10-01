@@ -28,6 +28,7 @@ namespace Model.Game.World.Agents
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
         private readonly Pathfinder<Node<Coordinate>, Coordinate> pathfinder;
         private readonly List<INode.NodeType> blockedNodes;
+        private readonly Dictionary<INode.NodeType, int> nodeCosts = new() { { INode.NodeType.Grass, 2 }, { INode.NodeType.Road, 1 }, { INode.NodeType.Water, 3 } };
         public List<Vector3> Path { get; } = new();
 
         private Coordinate targetCoordinate;
@@ -114,7 +115,7 @@ namespace Model.Game.World.Agents
                 onEnterParameters: () => new object[] { graph, NodeCoordinate },
                 onTickParameters: () => new object[] { GoldContainer });
             fsm.AddState<MoveState>(States.Move,
-                onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph, blockedNodes, Path },
+                onEnterParameters: () => new object[] { pathfinder, graph.Nodes[NodeCoordinate], graph.Nodes[targetCoordinate], graph, blockedNodes, Path, nodeCosts },
                 onTickParameters: () => new object[] { graph, MoveTowardsFunc, NodeCoordinate });
             fsm.AddState<MineState>(States.Mine, 
                 onEnterParameters: () => new object[] {graph, NodeCoordinate, GoldContainer},

@@ -7,9 +7,9 @@ namespace Model.Tools.Pathfinder.Algorithms
 {
     public class AStarPathfinder<TNodeType, TCoordinate> : Pathfinder<TNodeType, TCoordinate> where TCoordinate : ICoordinate where TNodeType : INode<TCoordinate>, INode
     {
-        protected override int MoveToNeighborCost(TNodeType a, TNodeType b)
+        protected override int MoveToNeighborCost(TNodeType a, TNodeType b, Dictionary<INode.NodeType, int> nodeCosts)
         {
-            return b.GetCost();
+            return nodeCosts[b.GetNodeType()];
         }
 
         protected override ICollection<TNodeType> GetAdjacents(TNodeType node, IGraph<TNodeType, TCoordinate> graph)

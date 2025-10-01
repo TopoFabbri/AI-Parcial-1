@@ -19,7 +19,8 @@ namespace Model.Game.World.Agents.CaravanStates
                 typeof(Node<Coordinate>), 
                 typeof(Graph<Node<Coordinate>, Coordinate>),
                 typeof(List<INode.NodeType>),
-                typeof(List<Vector3>)
+                typeof(List<Vector3>),
+                typeof(Dictionary<INode.NodeType, int>)
             };
 
         public override Type[] OnTickParamTypes => new[] { typeof(Graph<Node<Coordinate>, Coordinate>), typeof(Func<Vector3, Vector3>), typeof(Coordinate) };
@@ -35,12 +36,13 @@ namespace Model.Game.World.Agents.CaravanStates
             Graph<Node<Coordinate>, Coordinate> graph = parameters[3] as Graph<Node<Coordinate>, Coordinate>;
             List<INode.NodeType> blockedTypes = parameters[4] as List<INode.NodeType>;
             path = parameters[5] as List<Vector3>;
-
+            Dictionary<INode.NodeType, int> nodeCosts = parameters[6] as Dictionary<INode.NodeType, int>;
+            
             BehaviourActions behaviourActions = Pool.Get<BehaviourActions>();
 
             behaviourActions.AddMultiThreadableBehaviour(0, () => { currentNodeIndex = 0; });
 
-            behaviourActions.AddMultiThreadableBehaviour(0, () => { GeneratePath(pathfinder, startNode, targetNode, graph, blockedTypes); });
+            behaviourActions.AddMultiThreadableBehaviour(0, () => { GeneratePath(pathfinder, startNode, targetNode, graph, blockedTypes, nodeCosts); });
 
             return behaviourActions;
         }
@@ -68,14 +70,14 @@ namespace Model.Game.World.Agents.CaravanStates
         }
 
         private void GeneratePath(Pathfinder<Node<Coordinate>, Coordinate> pathfinder, Node<Coordinate> startNode, Node<Coordinate> targetNode,
-            Graph<Node<Coordinate>, Coordinate> graph, List<INode.NodeType> blockedTypes)
+            Graph<Node<Coordinate>, Coordinate> graph, List<INode.NodeType> blockedTypes, Dictionary<INode.NodeType, int> nodeCosts)
         {
             path.Clear();
             currentNodeIndex = 0;
             
             if (pathfinder != null)
             {
-                List<Node<Coordinate>> nodePath = pathfinder.FindPath(startNode, targetNode, graph, blockedTypes);
+                List<Node<Coordinate>> nodePath = pathfinder.FindPath(startNode, targetNode, graph, blockedTypes, nodeCosts);
 
                 foreach (Node<Coordinate> node in nodePath)
                 {

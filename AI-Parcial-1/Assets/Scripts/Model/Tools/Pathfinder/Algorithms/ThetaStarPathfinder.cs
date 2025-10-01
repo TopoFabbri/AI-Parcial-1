@@ -7,9 +7,9 @@ namespace Model.Tools.Pathfinder.Algorithms
 {
     public class ThetaStarPathfinder<TNodeType, TCoordinate> : AStarPathfinder<TNodeType, TCoordinate> where TCoordinate : ICoordinate where TNodeType : INode<TCoordinate>, INode
     {
-        public override List<TNodeType> FindPath(TNodeType startNode, TNodeType destinationNode, IGraph<TNodeType, TCoordinate> graph, List<INode.NodeType> blockedTypes)
+        public override List<TNodeType> FindPath(TNodeType startNode, TNodeType destinationNode, IGraph<TNodeType, TCoordinate> graph, List<INode.NodeType> blockedTypes, Dictionary<INode.NodeType, int> nodeCosts)
         {
-            List<TNodeType> astarPath = base.FindPath(startNode, destinationNode, graph, blockedTypes);
+            List<TNodeType> astarPath = base.FindPath(startNode, destinationNode, graph, blockedTypes, nodeCosts);
 
             if (astarPath == null || astarPath.Count < 3) return astarPath;
 

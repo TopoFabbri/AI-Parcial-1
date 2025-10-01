@@ -8,7 +8,7 @@ namespace Model.Tools.Pathfinder.Algorithms
 {
     public abstract class Pathfinder<TNodeType, TCoordinate> where TNodeType : INode<TCoordinate>, INode where TCoordinate : ICoordinate
     {
-        public virtual List<TNodeType> FindPath(TNodeType startNode, TNodeType destinationNode, IGraph<TNodeType, TCoordinate> graph, List<INode.NodeType> blockedTypes)
+        public virtual List<TNodeType> FindPath(TNodeType startNode, TNodeType destinationNode, IGraph<TNodeType, TCoordinate> graph, List<INode.NodeType> blockedTypes, Dictionary<INode.NodeType, int> nodeCosts)
         {
             Dictionary<TNodeType, (TNodeType Parent, int AcumulativeCost, int Heuristic)> nodes = new();
 
@@ -43,7 +43,7 @@ namespace Model.Tools.Pathfinder.Algorithms
 
                     int tentativeNewAccumulatedCost = 0;
                     tentativeNewAccumulatedCost += nodes[currentNode].AcumulativeCost;
-                    tentativeNewAccumulatedCost += MoveToNeighborCost(currentNode, neighbor);
+                    tentativeNewAccumulatedCost += MoveToNeighborCost(currentNode, neighbor, nodeCosts);
 
                     if (!openList.Contains(neighbor) || tentativeNewAccumulatedCost < nodes[currentNode].AcumulativeCost)
                     {
@@ -87,7 +87,7 @@ namespace Model.Tools.Pathfinder.Algorithms
             return a.Equals(b);
         }
 
-        protected abstract int MoveToNeighborCost(TNodeType a, TNodeType b);
+        protected abstract int MoveToNeighborCost(TNodeType a, TNodeType b, Dictionary<INode.NodeType, int> nodeCosts);
 
         protected virtual bool IsBlocked(TNodeType node, List<INode.NodeType> blockedTypes)
         {

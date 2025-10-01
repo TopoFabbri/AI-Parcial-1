@@ -7,16 +7,10 @@ namespace Model.Tools.Pathfinder.Node
     public class Node<TCoordinate> : INode, INode<TCoordinate>, INodeContainer<TCoordinate> where TCoordinate : ICoordinate
     {
         private TCoordinate coordinate;
-        protected int cost;
         private INode.NodeType type;
         
         private readonly List<INodeContainable<TCoordinate>> nodeContainables = new();
         
-        public void SetCost(int cost)
-        {
-            this.cost = cost;
-        }
-
         public void SetType(INode.NodeType type)
         {
             this.type = type;
@@ -25,11 +19,6 @@ namespace Model.Tools.Pathfinder.Node
         public bool IsBlocked(List<INode.NodeType> blockedTypes)
         {
             return blockedTypes.Contains(type);
-        }
-
-        public int GetCost()
-        {
-            return cost;
         }
 
         public INode.NodeType GetNodeType()
