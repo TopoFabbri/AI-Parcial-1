@@ -28,7 +28,7 @@ namespace Model.Game.World.Agents
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
         private readonly Pathfinder<Node<Coordinate>, Coordinate> pathfinder;
         private readonly List<INode.NodeType> blockedNodes;
-        private readonly Dictionary<INode.NodeType, int> nodeCosts = new() { { INode.NodeType.Grass, 2 }, { INode.NodeType.Road, 1 }, { INode.NodeType.Water, 3 } };
+        private readonly Dictionary<INode.NodeType, int> nodeCosts = new() { { INode.NodeType.Grass, 5 }, { INode.NodeType.Road, 1 }, { INode.NodeType.Water, 25 } };
         public List<Vector3> Path { get; } = new();
 
         private Coordinate targetCoordinate;
@@ -64,7 +64,8 @@ namespace Model.Game.World.Agents
             ReachedCenter,
             StayHidden,
             FoodDepleted,
-            TargetNotFound
+            TargetNotFound,
+            PathNotFound
         }
 
         private FSM<States, Flags> fsm;
@@ -134,6 +135,7 @@ namespace Model.Game.World.Agents
             fsm.SetTransition(States.Move, Flags.StayHidden, States.Hide);
             fsm.SetTransition(States.Move, Flags.AlarmCleared, States.FindMine);
             fsm.SetTransition(States.Move, Flags.TargetNotFound, States.FindMine);
+            fsm.SetTransition(States.Move, Flags.PathNotFound, States.Idle);
             
             fsm.SetTransition(States.FindCenter, Flags.CenterFound, States.Move);
             
@@ -184,7 +186,7 @@ namespace Model.Game.World.Agents
             fsm.Transition(Model.AlarmRaised ? Flags.AlarmRaised : Flags.AlarmCleared);
         }
 
-        public Vector3 MoveTowards(Vector3 target)
+        private Vector3 MoveTowards(Vector3 target)
         {
             if (graph == null) return position;
             

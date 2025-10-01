@@ -74,24 +74,22 @@ namespace Model.Game.World.Agents.CaravanStates
         {
             path.Clear();
             currentNodeIndex = 0;
-            
-            if (pathfinder != null)
-            {
-                List<Node<Coordinate>> nodePath = pathfinder.FindPath(startNode, targetNode, graph, blockedTypes, nodeCosts);
 
-                foreach (Node<Coordinate> node in nodePath)
-                {
-                    (float x, float y) = graph.GetPositionFromCoordinate(node.GetCoordinate());
-                    path.Add(new Vector3(x, 0, y));
-                }
+            if (pathfinder == null) return;
+            
+            List<Node<Coordinate>> nodePath = pathfinder.FindPath(startNode, targetNode, graph, blockedTypes, nodeCosts);
+
+            if (nodePath == null || nodePath.Count == 0)
+            {
+                flag?.Invoke(Caravan.Flags.PathNotFound);
+                return;
             }
 
-            if (path != null && path.Count > 0 && pathfinder != null) return;
-
-            (float startX, float startY) = graph.GetPositionFromCoordinate(startNode.GetCoordinate());
-            (float targetX, float targetY) = graph.GetPositionFromCoordinate(targetNode.GetCoordinate());
-
-            path = new List<Vector3> { new(startX, 0, startY), new(targetX, 0, targetY) };
+            foreach (Node<Coordinate> node in nodePath)
+            {
+                (float x, float y) = graph.GetPositionFromCoordinate(node.GetCoordinate());
+                path.Add(new Vector3(x, 0, y));
+            }
         }
 
         private void MoveTowardsCoordinate(Graph<Node<Coordinate>, Coordinate> graph, Func<Vector3, Vector3> moveTowards, Coordinate caravanCoordinate)

@@ -37,6 +37,10 @@ namespace Model.Tools.Pathfinder.Algorithms
                 if (IsBresenhamPathBlocked(graph, blockedTypes, astarPath, currentIndex, targetIndex))
                 {
                     targetIndex--;
+                    
+                    if (targetIndex <= currentIndex)
+                        return null;
+                    
                     continue;
                 }
 

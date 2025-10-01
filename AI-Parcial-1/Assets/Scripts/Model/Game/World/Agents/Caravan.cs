@@ -21,7 +21,7 @@ namespace Model.Game.World.Agents
         private readonly Graph<Node<Coordinate>, Coordinate> graph;
         private readonly Pathfinder<Node<Coordinate>, Coordinate> pathfinder;
         private readonly List<INode.NodeType> blockedNodes;
-        private readonly Dictionary<INode.NodeType, int> nodeCosts = new() { { INode.NodeType.Grass, 3 }, { INode.NodeType.Road, 1 }, { INode.NodeType.Water, 2 } };
+        private readonly Dictionary<INode.NodeType, int> nodeCosts = new() { { INode.NodeType.Grass, 25 }, { INode.NodeType.Road, 1 }, { INode.NodeType.Water, 5 } };
 
         private FoodContainer FoodContainer { get; }
 
@@ -58,7 +58,8 @@ namespace Model.Game.World.Agents
             FoodDeposited,
             StayHidden,
             FoodDepleted,
-            TargetNotFound
+            TargetNotFound,
+            PathNotFound
         }
 
         private FSM<States, Flags> fsm;
@@ -120,6 +121,7 @@ namespace Model.Game.World.Agents
             fsm.SetTransition(States.Move, Flags.AlarmCleared, States.FindCenter);
             fsm.SetTransition(States.Move, Flags.AlarmRaised, States.FindCenter);
             fsm.SetTransition(States.Move, Flags.TargetNotFound, States.FindMine);
+            fsm.SetTransition(States.Move, Flags.PathNotFound, States.FindCenter);
 
             fsm.SetTransition(States.FindCenter, Flags.CenterFound, States.Move);
             fsm.SetTransition(States.FindCenter, Flags.AlarmRaised, States.FindCenter);
