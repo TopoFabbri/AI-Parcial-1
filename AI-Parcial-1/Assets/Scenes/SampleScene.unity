@@ -3358,7 +3358,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 247e8cb5a4af4e40b9a97fac5112d5cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  colour: {r: 1, g: 0, b: 0, a: 1}
+  engineManager: {fileID: 1850194844}
+  minerColour: {r: 0, g: 0, b: 0, a: 1}
+  caravanColour: {r: 1, g: 0, b: 0, a: 1}
   lineWidth: 0.2
   offset: {x: 0, y: 1, z: 0}
 --- !u!4 &1803624212

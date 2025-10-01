@@ -331,6 +331,36 @@ namespace Model.Game.Graph
             return GetDistanceBetweenNodes(Nodes[a], Nodes[b]);
         }
 
+        public float GetEuclideanDistanceBetweenCoordinates(TCoordinate a, TCoordinate b)
+        {
+            int dx;
+            int dy;
+
+            if (!circumnavigable)
+            {
+                dx = Math.Abs(a.X - b.X);
+                dy = Math.Abs(a.Y - b.Y);
+            }
+            else
+            {
+                List<int> xDis = new();
+                List<int> yDis = new();
+
+                xDis.Add(Math.Abs(a.X - b.X));
+                xDis.Add(Math.Abs(a.X - (b.X + size.X)));
+                xDis.Add(Math.Abs(a.X - (b.X - size.X)));
+
+                yDis.Add(Math.Abs(a.Y - b.Y));
+                yDis.Add(Math.Abs(a.Y - (b.Y + size.Y)));
+                yDis.Add(Math.Abs(a.Y - (b.Y - size.Y)));
+
+                dx = xDis.Min();
+                dy = yDis.Min();
+            }
+                
+            return (float)Math.Sqrt(Math.Pow(dx * nodeDistance, 2d) + Math.Pow(dy * nodeDistance, 2d));
+        }
+
         public bool IsCircumnavigable()
         {
             return circumnavigable;

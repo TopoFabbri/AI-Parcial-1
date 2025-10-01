@@ -6,7 +6,7 @@ namespace Model.Tools.Voronoi
 {
     // Generic fallback policy that uses the coordinate's provided distance function.
     // This still adheres to the Voronoi definition (region of closest site) under the given metric.
-    public sealed class DistanceBasedVoronoiPolicy<TNode, TCoordinate> : IVoronoiPolicy<TNode, TCoordinate>
+    public sealed class ManhattanDistancePolicy<TNode, TCoordinate> : IVoronoiPolicy<TNode, TCoordinate>
         where TNode : INode<TCoordinate>, INode
         where TCoordinate : ICoordinate
     {

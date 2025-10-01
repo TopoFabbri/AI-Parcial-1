@@ -98,7 +98,7 @@ namespace Model.Game
             }
 
             VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), Mine.Mines,
-                new Voronoi<Node<Coordinate>, Coordinate>(new DistanceBasedVoronoiPolicy<Node<Coordinate>, Coordinate>(), Graph));
+                new Voronoi<Node<Coordinate>, Coordinate>(new EuclideanDistancePolicy<Node<Coordinate>, Coordinate>(), Graph));
             EventSystem.Raise<GraphModifiedEvent>();
         }
 

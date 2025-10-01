@@ -13,6 +13,7 @@ namespace Model.Tools.Pathfinder.Graph
         public float GetNodeDistance();
         public float GetDistanceBetweenNodes(TNode a, TNode b);
         public float GetDistanceBetweenCoordinates(TCoordinate a, TCoordinate b);
+        public float GetEuclideanDistanceBetweenCoordinates(TCoordinate a, TCoordinate b);
         public bool IsCircumnavigable();
         public TNode GetNodeAt(TCoordinate coordinate);
     }

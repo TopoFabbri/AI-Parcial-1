@@ -91,6 +91,11 @@ namespace Engine.Controller
             return a.GetDistanceTo(b);
         }
 
+        public float GetEuclideanDistanceBetweenCoordinates(TCoordinate a, TCoordinate b)
+        {
+            return a.GetDistanceTo(b);
+        }
+
         public bool IsCircumnavigable()
         {
             return false;
