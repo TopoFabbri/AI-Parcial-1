@@ -42,8 +42,6 @@ namespace Model.Game.World.Objects
 
         ~Mine()
         {
-            Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
-
             GoldContainer.Depleted -= Destroy;
         }
 

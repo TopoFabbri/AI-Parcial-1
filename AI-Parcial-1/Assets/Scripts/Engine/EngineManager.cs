@@ -76,21 +76,16 @@ namespace Engine
         private void Start()
         {
             cam = Camera.main;
-            model = new Model.Game.Model();
+            model = new Model.Game.Model(MapCreationData.NodeTypes, MapCreationData.MineQty, minMineGoldQty, maxMineGoldQty, maxMineFoodQty, mineBlockedTypes, MapCreationData.NodeDistance, circumnavigableMap);
             drawer = new Drawer(prefabs, defaultPrefab);
-            
-            CreateGraph();
 
+            Graph = model.Graph;
+            
             tileScale = tilePrefab.transform.localScale * drawSize * MapCreationData.NodeDistance;
             tileMesh = tilePrefab.GetComponent<MeshFilter>().sharedMesh;
             tileMaterial = tilePrefab.GetComponent<MeshRenderer>().sharedMaterial;
 
             cameraController.PositionCamera(Graph);
-        }
-
-        private void CreateGraph()
-        {
-            Graph = model.CreateGraph(MapCreationData.NodeTypes, MapCreationData.MineQty, minMineGoldQty, maxMineGoldQty, maxMineFoodQty, mineBlockedTypes, MapCreationData.NodeDistance, circumnavigableMap);
         }
 
         private void Update()

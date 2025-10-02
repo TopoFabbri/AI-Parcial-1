@@ -20,9 +20,11 @@ namespace Model.Game
 
         public static bool AlarmRaised { get; private set; }
 
-        public Model()
+        public Model(INode.NodeType[,] nodeTypes, int mineQty, float minMineGold, float maxMineGold, int maxFoodQty,
+            List<INode.NodeType> mineBlockedTypes, float nodeDistance = 1f, bool circumnavigable = false)
         {
             EventSystem.Subscribe<RaiseAlarmEvent>(OnRaiseAlarm);
+            CreateGraph(nodeTypes, mineQty, minMineGold, maxMineGold, maxFoodQty, mineBlockedTypes, nodeDistance, circumnavigable);
         }
 
         ~Model()
@@ -38,8 +40,8 @@ namespace Model.Game
             Graph = null;
         }
 
-        public Graph<Node<Coordinate>, Coordinate> CreateGraph(int width, int height, int mineQty, float minMineGold, float maxMineGold, int maxFoodQty,
-            List<INode.NodeType> mineBlockedTypes, float nodeDistance = 1f, bool circumnavigable = false)
+        private void CreateGraph(int width, int height, int mineQty, float minMineGold, float maxMineGold, int maxFoodQty,
+            List<INode.NodeType> mineBlockedTypes, float nodeDistance, bool circumnavigable)
         {
             Time.Start();
 
@@ -47,12 +49,10 @@ namespace Model.Game
 
             CreateCenter(width, height, mineBlockedTypes);
             GenerateMines(mineQty, minMineGold, maxMineGold, maxFoodQty, mineBlockedTypes);
-
-            return Graph;
         }
         
-        public Graph<Node<Coordinate>, Coordinate> CreateGraph(INode.NodeType[,] nodeTypes, int mineQty, float minMineGold, float maxMineGold, int maxFoodQty,
-            List<INode.NodeType> mineBlockedTypes, float nodeDistance = 1f, bool circumnavigable = false)
+        private void CreateGraph(INode.NodeType[,] nodeTypes, int mineQty, float minMineGold, float maxMineGold, int maxFoodQty, List<INode.NodeType> mineBlockedTypes,
+            float nodeDistance, bool circumnavigable)
         {
             Time.Start();
 
@@ -60,8 +60,6 @@ namespace Model.Game
 
             CreateCenter(Graph.GetSize().X, Graph.GetSize().Y, mineBlockedTypes);;
             GenerateMines(mineQty, minMineGold, maxMineGold, maxFoodQty, mineBlockedTypes);
-
-            return Graph;
         }
 
         private void CreateCenter(int width, int height, List<INode.NodeType> mineBlockedTypes)
