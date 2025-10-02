@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 
 namespace Model.Tools.Voronoi
 {
@@ -7,17 +8,33 @@ namespace Model.Tools.Voronoi
         private readonly Vector3 normal;
         private readonly float distance;
 
-        public VoronoiPlane(Vector3 normal, Vector3 point)
+        private readonly Vector3 altNormal;
+        private readonly float altDistance;
+
+        private readonly bool separated;
+        
+        public VoronoiPlane(Vector3 normal, Vector3 point, Vector3 altPoint)
         {
             this.normal = Vector3.Normalize(normal);
             distance = -Vector3.Dot(this.normal, point);
+
+            altNormal = -Vector3.Normalize(normal);
+            altDistance = -Vector3.Dot(altNormal, altPoint);
+
+            separated = !GetSide(altPoint);
         }
 
         internal float GetDistanceToPoint(Vector3 point)
         {
-            return Vector3.Dot(normal, point) + distance;
+            float dis = Vector3.Dot(normal, point) + distance;
+            float altDis = Vector3.Dot(altNormal, point) + altDistance;
+
+            if ((dis >= 0 && altDis >= 0) || !separated)
+                return Math.Min(dis, altDis);
+            
+            return Math.Max(dis, altDis);
         }
-        
+
         public bool GetSide(Vector3 point)
         {
             return GetDistanceToPoint(point) >= -float.Epsilon;
@@ -28,18 +45,5 @@ namespace Model.Tools.Voronoi
             float dis = GetDistanceToPoint(point);
             return point - normal * dis;
         }
-        
-        // Expose plane data for drawing/debug visualization
-        public Vector3 GetNormal()
-        {
-            return normal;
-        }
-        
-        public Vector3 GetAnyPoint()
-        {
-            // Closest point to origin lies on the plane
-            return GetClosestPoint(Vector3.Zero);
-        }
-
     }
 }

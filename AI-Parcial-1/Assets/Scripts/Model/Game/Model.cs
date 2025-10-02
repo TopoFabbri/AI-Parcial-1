@@ -83,22 +83,22 @@ namespace Model.Game
         private void GenerateMines(int mineQty, float minMineGold, float maxMineGold, int maxFoodQty, List<INode.NodeType> mineBlockedTypes)
         {
             Random random = new();
-
+            
             for (int i = 0; i < mineQty; i++)
             {
                 Coordinate coordinate = new();
                 int maxIterations = 100;
-
+            
                 do
                 {
                     coordinate.Set(random.Next(0, Graph.GetSize().X), random.Next(0, Graph.GetSize().Y));
                 } while ((Graph.Nodes[coordinate].GetNodeContainables().Count != 0 || Graph.Nodes[coordinate].IsBlocked(mineBlockedTypes)) && --maxIterations > 0);
-
+            
                 Mine mine = new(Graph.Nodes[coordinate], Graph, random.Next((int)minMineGold, (int)maxMineGold), maxFoodQty);
             }
 
             VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), Mine.Mines,
-                new Voronoi<Node<Coordinate>, Coordinate>(new EuclideanDistancePolicy<Node<Coordinate>, Coordinate>(), Graph));
+                new BisectorVoronoi(Graph));
             EventSystem.Raise<GraphModifiedEvent>();
         }
 

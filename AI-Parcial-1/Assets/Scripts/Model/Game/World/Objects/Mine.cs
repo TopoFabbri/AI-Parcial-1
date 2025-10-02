@@ -75,8 +75,7 @@ namespace Model.Game.World.Objects
             Mines.Remove(this);
             Localizables.RemoveLocalizable(this, ((ILocalizable)this).Id);
 
-            VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), Mines,
-                new Voronoi<Node<Coordinate>, Coordinate>(new EuclideanDistancePolicy<Node<Coordinate>, Coordinate>(), graph));
+            VoronoiRegistry<Node<Coordinate>, Coordinate>.GenerateVoronoi(typeof(Mine), Mines, new BisectorVoronoi(graph));
             EventSystem.Raise<GraphModifiedEvent>();
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
 using Model.Game.Graph;
@@ -9,8 +10,9 @@ namespace Model.Tools.Voronoi
 {
     internal sealed class BisectorVoronoi : IVoronoi<Node<Coordinate>, Coordinate>
     {
-        private IGraph<Node<Coordinate>, Coordinate> graph;
+        private readonly IGraph<Node<Coordinate>, Coordinate> graph;
         private readonly Dictionary<Coordinate, List<VoronoiPlane>> bisectorPlanes = new();
+        private readonly Dictionary<Coordinate, List<VoronoiPlane>> altBisectorPlanes = new();
 
         public ParallelOptions ParallelOptions { get; } = new() { MaxDegreeOfParallelism = 32 };
 
@@ -31,7 +33,7 @@ namespace Model.Tools.Voronoi
             }
 
             CalculateBisectorPlanes(sites, intersections);
-            RemoveOuterPlanes(intersections);
+            // RemoveOuterPlanes(intersections);
         }
 
         public Coordinate GetClosestTo(Coordinate coordinate)
@@ -114,7 +116,26 @@ namespace Model.Tools.Voronoi
                     Vector3 point = new((siteA.X + siteB.X) / 2f, (siteA.Y + siteB.Y) / 2f, 0);
                     Vector3 normal = Vector3.Normalize(new Vector3(siteA.X - point.X, siteA.Y - point.Y, 0));
 
-                    VoronoiPlane plane = new(normal, point);
+                    float aDistanceToEdgeX = siteA.X > graph.GetSize().X / 2f ? graph.GetSize().X - siteA.X + .5f : -(siteA.X + .5f);
+                    float aDistanceToEdgeY = siteA.Y > graph.GetSize().Y / 2f ? graph.GetSize().Y - siteA.Y + .5f : -(siteA.Y + .5f);
+
+                    float bDistanceToEdgeX = siteB.X > graph.GetSize().X / 2f ? graph.GetSize().X - siteB.X + .5f : -(siteB.X + .5f);
+                    float bDistanceToEdgeY = siteB.Y > graph.GetSize().Y / 2f ? graph.GetSize().Y - siteB.Y + .5f : -(siteB.Y + .5f);
+
+                    Vector3 aDistanceToEdgeVector = Math.Abs(aDistanceToEdgeX) / Math.Abs(normal.X) < Math.Abs(aDistanceToEdgeY) / Math.Abs(normal.Y)
+                        ? new Vector3(aDistanceToEdgeX, normal.Y * (aDistanceToEdgeX / Math.Abs(normal.X)), 0)
+                        : new Vector3(normal.X * (aDistanceToEdgeY / Math.Abs(normal.Y)), aDistanceToEdgeY, 0);
+                    
+                    Vector3 bDistanceToEdgeVector = Math.Abs(bDistanceToEdgeX) / Math.Abs(normal.X) < Math.Abs(bDistanceToEdgeY) / Math.Abs(normal.Y)
+                        ? new Vector3(bDistanceToEdgeX, normal.Y * (bDistanceToEdgeX / Math.Abs(normal.X)), 0)
+                        : new Vector3(normal.X * (bDistanceToEdgeY / Math.Abs(normal.Y)), bDistanceToEdgeY, 0);
+
+                    Vector3 altPoint = new Vector3(siteB.X, siteB.Y, 0) + (bDistanceToEdgeVector - aDistanceToEdgeVector) / 2f;
+                    
+                    if (altPoint.X < -.5f || altPoint.X > graph.GetSize().X + .5f || altPoint.Y < -.5f || altPoint.Y > graph.GetSize().Y + .5f)
+                        altPoint = new Vector3(siteA.X, siteA.Y, 0) + (aDistanceToEdgeVector - bDistanceToEdgeVector) / 2f;
+                    
+                    VoronoiPlane plane = new(normal, point, altPoint);
 
                     if (!bisectorPlanes.ContainsKey(siteA))
                         bisectorPlanes.TryAdd(siteA, new List<VoronoiPlane>());
