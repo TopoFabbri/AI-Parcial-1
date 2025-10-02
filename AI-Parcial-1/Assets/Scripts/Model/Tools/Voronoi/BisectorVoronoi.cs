@@ -47,12 +47,14 @@ namespace Model.Tools.Voronoi
 
                 foreach (VoronoiPlane plane in planeGroup.Value)
                 {
-                    if (!plane.GetSide(coordAsPoint))
-                        isOnRegion = false;
+                    if (plane.GetSide(coordAsPoint)) continue;
+                    
+                    isOnRegion = false;
+                    break;
                 }
 
                 if (isOnRegion)
-                    closest = planeGroup.Key;
+                    return planeGroup.Key;
             }
 
             return closest;
@@ -116,19 +118,19 @@ namespace Model.Tools.Voronoi
                     Vector3 point = new((siteA.X + siteB.X) / 2f, (siteA.Y + siteB.Y) / 2f, 0);
                     Vector3 normal = Vector3.Normalize(new Vector3(siteA.X - point.X, siteA.Y - point.Y, 0));
 
-                    float aDistanceToEdgeX = siteA.X > graph.GetSize().X / 2f ? graph.GetSize().X - siteA.X + .5f : -(siteA.X + .5f);
-                    float aDistanceToEdgeY = siteA.Y > graph.GetSize().Y / 2f ? graph.GetSize().Y - siteA.Y + .5f : -(siteA.Y + .5f);
+                    float aDistanceToEdgeX = normal.X > 0f ? graph.GetSize().X - siteA.X + .5f : -(siteA.X + .5f);
+                    float aDistanceToEdgeY = normal.Y > 0f ? graph.GetSize().Y - siteA.Y + .5f : -(siteA.Y + .5f);
 
-                    float bDistanceToEdgeX = siteB.X > graph.GetSize().X / 2f ? graph.GetSize().X - siteB.X + .5f : -(siteB.X + .5f);
-                    float bDistanceToEdgeY = siteB.Y > graph.GetSize().Y / 2f ? graph.GetSize().Y - siteB.Y + .5f : -(siteB.Y + .5f);
+                    float bDistanceToEdgeX = normal.X < 0f ? graph.GetSize().X - siteB.X + .5f : -(siteB.X + .5f);
+                    float bDistanceToEdgeY = normal.Y < 0f ? graph.GetSize().Y - siteB.Y + .5f : -(siteB.Y + .5f);
 
                     Vector3 aDistanceToEdgeVector = Math.Abs(aDistanceToEdgeX) / Math.Abs(normal.X) < Math.Abs(aDistanceToEdgeY) / Math.Abs(normal.Y)
-                        ? new Vector3(aDistanceToEdgeX, normal.Y * (aDistanceToEdgeX / Math.Abs(normal.X)), 0)
-                        : new Vector3(normal.X * (aDistanceToEdgeY / Math.Abs(normal.Y)), aDistanceToEdgeY, 0);
+                        ? new Vector3(aDistanceToEdgeX, normal.Y * (Math.Abs(aDistanceToEdgeX) / Math.Abs(normal.X)), 0)
+                        : new Vector3(normal.X * (Math.Abs(aDistanceToEdgeY) / Math.Abs(normal.Y)), aDistanceToEdgeY, 0);
                     
                     Vector3 bDistanceToEdgeVector = Math.Abs(bDistanceToEdgeX) / Math.Abs(normal.X) < Math.Abs(bDistanceToEdgeY) / Math.Abs(normal.Y)
-                        ? new Vector3(bDistanceToEdgeX, normal.Y * (bDistanceToEdgeX / Math.Abs(normal.X)), 0)
-                        : new Vector3(normal.X * (bDistanceToEdgeY / Math.Abs(normal.Y)), bDistanceToEdgeY, 0);
+                        ? new Vector3(bDistanceToEdgeX, -normal.Y * (Math.Abs(bDistanceToEdgeX) / Math.Abs(normal.X)), 0)
+                        : new Vector3(-normal.X * (Math.Abs(bDistanceToEdgeY) / Math.Abs(normal.Y)), bDistanceToEdgeY, 0);
 
                     Vector3 altPoint = new Vector3(siteB.X, siteB.Y, 0) + (bDistanceToEdgeVector - aDistanceToEdgeVector) / 2f;
                     

@@ -82,7 +82,11 @@ namespace Model.Game
         
         private void GenerateMines(int mineQty, float minMineGold, float maxMineGold, int maxFoodQty, List<INode.NodeType> mineBlockedTypes)
         {
-            Random random = new();
+            Random random2 = new();
+            int randomInt = random2.Next(0, 1000);
+            EventSystem.Raise<DebugEvent>(randomInt.ToString());
+            
+            Random random = new(randomInt);
             
             for (int i = 0; i < mineQty; i++)
             {
