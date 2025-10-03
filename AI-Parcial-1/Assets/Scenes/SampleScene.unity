@@ -3739,7 +3739,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1890958369
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3753,7 +3753,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   drawHeight: 0.2
-  drawDistance: 5
+  drawDistance: 50
+  normalDrawDis: 5
   minesVisible: 
 --- !u!4 &1890958370
 Transform:

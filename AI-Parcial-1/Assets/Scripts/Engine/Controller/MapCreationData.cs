@@ -9,7 +9,7 @@ namespace Engine.Controller
     public static class MapCreationData
     {
         public static float NodeDistance { get; set; } = 1f;
-        public static int MineQty { get; set; } = 3;
+        public static int MineQty { get; set; } = 5;
 
         public static Coordinate Size
         {

@@ -86,7 +86,7 @@ namespace Model.Game
             int randomInt = random2.Next(0, 1000);
             EventSystem.Raise<DebugEvent>(randomInt.ToString());
             
-            Random random = new(randomInt);
+            Random random = new(762);
             
             for (int i = 0; i < mineQty; i++)
             {

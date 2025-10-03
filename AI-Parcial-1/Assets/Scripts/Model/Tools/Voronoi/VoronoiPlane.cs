@@ -12,7 +12,9 @@ namespace Model.Tools.Voronoi
         private readonly float altDistance;
 
         private readonly bool separated;
-        
+
+        public Vector3 Normal => normal;
+
         public VoronoiPlane(Vector3 normal, Vector3 point, Vector3 altPoint)
         {
             this.normal = Vector3.Normalize(normal);

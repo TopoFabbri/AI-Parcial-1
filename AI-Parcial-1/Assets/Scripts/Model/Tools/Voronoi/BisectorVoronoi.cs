@@ -134,8 +134,8 @@ namespace Model.Tools.Voronoi
 
                     Vector3 altPoint = new Vector3(siteB.X, siteB.Y, 0) + (bDistanceToEdgeVector - aDistanceToEdgeVector) / 2f;
                     
-                    if (altPoint.X < -.5f || altPoint.X > graph.GetSize().X + .5f || altPoint.Y < -.5f || altPoint.Y > graph.GetSize().Y + .5f)
-                        altPoint = new Vector3(siteA.X, siteA.Y, 0) + (aDistanceToEdgeVector - bDistanceToEdgeVector) / 2f;
+                    // if (altPoint.X < -.5f || altPoint.X > graph.GetSize().X + .5f || altPoint.Y < -.5f || altPoint.Y > graph.GetSize().Y + .5f)
+                    //     altPoint = new Vector3(siteA.X, siteA.Y, 0) + (aDistanceToEdgeVector - bDistanceToEdgeVector) / 2f;
                     
                     VoronoiPlane plane = new(normal, point, altPoint);
 
